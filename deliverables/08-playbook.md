@@ -606,4 +606,4 @@ followed (`[PC-PARTIAL E02-011, E06-042]`); the richer `Model-Effort:` trailer r
 - **What would change conclusions**: PR review data via the GitHub API; the contents of `log/devlog.md`;
   cost data from any maintainer.
 - Citations here are evidence IDs; primary shas/PRs are carried where load-bearing and resolve through
-  `deliverables/01-evidence-ledger.md`. The citation-verifier script was not run (per orchestrator instruction).
+  `deliverables/01-evidence-ledger.md`. `scripts/verify_citations.py` run after review (2026-11-12): 15 citations checked, 0 unresolved.
