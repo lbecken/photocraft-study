@@ -282,6 +282,8 @@ All quotes come from the Algolia API (`https://hn.algolia.com/api/v1/items/<id>`
 | C19 | AI attribution is credited in the product | E08-010 (P1) | CORROBORATED (`contributors.json` `models`) |
 | C20 | PRs must not say an agent wrote them (from 2026-11-06) | E08-008 (P1) | CORROBORATED-BY-GIT (rule present; Claude-trailer share 31.7% → 27.5%) |
 | C21 | Cost "real but modest" | S18 (P3) | UNCORROBORATED; no figure anywhere |
+| C22 | "Much of the current PR volume comes from coding agents" | E08-028 (P1, org RFC) | CORROBORATED in direction (4,727/12,396 main commits have a Claude co-author trailer; more than half until mid-October) |
+| C23 | Typical agent failure modes: duplicate PRs, already-fixed bugs, abandoned drafts, nonexistent functions | E08-028 (P1) | Not checked here (lead for PR streams) |
 
 ## 6. Method questions with no developer statement found
 
@@ -293,7 +295,7 @@ Searches covered the README, docs, AGENTS.md, book, websites, HN (Algolia, all `
 5. **Human review process for merges**: who merges, and how much human reading occurs. Only the norm in E08-009 and the ambiguous remark in E08-016.
 6. **Failure and rollback rates**, abandoned agent sessions, reverted PRs. No statement.
 7. **How the 42,241-line "one-shot" commit was produced**: prompt, model, duration.
-8. **The split between the founder's own agents and community agents**, and whether maintainers (David Mann, aiongg, Dylan M. Taylor) run agent fleets. No public statements by these maintainers were found. Only the founder was searched on HN.
+8. **The split between the founder's own agents and community agents**, and whether maintainers (David Mann, aiongg, Dylan M. Taylor) run agent fleets. No public statements by these maintainers were found (E08-031). RFC-0006 says only that "much" of the PR volume is agent-driven (E08-028).
 9. **Model choice rationale** and model switching (Opus 4.8 → 5.5, Fable, Mythos trailers). No statement.
 10. **Testing strategy as an agent guardrail**: documented in AGENTS.md (gates), but no developer statement on how well it worked.
 
@@ -303,7 +305,9 @@ Searches covered the README, docs, AGENTS.md, book, websites, HN (Algolia, all `
 - All press entries are WebFetch small-model summaries. Short quotes there are lower-fidelity.
 - HN `echelon` = Brandon Thomas is inferred (same handle as the GitHub login, ownership claims); it is not stated on the profile.
 - The scope of the "no human review" remark (E08-016) is unclear.
-- No search was made for statements by other maintainers (David Mann, aiongg, Dylan M. Taylor) beyond git. X/Twitter, YouTube and Discord were not read directly.
+- Other maintainers were searched only by web search (E08-031). X/Twitter, YouTube (e.g. youtube.com/watch?v=BGShygDux9o cited in HN 50333271; LegalEagle) and Discord were not read directly.
+- RFC-0006 and craft-contrib were read only through WebFetch. The RFC's author, date and status are not shown. The `standards/house-rules-*.md` files were not fetched.
+- When the GitHub About text dropped "clean-room reimplementation of Adobe Photoshop" is unknown (E08-029).
 
 ## Leads for other streams
 - Concurrency claims (E08-003, E08-005): measure overlapping PR lifetimes and distinct `Claude-Session` ids per hour around 2026-10-01..10-10 and later.
@@ -324,4 +328,5 @@ Searches covered the README, docs, AGENTS.md, book, websites, HN (Algolia, all `
 - Credit models in the product from trailers (E08-010). Note that a later "no agent attribution" rule erodes the same data (E08-008).
 - Public "one-shot" and "within a month" claims invite reputational blowback when the project's own docs say alpha (E08-013, E08-019, E08-025). Keep public claims aligned with the in-repo readiness docs.
 - Use the community as a distributed token budget. This is a stated strategy (E08-018), and its costs and quality control are undocumented.
+- Turn observed agent failure modes into org-wide rules that are copied into each repo with integrity checks. RFC-0006 lists duplicate PRs, already-fixed bugs, abandoned drafts and invented functions, and each rule answers one of them (E08-028, E08-008).
 - A clean-room claim needs a documented procedure. "Observed behaviour" here includes reading installed-app resource files and comparing renders (E08-006, E08-017, E08-026).
