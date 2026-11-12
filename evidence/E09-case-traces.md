@@ -1,0 +1,209 @@
+# E09 — Feature case-study traces
+
+Stream E09. Upstream clone pinned at `main` = `74330157cb` (2026-11-12). All shas are from
+`/tmp/.../scratchpad/upstream/photocraft`. Times are given as recorded by git (author date `a:`,
+committer date `c:`) and converted to UTC where an elapsed time is computed. "WF" = WebFetch summary
+of a GitHub page, accessed 2026-11-12, lower fidelity.
+
+Method notes (apply to all cases):
+- `git log --all --grep`, `-S`/`-G`, `git log -- <path>`, `git branch -r --contains`, `git for-each-ref refs/pull`,
+  `git merge-base`, `git rev-list --first-parent origin/main` (3,475 first-parent commits out of 12,396 total).
+- "Squash" = main commit with one parent, committer `GitHub`, PR number in subject. "Rebase-merge" = one parent,
+  committer = the merging human, branch tip absent from main but an equal-subject commit present.
+- Test names were extracted with `git diff <mb> <head> | grep -A1 '^\+\s*#\[test' | grep -o 'fn [a-z_0-9]*'`.
+- AI attribution is reported **only** as written in trailers/author fields/branch names (brief rule 4).
+
+---
+
+## Case A — MCP server / control protocol
+
+### Commit-level table
+
+| sha | date (as recorded) | author | AI trailer as written | branch / PR | files touched | tests added/changed |
+|---|---|---|---|---|---|---|
+| 16941f7198 | 2026-09-30 05:02 -0400 | Brandon Thomas | none | direct (root "one-shot", 241 files, +42,241) | `docs/control-protocol.md` (+50), `apps/photocraft/src/control_server.rs`, `crates/ui-egui/src/control.rs` | none specific |
+| ae92ac20bf | 2026-09-30 09:37 -0400 | Brandon Thomas | none | direct ("continued wip", 181 files, +37,990) | new `crates/automation/` (`server.rs` 627, `bridge.rs` 137, `headless.rs` 157), `apps/photocraft-cli/src/lib.rs`, `docs/control-protocol.md` | `crates/automation/tests/mcp.rs` (+411): in-process server over tokio duplex; "Bridge mode against a fake control server"; `bridge_rejects_non_loopback` |
+| cfecebbcfb | 2026-10-01 21:40 -0400 | Brandon Thomas | `Co-Authored-By: Claude Opus 5.5` | direct | `crates/automation/src/rpc.rs` (+349), `server.rs`, `docs/control-protocol.md` (+30) | `tests/mcp.rs` (+25) |
+| 8a2f31c2c4 | 2026-10-03 | storybored379 | — | PR #16 | MCP: panicking command no longer wedges headless session | (see sha) |
+| 1d832d3e84 | 2026-10-04 13:25 -0400 | Brandon Thomas | `Co-authored-by: Claude Opus 5.5` | PR #38 (`pr/never-crash-automation`) | automation + CLI panic-free | — |
+| 55054b5fcc, 7eb3b2e072, 8f0f95959d | 2026-10-07 | BFlat | — | PRs #439, #546, #548 | user-report fixes (#415, #503–#514): batch `wait`, serve stdio survives a bad line, MCP `ui_pointer` button | — |
+| 209831f77e / 07dafe23e0 | a: 2026-10-08 21:41 -0400 | harrisonoconnorhover | none | `community/1533-mcp-preview-index`, PR #1533 head = 07dafe23e0 | `server.rs` (+16), `docs/control-protocol.md` (+2) | `tests/mcp.rs` (+54): `bridge_previews_reject_document_indices`, `headless_previews_preserve_document_indices` |
+| 0e0311d245 | c: 2026-10-09 11:12:46 +0700 (BFlat) | harrisonoconnorhover | none | rebase-merge of #1533 onto first-parent main | same | same |
+| cff8daf185 (cherry-pick of 7406c26bd4 from `claude/integ-batch-7`) | c: 2026-10-09 11:12:46 +0700 | Claude | `Co-Authored-By: Claude Opus 5.5`, `Claude-Session: …session_01UHgFEH…` | landed with #1533; also 5774989896 on `community/1533-…` | `tests/mcp.rs` (1 line) | clippy 1.99 `as_chunks` in preview pixel check |
+| 15e35cf605 | 2026-10-09 06:54 -0700 | storybored379 | `Co-Authored-By: Claude Opus 5.5` | squash, PR #1668 | creates `docs/mcp.md` (+64), `server/conventions.rs`, `progress.rs`, `transport.rs`, `workspace.rs` | `tests/mcp_wire.rs` (+147, raw JSON-RPC line transport: `malformed_line_recovers_and_modern_lists_are_complete`), `tests/mcp.rs` (+60), `video_cmds/tests.rs` |
+| 7ba589e01c | 2026-11-05 | Khawar Zamman Wani | — | PR #8132 (#8129) | MCP headless waited commands as jobs | adds `crates/automation/tests/mcp_wait.rs` |
+
+### E09-A-001 — The control protocol was specified as a doc inside the one-shot root commit, and MCP was declared a future wrapper of it
+- Label: VERIFIED
+- Source: 16941f7198:docs/control-protocol.md:3,15 (2026-09-30)
+- Quote: "Each request is one JSON line" … "An MCP server will wrap this same protocol (milestone M11)."
+- Notes: spec = method list + engine-command table; no separate requirements doc. The MCP server (rmcp) arrived 4h35m later in ae92ac20bf, with a 411-line test file — so spec, implementation and tests all came in large unattributed bulk commits (see E01 for one-shot genesis).
+
+### E09-A-002 — MCP verification is in-process client tests plus a raw wire test, not golden transcripts
+- Label: VERIFIED
+- Source: ae92ac20bf:crates/automation/tests/mcp.rs:1 ("Spin the MCP server in-process (tokio duplex), call tools as a client."), :295–298 ("Bridge mode against a fake control server"); 15e35cf605:crates/automation/tests/mcp_wire.rs:1 ("Exercise the actual line transport, including recovery and modern result fields.")
+- Method: `git ls-tree -r origin/main | grep -i mcp`; no `*.golden`/transcript fixtures found for MCP. At main, `tests/it/mcp.rs` has 53 `#[...]` attribute lines (`grep -c '#\['`).
+- Notes: The bridge to the running app is tested against a fake control server, not the real GUI.
+
+### E09-A-003 — The MCP evolved by cross-project "shared conventions" and by user-report batches
+- Label: VERIFIED
+- Source: commit 15e35cf605 (2026-10-09, PR #1668) body: "The MCP server follows the crafts' shared conventions (FilmCraft #28): core tools incl. render_preview, … strict argument keys (-32602), … -32700 recovery from malformed JSON lines."; commits 55054b5fcc/7eb3b2e072/8f0f95959d (2026-10-07) cite user issues #415, #503–#514.
+- Method: `git log origin/main -i --grep=mcp` → 135 commits; `git log origin/main -- docs/mcp.md` → 14 commits; `-- crates/automation` → 431 commits.
+- Notes: spec source shifts from in-repo doc (A-001) to a sibling project's issue (FilmCraft #28) to user reports.
+
+### E09-A-004 — The community MCP fix #1533 landed in ~2.5 h, with a Claude integration-branch lint fix riding along
+- Label: VERIFIED (times), INFERRED (that the Claude fix was produced while integrating batch 7)
+- Source: 07dafe23e0 a: 2026-10-08T21:41-04:00 (= 01:41Z 10-09); 0e0311d245 c: 2026-10-09T11:12:46+07:00 (= 04:12Z) committer BFlat; cff8daf185 body "(cherry picked from commit 7406c26bd4…)", 7406c26bd4 is on `origin/claude/integ-batch-7` (a: 03:32Z).
+- Notes: elapsed first commit → merge 2h31m; follow-up (clippy) 0 min after (same push). Chain: Claude integration branch found clippy 1.99 failure → fix cherry-picked into community branch → rebase-merged by maintainer BFlat. Review path for #1533 not fetched.
+
+### Case A summary
+Spec: in-repo protocol doc (one-shot) → sibling-project conventions (FilmCraft #28) → user issues. Tests: in-process client tests from day 0 (ae92ac20bf), wire-level test added with conventions (#1668). Elapsed: doc to MCP server 4h35m; doc to `docs/mcp.md` 9 days.
+
+---
+
+## Case B — Community bug #1381 fixed by an AI-authored branch
+
+Chosen over #1248/#1286/#1323 because it has a regression test, an issue thread and a PR page. All four are summarized for comparison.
+
+### Commit-level table
+
+| sha | date | author / committer | AI trailer as written | branch / PR | files | tests |
+|---|---|---|---|---|---|---|
+| 0582884a5f | 2026-10-08 20:49:46 +0000 | Claude / Claude | `Co-Authored-By: Claude Opus 5.5`; `Claude-Session: https://claude.ai/code/session_01UHgFEHEsefoQoBParH47JA` | `claude/fix-1381-ime-empty-preedit` | `crates/ui-egui/src/type_tool.rs` (+6) | `crates/ui-egui/src/type_tool_tests.rs` (+26): `empty_ime_events_never_delete_the_selection` |
+| d92bb1347b | 2026-10-09 00:24:57 +0000 | Claude | — | same branch; = `refs/pull/1421/head` | merge of `origin/main` (parents 0582884a5f, d2ad238e82) | — |
+| c1cb455c7a | 2026-10-09 08:08:01 +0700 | BFlat / GitHub | `Claude-Session: …01UHgFEH…`, `Co-authored-by: Claude` | squash of PR #1421 onto main | same 2 files | same |
+
+Sibling Claude fixes, same session id `session_01UHgFEH…` (VERIFIED, `git show`):
+
+| issue | branch commit (UTC) | main squash (PR) | elapsed | regression test in same commit |
+|---|---|---|---|---|
+| #1248 | 345c28130f 10-08 19:26 | 88a47dc7c7 (#1392) 10-09 00:37Z | 5h11m | yes: `clipping_masks_apply_to_every_selected_layer` (`crates/engine/src/tests.rs`) |
+| #1286 | f97318d0bb 10-08 18:08 | 3e8d788441 (#1331) 10-08 18:51Z | 43m | yes: `edit_menu_cmds/tests.rs` (+24) |
+| #1323 | 988ad9558a 10-08 18:09 | 437b25bea9 (#1332) 10-08 18:52Z | 42m | **no** (only `transform_tool.rs` changed) |
+| #1381 | 0582884a5f 10-08 20:49 | c1cb455c7a (#1421) 10-09 01:08Z | 4h18m | yes |
+
+### E09-B-001 — Commit message structure of the Claude-authored fix branches is fixed and narrative
+- Label: VERIFIED
+- Source: commit 0582884a5f (2026-10-08)
+- Quote: "Fix #1381: selecting type on Wayland no longer deletes it" / "…With nothing being composed, ime_update took that as \"replace the selection with nothing\" and deleted the selected text."
+- Notes: pattern (all four): subject `Fix #N: <user-visible outcome>`; body = symptom → root cause → new behaviour (and Photoshop parity reference in #1248/#1286/#1323); trailers `Co-Authored-By: Claude Opus 5.5` + `Claude-Session`. No "Tests:" line; the test is in the diff. The code comment also cites the issue ("deleting the text as it was selected (#1381)", 0582884a5f:crates/ui-egui/src/type_tool.rs).
+
+### E09-B-002 — Issue → diagnosis → PR → close was run by the maintainer account via Claude Code within ~1 day, without a human review
+- Label: VERIFIED (WF)
+- Source: https://github.com/storytold/photocraft/issues/1381 and /pull/1421 (WF, accessed 2026-11-12)
+- Data: issue opened 2026-10-08 by hash-mc ("Ctrl + A deletes the text", Kubuntu Wayland); maintainer bflatastic diagnosed "empty preedit events on Wayland" in a comment marked "Generated by Claude Code"; PR #1421 opened by bflatastic, "No reviews", "4 of 7 checks passed" at merge; closed 2026-10-09 "Fixed on main by #1421" (also Claude-generated comment).
+- Notes: the author field `Claude` + PR opened by human account + merge by the same human is the review path. Contrast with #1323 shipped with no test.
+
+### E09-B-003 — The task premise "integrated via `claude/integ-batch-N`" is not supported for these four fixes
+- Label: VERIFIED
+- Method: `for i in 1..11; git log --format=%s origin/main..origin/claude/integ-batch-$i | grep -E '1392|1421|1381|1248|1331|1332|1286|1323'` → no hits; `git branch -r --contains 0582884a5f` → only its own branch.
+- Notes: each fix was its own PR, squash-merged by BFlat. `claude/integ-batch-1..11` (2026-10-08 18:12Z → 10-09 14:18Z, all authored `Claude`) are octopus-style integration branches of *community* PRs ("Merge pr/1487", "Merge #1024 (carry)", "Merge refs/tmp/p1572") plus fix-ups such as 94c003452f "Regenerate docs/scorecard.md (stale on main since #1084)" and 7406c26bd4 (clippy). See Case A-004 for one fix-up travelling to main.
+
+### E09-B-004 — Follow-ups
+- Label: VERIFIED / INFERRED
+- Source: `git log origin/main -G'empty preedit|ime_update' -- crates/ui-egui/src/type_tool.rs` → only refactors after the fix (5c9192bbe2 egui 0.37 migration, d3b0a76c3f lint, 668009e152/428414a61a/36199e41c3 file moves). No IME-regression fix found.
+- INFERRED follow-up for #1248: 77a258b9a0 (2026-10-15, Tanish Manku, #5868) "Release Clipping Mask takes the layers above" changes the same command's semantics; the link to #1248 is not stated in the commit.
+
+---
+
+## Case C — The "never crash" campaign (2026-10-04)
+
+### Commit-level table (all author Brandon Thomas; all main commits are squashes, committer GitHub, 1 parent)
+
+| PR | branch (= `refs/pull/N/head`) | branch tip a: (-0400) | main sha, c: | scope as written | trailer |
+|---|---|---|---|---|---|
+| trigger | — (direct) | — | bf111b524e 00:24 | "Fix panics on malformed params; add panic-fuzz harness" | `Co-Authored-By: Claude Opus 4.8` |
+| #33 | `pr/never-crash-steering` de807bb785 | 10:50 | 50a27e6c74 11:14 | AGENTS.md section, `clippy.toml`, `unsafe_code = "forbid"` | `Co-authored-by: Claude Opus 5.5` |
+| #34 | `-formats` f9535d6b6a | 11:59 | 69f0e25d5f 13:25 | psd, codecs, format, io | same |
+| #36 | `-cms` d3b3e1ade2 | 11:59 | 48d1a4f9e5 13:25 | cms | same |
+| #39 | `-core` 55566337b8 | 11:59 | 296ced38d6 13:25 | text, color, doc, paint, geom, raster, compose, vector | same |
+| #38 | `-automation` a5dec21e97 | 11:59 | 1d832d3e84 13:25 | automation (MCP/RPC), CLI | same |
+| #40 | `-algo-ui-misc` f15f593c4f | 11:59 | 91ef877f2f 13:26 | algo pyramids, ui-egui parity | same |
+| #54 | `-engine` 4bd7f4eeb1 | 12:18 | 4218d07f40 13:26 | engine (20 `*_cmds.rs` files) | same |
+| #55 | `-gpu` c98d1770e7 | 12:26 | f8f48db78a 13:39 | GPU compositor | same |
+| #56 | `-algo` d712c8faa6 | 12:32 | 6dffa0894c 13:40 | algo | same |
+| #57 | `-ui` b02141e00e | 12:43 | 86cc989e72 13:40 | ui-egui | same |
+| #58 | `-guard` 63b589318a | 12:54 | ab3ab92b4a 13:40 | last-resort `catch_unwind` guard | same |
+| #59 | `-ops` 83ab5a521a | 12:55 | 2e80c781ee 13:40 | ops: attribute only | same |
+
+Tests in campaign commits (VERIFIED from `--stat`): #34 adds `crates/codecs/tests/malformed.rs` (+50) incl. `tiff_empty_sample_format_is_an_error`; trigger adds `crates/engine/tests/panic_hunt.rs` (+48) and `paste_with_malformed_center_does_not_panic`. #54/#58/#59 change no test files.
+
+### E09-C-001 — Trigger: a fuzz harness that found panics, ten hours before the campaign; standard imported from a shared org repo
+- Label: VERIFIED
+- Source: commit bf111b524e (2026-10-04 00:24 -0400)
+- Quote: "Rule 9 (no panic on input). Fixes found via fuzzing: … Tests: paste_with_malformed_center_does_not_panic (fast regression) plus tests/panic_hunt.rs, an opt-in (#[ignore], run --ignored) fuzz that dispatches every command with adversarial params"
+- Also: 50a27e6c74 body "Standard: craftrules/standards/never-crash.md" — the rule text was authored outside this repo (`../craftrules`), not visible here.
+
+### E09-C-002 — The rule change: "Never crash (outranks feature work)" added at the top of AGENTS.md golden rules
+- Label: VERIFIED
+- Source: 50a27e6c74:AGENTS.md (diff hunk @@ -39 +39 @@), still present at origin/main:AGENTS.md:103; condensed as rule 1 at origin/main:AGENTS.md:27
+- Quote: "Don't ship a feature by adding a panic path; fix a crash before building on top of it." / "**Prove it.** Every crash fix comes with a small synthetic regression test that panicked before the fix."
+- Notes: Rule 9 ("Never panic on input") pre-existed and was re-pointed. Cross-ref E02.
+
+### E09-C-003 — The mechanical guard is clippy deny attributes per crate root, counted by the scorecard; `pr/never-crash-guard` is a runtime net, not a lint
+- Label: VERIFIED
+- Source: ab3ab92b4a body (#58): "Session::execute wraps a command's run in catch_unwind … a new crash_guard module installs a logging panic hook"; 50a27e6c74 `clippy.toml` "lets tests use unwrap/expect/panic/indexing"; origin/main:xtask/src/scorecard.rs:420 `const NEVER_CRASH: &str = "deny(clippy::unwrap_used";`, :424 `fn never_crash(root)` lists crate roots lacking it (added 0f955e6c82, 2026-10-05, #239); origin/main:docs/scorecard.md:15 "never-crash lints on 28 of 28 crates; panic_hunt present", :284–285 REL-1/REL-2.
+- Method: `git grep -l 'deny(clippy::unwrap_used' origin/main -- 'crates/*/src/lib.rs' 'apps/*/src/main.rs'` → 28.
+
+### E09-C-004 — Decomposition: 12 single-commit branches prepared in ~2 h, landed serially in 15 min as stacked squashes
+- Label: VERIFIED (times), INFERRED (stacking: each branch's merge-base equals the previous landed main commit, e.g. `pr/never-crash-ops` mb = ab3ab92b4a = #58)
+- Method: `git merge-base origin/main origin/pr/never-crash-*`
+- Elapsed: steering tip 10:50 → last landing 13:40:43 = 2h50m. Each PR trailered Claude Opus 5.5; review path unknown (no PR page fetched for #34–#59).
+
+### E09-C-005 — Results / follow-ups
+- Label: VERIFIED
+- Data: `git log origin/main --since=2026-10-05 -i --grep=panic | wc -l` → 180 commits; `--grep=crash` since 10-04 → 60; one later commit adopts the campaign name: 5049a1d062 (2026-10-08, Tanish Manku, #869) "Never crash on hostile numbers: LUT sizes, Quick Selection points, link group ids". Trailers on Brandon Thomas commits 2026-10-04: 54× `Claude Opus 5.5`, 2× `Claude Opus 4.8`, 61 without (`git log --format='%(trailers:key=Co-authored-by,valueonly)'`).
+
+---
+
+## Case D — PSD as an oracle/corpus-driven feature
+
+### Commit-level table
+
+| sha (main) | date | author | trailer | PR / branch tip | files summary | tests / oracle |
+|---|---|---|---|---|---|---|
+| f225c290cc, 11b175e22b | 2026-10-04 12:58 -0400 | Brandon Thomas | — | `fix/psd-adjustment-roundtrip` (unmerged tips) | vibA, blnc, blwh, phfl, mixr adjustment blocks | "Corpus: export round-trip step and pass floors" |
+| 574d0d3d53 | 2026-10-05 08:01 -0400 | Brandon Thomas | — (squash; branch tip 15d63afbc7 has no body) | #195 / `feat/psd-tools-corpus` | `xtask/psd_tools.rs`, `xtask/psd-tools-corpus.sha256` (309 lines), `crates/io/src/*`, `crates/psd/src/layer.rs` | `crates/io/tests/corpus.rs` (+465/-?), `corpus_regressions.rs` (+167), `compose/src/tests.rs`; MIXED floor = 133 |
+| 1d9d92341f | 2026-10-05 10:52 -0400 | Brandon Thomas | — | #224 / `fix/psd-effects` | `compose/effects.rs`, `gpu/compose.wgsl`, `io/examples/oracle_diff.rs` | `compose/src/tests.rs` (+47), `gpu/tests/parity.rs` (+18); subject "(113 -> 118 oracle passes)"; floor 145 |
+| 8bac8926a3 | 2026-10-05 11:48 -0400 | Brandon Thomas | — | #233 / `fix/psd-strokes` | stroke effects | floor 146 |
+| 968baf639e | 2026-10-05 17:47 -0400 | Brandon Thomas | — | #190 / `feat/photoshop-oracle-corpus` | `.github/workflows/ci.yml` (+23, corpus job), `xtask/src/corpus.rs`, `corpus_pins.rs`, `pinned.rs`, `photoshop-corpus.sha256` (256), `psd-corpus.sha256` (170), `docs/development.md` (+74) | new `crates/engine/tests/photoshop_oracles.rs` (+133); floors PSD_TOOLS 229, PHOTOSHOP 126 |
+| f54d605e2c | 2026-11-05 21:41 +0530 | Khawar Zamman Wani | — | #10307 | `xtask/src/psd_write_oracle.rs`, `xtask/psd-write-oracle/starter.json` | `apps/photocraft-cli/tests/it/psd_write_oracle.rs` |
+| a0e7169ed7 → 50bad2e3e9; 9cebb79f31 … c17e1c4b69 | 2026-11-12 00:37Z → 06:45Z | Dylan M. Taylor | none | `switch-craft-psd` (3) / `switch-photocraft-psd` (8) | "Use craft-psd from craft-libs; remove crates/psd", scorecard regen, lockfile, "Match brush import cap to shared decoder budget", "xtask: update layer fixtures after PSD extraction" | fixture updates only |
+| 74330157cb | 2026-11-12 02:53:54 -0500 | Dylan M. Taylor | none | squash #13414 (= pinned main HEAD) | 294 files, +755 / −25,930 | — |
+
+### E09-D-001 — "Correct" is defined as matching Photoshop's own merged composite within 2/255
+- Label: VERIFIED
+- Source: 968baf639e:docs/development.md:180 "**Composite oracle:** a PSD's embedded merged image is compared with our compositor's output."; 968baf639e:crates/engine/tests/photoshop_oracles.rs:24 `const PASS_TOL: f32 = 2.0 / 255.0;` ("Within two 8-bit steps of Photoshop (same tolerance as the io corpus)"), and its header: "every smart object is re-rendered … every type layer is re-laid-out … then compared with Photoshop's merged composite."
+- Notes: the oracle is the file's own embedded composite (produced by Photoshop), so no Photoshop install is needed in CI. The later write oracle (f54d605e2c:xtask/src/psd_write_oracle.rs:1) says "Photoshop is a separate judge".
+
+### E09-D-002 — Correctness is enforced by ratcheting pass floors over pinned, sha256-verified corpora run in CI
+- Label: VERIFIED
+- Source: origin/main:crates/io/tests/it/corpus.rs:35 ("Raise the floors when they improve"), :151/:155/:159 (floors), :435 `assert!(pass >= src.pass_floor, …)`; 968baf639e:docs/development.md:318–322 ("a missing corpus is a failure … never a silent skip"; "The CI `corpus` job runs … on every PR and on main").
+- Data (pass_floor history; method: loop over `git log -G'pass_floor' -- crates/io/tests/{,it/}corpus.rs` printing the constants):
+
+| commit | date | author | MIXED | PSD_TOOLS | PHOTOSHOP |
+|---|---|---|---|---|---|
+| 574d0d3d53 | 10-05 | Brandon Thomas | 133 | – | – |
+| 1d9d92341f | 10-05 | Brandon Thomas | 145 | – | – |
+| 968baf639e | 10-05 | Brandon Thomas | 146 | 229 | 126 |
+| 452672765d | 10-08 | BFlat | 146 | 229 | 133 |
+| becc27ac1c | 10-13 | Timothy Daly | 146 | 236 | 145 |
+| a62ef68ca2 | 10-14 | Timothy Daly | 148 | 249 | 185 |
+| b526378de4 | 10-22 | David Mann | 148 | 249 | 190 |
+
+  20 floor-changing commits; floors never decrease. Corpora: 256 own Photoshop-authored PSDs (storytold/photocraft-corpus), 170 psd-tools/ag-psd files, 309 psd-tools files (968baf639e:docs/development.md:299–301).
+
+### E09-D-003 — Contributors report fixes in oracle units
+- Label: VERIFIED
+- Source: subjects 1d9d92341f "(113 -> 118 oracle passes)"; 4c450b3879 (10-14, Timothy Daly) "(seven Lab oracles pass)"; 1e6f565a7b "(14 oracles pass)"; 00c16f2c6d "(six oracles pass)".
+- Notes: the oracle count functions as the requirement and the acceptance metric at once.
+
+### E09-D-004 — Extraction to craft-psd (#13414) was done in one ~7 h branch with no AI attribution and no PR body beyond the squash list
+- Label: VERIFIED
+- Source: a0e7169ed7 a: 2026-11-12T00:37:34Z; 74330157cb c: 2026-11-12T02:53:54-05:00 (07:53Z). Squash body lists the seven branch commits. `%(trailers)` empty on all branch commits.
+- Notes: elapsed 7h16m; `crates/psd` removed (−25,930 lines), behaviour pinned by the corpus floors remaining in photocraft (INFERRED: the floors are the safety net for the swap; no commit says so).
+
+### Case D summary
+Spec = Photoshop-authored files + their embedded composites; decomposition by feature group (effects, strokes, type, adjustments) each reported as oracle-pass deltas; floors ratchet; CI corpus job. The `fix/psd-*` branch tips carry no message bodies, so method is visible only in tests/docs.
+
+<!-- CASES E-H -->
