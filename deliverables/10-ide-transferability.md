@@ -20,29 +20,10 @@ Terms used throughout (PhotoCraft-specific):
 
 ## 1. Verdict
 
-**Directly transferable (PROPOSED, high confidence):** a headless core with UI only at the top
-layer, checked by a dependency-layer linter from day 1 (E04-007, E04-031); one action registry
-dispatched by every front-end, with a "UI must dispatch actions" check (E04-012); fuzzing every
-registered action (E04-012); the local gate and CI gate as one command (E05 §0.2); generated status
-docs with `--check` (E04-050); ratchet floors (E04-042); fail-on-skip CI (E05-024, E07-018);
-hash-checked shared agent rules (E02-012); agent-isolation rules (E01-016, E02-003).
-
-**Transfers with adaptation:** the oracle strategy. PhotoCraft's "correct" was mostly *given* by
-Photoshop (menu tree, embedded composites, corpora; E04-036, E04-042). An IDE has no single
-reference binary, so you must *build* oracles: the compiler, differential LSP servers,
-round-trip/idempotence properties, incremental-equals-from-scratch checks, and pinned
-snapshot corpora. Also adapt: control channel + screenshot, MCP/CLI, perf budgets (which must be
-*enforced*, unlike PhotoCraft's 0 of 88; E04-051), parity checklist (as per-language feature matrices).
-
-**Does not transfer:** "parity with the reference app" as the main progress metric (it measured
-wiring: E07-013); breadth-first fan-out on day 1 (an IDE's core is deep and stateful); CPU-vs-GPU
-pixel parity as a *core* oracle (only relevant to a custom renderer).
-
-**Three biggest risks:** (1) agents fan out onto an unstable incremental/semantic core and every
-feature encodes a different wrong assumption about invalidation, threading or undo; (2) green-but-hollow
-checks — feature counts, skip-passing tests, unenforced latency budgets — repeating E07-013,
-E07-018, E04-051; (3) parallel PRs that are each green colliding on shared state (indexes,
-registries, settings schemas) as in E05-052, worse because IDE coupling is semantic.
+- **Direct (PROPOSED, high confidence):** headless core + `xtask layers` from day 1 (E04-007, E04-031); one action registry for every front-end + UI-dispatch check (E04-012); fuzz every action (E04-012); local gate == CI gate (E05 §0.2); generated docs with `--check` (E04-050); ratchet floors (E04-042); fail-on-skip (E05-024, E07-018); hash-checked shared rules (E02-012); agent-isolation rules (E01-016).
+- **With adaptation:** the oracle strategy. Photoshop *gave* PhotoCraft "correct" (menu tree, embedded composites, corpora; E04-036, E04-042); an IDE must *build* it: compiler-as-oracle, differential LSP servers, round-trip/idempotence, incremental == from-scratch, pinned snapshot corpora. Also adapt control channel/screenshot, MCP/CLI, feature matrices, and perf budgets, which must be *enforced* (PhotoCraft: 0 of 88; E04-051).
+- **Does not transfer:** reference-app parity as the progress metric (it measured wiring; E07-013); breadth-first fan-out from day 1 (an IDE core is deep and stateful); CPU-vs-GPU pixel parity as a core oracle.
+- **Biggest risks:** (1) agents fan out onto an unstable incremental/semantic core, each feature encoding different wrong assumptions about invalidation, threading or undo; (2) green-but-hollow checks (feature counts, skip-passing tests, unenforced latency) as in E07-013, E07-018, E04-051; (3) individually green PRs colliding on shared semantic state, as in E05-052 but harder to detect.
 
 ---
 
@@ -82,6 +63,21 @@ was missing, the metrics stayed green while the product was not.
 INFERRED overall: the conditions in §2.1 are what made a six-week, ~1M-line (E04-004) build
 feasible; the weaknesses in §2.2 are exactly the places where no cheap oracle existed (behaviour
 vs wiring, timing, real filesystems, cross-PR semantics). An IDE has *more* of the second kind.
+
+### 2.3 Where the analogy holds and breaks (INFERRED)
+
+| PhotoCraft concept (evidence) | IDE counterpart | Holds? | Why |
+|---|---|---|---|
+| Document + layers in a `Session` (E04-008) | Project model + open files + derived indexes | Partly | IDE state is mostly *derived* and must stay consistent with source under edits |
+| Command = one history step (E04-011) | Action = one undoable transaction | Yes for edits | Multi-file refactors and background analysis have no PhotoCraft analogue |
+| Photoshop menu tree as backlog (E01-015) | IntelliJ/rust-analyzer feature lists | Weakly | A feature list says *what*, not *what output is correct*; no embedded oracle |
+| Embedded composite as oracle (E04-036) | Compiler output on the same source | Yes, for diagnostics/types/refactor validity | Compiler covers analysis, not completion ranking or UX |
+| CPU reference vs GPU (E04-037) | From-scratch vs incremental analysis | Yes | Same "two implementations, one trusted" structure |
+| Pixel tolerance 2/255 (E04-036) | Exact equality (types, spans) or ranking metrics | Partly | Most IDE outputs are discrete; tolerance applies only to ranking/latency |
+| Render latency (E04-051) | Keystroke-to-paint, completion latency | Yes, but more central | Latency is a primary IDE quality, not a secondary goal |
+| File formats & corpora (E04-036) | Language versions, editions, cfgs, macros | Partly | Language semantics evolve; corpora need pinned toolchains too |
+| Plugins via wasmi sandbox (E04-015) | Plugin API with long-term stability | Weakly | IDE plugin ecosystems depend on API stability for years |
+
 
 ---
 
@@ -155,6 +151,27 @@ Rank checks by how much an agent can trust a green result:
 
 INFERRED: PhotoCraft's agents had level 1 (via Photoshop's files) for free and leaned on level 6
 for the headline number; the IDE must invest in levels 1–2 *before* fan-out.
+
+### 4.3 Cost of the oracles (INFERRED / PROPOSED)
+
+PhotoCraft's main oracles were cheap per run: a corpus comparison at ≤2/255 (E04-036) and a
+CPU-vs-GPU comparison on a software rasterizer (E04-037, E04-029). The IDE's strongest oracles are
+expensive: a refactor-compiles check costs a `cargo check` (and possibly a test run) per sampled
+site; differential runs need a second server warmed on the same corpus. PROPOSED budget split:
+
+| Check | PR gate | Merge queue | Nightly |
+|---|---|---|---|
+| Parse round-trip, format idempotence, schema completeness, layers | full | full | full |
+| Incremental == from-scratch fuzz | fixed small seed set | larger seed set | long run, new seeds |
+| Diagnostics vs `cargo check` | tier-1 fixtures | tier-2 corpus | tier-3 large repos |
+| Refactor compiles + tests pass | changed refactorings only, few sites | rotated sample (PhotoCraft `Sweep` pattern, E04-027) | full sample |
+| Differential vs rust-analyzer / other servers | — | — | full; disagreements filed as triage issues |
+| Latency budgets | proxy counters | fixed-runner timings | full scenario set |
+
+The rotation idea is VERIFIED in PhotoCraft (`testkit::sweep` slices long sweeps by UTC date,
+E04-027); its use for semantic oracles is PROPOSED. Nightly-only checks find problems late
+(PhotoCraft's release-only failures motivated its nightly dry run, E05-063, E05-062), so every
+nightly finding should become a PR-gate fixture.
 
 ---
 
@@ -426,6 +443,10 @@ The failure modes in §2.2 and §9 are VERIFIED from commit text (E05-052, E07-0
 - Evidence that PhotoCraft agents designed and evolved the core contracts unsupervised without rework would weaken §6's "humans own the deep core".
 - A working, cheap semantic oracle for the target language beyond the compiler (e.g. a formal spec with executable semantics) would move more IDE work into the "direct" class.
 - If an IDE prototype showed incremental==from-scratch checks too slow for the PR gate, §4's central check would have to move to nightly, increasing the risk in §9 row 4.
+
+**Dependencies on other deliverables.** §7 refers to the playbook (`08-playbook.md`) by topic only;
+if the playbook's tiers or gate list differ, §7's IDE-specific additions still apply but the tier
+names should be aligned. The E05/E06 PR samples are WebFetch summaries (lower fidelity).
 
 No new upstream evidence was gathered during synthesis; all PhotoCraft claims cite existing
 evidence entries. No commit shas are cited directly in this document.
