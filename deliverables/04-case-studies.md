@@ -289,8 +289,9 @@ All commits are by Brandon Thomas. ed0b99964d and bf111b524e are direct commits 
 
 ### 5. Review and integration path
 - **VERIFIED.** 12 branches were prepared between 10:50 and 12:55 (tips). 11 landed between 13:25:17
-  and 13:40:43. Each branch's merge-base is the previous landed commit, i.e. the branches were stacked
-  (E09-C-004). Elapsed from steering tip to last landing: 2 h 50 min.
+  and 13:40:43. Each branch's merge-base is the previous landed commit (`git merge-base origin/main
+  origin/pr/never-crash-*`). INFERRED: the branches were rebased one by one onto main as each landed,
+  or stacked; the merge-bases alone do not distinguish the two (E09-C-004 labels it INFERRED). Elapsed from steering tip to last landing: 2 h 50 min.
 - Unknown: the PR pages for #33–#59 were not fetched. Landing 11 PRs in 15 minutes is INFERRED to
   leave no room for substantive human review of each.
 
