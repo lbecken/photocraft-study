@@ -206,7 +206,7 @@ Sibling fixes from the same session id (VERIFIED, `git show`; the #1323 row corr
 ### 7. What this case demonstrates about method
 - (a) **VERIFIED.** Each fix is small, comes with its own test, and has a fixed message shape (subject
   `Fix #N: <user-visible outcome>`, then symptom, cause, behaviour). The code comment cites the issue
-  (0582884a5f:type_tool.rs). Together with the `Claude-Session` link, this gives traceability from
+  (0582884a5f:crates/ui-egui/src/type_tool.rs). Together with the `Claude-Session` link, this gives traceability from
   issue to session to commit to test.
 - (a) **VERIFIED.** The test pins both sides: the bug must not recur, and real composition must still
   work. This guards against "fix by disabling the feature".
@@ -363,7 +363,7 @@ that verification protects a large swap.
   (574d0d3d53:crates/io/tests/corpus_regressions.rs:1-4)
 - **VERIFIED. Two oracle strengths.** The io corpus flattens Photoshop's cached pixels. The
   re-render oracle "throws those caches away" and re-renders smart objects and type before comparing
-  (968baf639e:photoshop_oracles.rs:6-10). It started with a floor of 1 of 84 files, which is an honest
+  (968baf639e:crates/engine/tests/photoshop_oracles.rs:6-10). It started with a floor of 1 of 84 files, which is an honest
   statement of how far off the text and smart-filter engines were.
 - **VERIFIED. Fitting to measured ground truth.** a62ef68ca2 refits a curve to "the ±50 samples from
   4759d12b" and corpus files, and states the residual: "Every measured point is within about a level."
@@ -373,7 +373,7 @@ that verification protects a large swap.
      (f54d605e2c:xtask/src/psd_write_oracle.rs:1), and "The ordinary CI corpus job does not yet run this
      recipe command" (`docs/development.md:1127-1130`; E04-041).
   2. Type re-renders need the corpus fonts, "so the floor counts on none of them"
-     (photoshop_oracles.rs:12-13).
+     (968baf639e:crates/engine/tests/photoshop_oracles.rs:12-13).
   3. For #13414: the crates/psd tree at the parent commit held **499** `#[test]` attributes
      (`git grep -c -E '^\s*#\[test' 74330157cb^ -- crates/psd`), and all of them left this repository
      with the crate. Whether they now run in craft-libs cannot be checked here (external repo). The
@@ -602,3 +602,257 @@ AI attribution is unknown. The handle contains "-ai", but a name is not an attri
   can be compared bit-for-bit with the old one (deterministic kernels).
 
 ---
+
+## Case G — The `Finding:` security sweep (October 2026)
+
+### 1. What it is and why it was chosen
+In about one hour on 10-21, one maintainer authored 25 single-finding hardening commits. Each ends in
+a `Finding: <uuid> (CWE-NNN)` trailer, and each landed as its own PR. The case was chosen because it
+is a high-throughput "finding → fix" pipeline where the source of the findings is invisible.
+Per errata #7, these trailers belong to the October `security(...)` PRs, not to the November
+`fix/sec-*` branches.
+
+### 2. Trigger and specification
+- **VERIFIED (absence).** The finding source is not named. `git grep -n -iE 'Finding:|CWE-' origin/main
+  -- '*.md'` gives no hits. The PR pages for #8417 and #8452 (WF) cite only the UUID and CWE, and 0 of
+  the 27 messages mention Claude, Codex or "Generated" (E09-G-002). INFERRED, low confidence: an
+  external finding tracker, given one UUID per finding. **Attribution: unknown.**
+- **VERIFIED.** Each commit body is the spec: attack surface, mechanism, fix, and preserved behaviour.
+  For example:
+  > "an O(n*m) scan over two file-controlled collections. A crafted resource with many slices and many
+  > unmatched descriptor IDs could therefore cause quadratic CPU work … or_insert preserves the existing
+  > first-match behavior for duplicate IDs." (42d8aad56f, `Finding: cf3f9ceb-… (CWE-407)`)
+
+### 3. Trace (representative; all by Dylan M. Taylor; AI attribution: none recorded on any)
+| sha | a: / c: | PR | what changed | tests touched |
+|---|---|---|---|---|
+| 42d8aad56f | a=c: 2026-10-21 21:44 −0400 | #8417 (merge 9852baa4ba, 10-22 19:27) | `psd/src/slices.rs`: ID→index map replaces O(n·m) find (CWE-407) | inline `trailing_descriptor_applies_outsets_to_first_matching_slice` |
+| 7c78c951e4 … f65832931b (25) | a: 10-21 21:47 → 22:43; c: 10-22 07:10–07:12 | #8420–#8452 (rebase-merged) | CWE-407 ×11, CWE-400 ×9, CWE-770 ×3, CWE-409 ×1, CWE-789 ×1 | e.g. f65832931b (`compose/src/pattern.rs` +11, 256 MiB cap): **none** |
+| ef4e13dc2d | a: 10-22 06:22; c: 19:44 | #8505 (merge ee0d23f77a) | `io/src/svg.rs`: bounded inflate, no double decompression (CWE-409) | `crates/io/tests/it/svg.rs` +46: `gzip_compressed_embedded_svg_decompresses_once_with_a_size_cap`, `resolve_data_rejects_nested_gzip_and_handles_text_plain_svgz` |
+
+### 4. Verification actually used
+- **VERIFIED.** 11 of the 27 finding commits on main add a `#[test]` (`git log origin/main
+  --grep='^Finding:'` then `git show | grep -E '^\+\s*#\[(tokio::)?test'`; recounted here: 11). The
+  rest rely on reasoning in the message, and CI shows only that nothing else broke.
+- **VERIFIED (WF).** PR bodies list targeted validation, e.g. "Validation: `cargo fmt`, `cargo test -p
+  photocraft-compose --lib pattern` (5 passed)" (#8452; E09-G-003). Running the existing tests of the
+  touched module proves no regression, not that the bound works.
+- **Not verified.** Cost bounds (CWE-400/407/770) have no complexity or adversarial-size test in most
+  commits, e.g. the 256 MiB cap in f65832931b. No fuzz target was added in the sweep. Per E05-023 the
+  CI fuzz job is dispatch-only.
+
+### 5. Review and integration path
+- **VERIFIED (WF).** CodeRabbit commented on each PR. #8452 was approved by FredApps, while CodeRabbit
+  raised an aggregate-memory concern that stayed unaddressed. #8417 shows "No reviews" and "15 of 21
+  checks passed" at merge (E09-G-003).
+- **VERIFIED.** Authoring took 59 min for 26 commits (21:44 → 22:43). The 25 were rebase-landed in
+  about 2 min (07:10–07:12 on 10-22). The first and last went through merge commits about 22 h after
+  authoring (E09-G-001).
+
+### 6. Aftermath
+- **VERIFIED.** A different, later series used multi-finding bundles per area. It has no `Finding:`
+  trailers and adds "address review" commits, e.g. 59158ffdf2, 2be2838f79 (11-03 → 11-11). 18 of its
+  20 `fix/sec-*` tips are still ahead of main at the pin (E09-G-004). The batching style changed from
+  one finding per PR to one area per PR.
+
+### 7. What this case demonstrates about method
+- (a) **VERIFIED.** One finding per PR, with a stable ID and CWE in a machine-readable trailer, gives
+  27 independently revertable changes that can be traced back to a finding.
+- (a) **VERIFIED.** Message bodies state the preserved behaviour ("or_insert preserves the existing
+  first-match behavior"), which is a review aid when there is no test.
+- (b) **VERIFIED.** 16 of 27 fixes carry no test. A DoS bound is the kind of change that silently
+  regresses when someone refactors.
+- (b) **VERIFIED.** The finding source is unrecorded, so a reader cannot judge false-positive rate or
+  coverage. A bot concern was merged over (#8452).
+- (c) **INFERRED.** Transferable pattern: a finding ID trailer plus one PR per finding. Precondition: a
+  finding store the team can see. Add "each bound gets an adversarial-size test" to close gap (b).
+
+---
+
+## Case H — Artboards: a feature that needed repeated correction
+
+### 1. What it is and why it was chosen
+Artboards (Photoshop-style boards inside one document) received an agent fix on 10-09 (#1531). On
+10-31 two feature PRs followed (#10512 auto-nesting, #10538 paste between boards), and a post-merge
+follow-up PR (#11441) fixed what a tester found. The case was chosen because it shows tests that
+passed while the semantics were wrong, and how the gaps were closed.
+
+### 2. Trigger and specification
+- **VERIFIED.** The triggers were issues: #1531 (fixed by 7488ab413d), #10218 (→ #10512) and #8788
+  (→ #10538) (E09 Case H table). Photoshop behaviour is the implicit reference. No design doc was found
+  before the code. #10512 added "Document the auto-nesting rule and exclusions" only during review
+  (b15ac4b016, FredApps, 11-05).
+- **VERIFIED (WF).** The third trigger was a person: #11441's description names three problems "that
+  skylartaylor found on `main` after #10512 … and #10538" (E09-H-002).
+
+### 3. Trace
+| sha | date-time | author (committer) | AI attribution as written | branch / PR | what changed | tests touched |
+|---|---|---|---|---|---|---|
+| 7488ab413d | 2026-10-09 03:22Z | Claude | `Co-Authored-By: Claude Opus 5.5`, `Claude-Session: …01UHgFEH…` | `claude/fix-1531-artboards` → squash 3e8d54896d (#1584, BFlat) | duplicate beside original; Move tool drags boards; canvas grows | 5 tests: `duplicate_artboard_lands_beside_the_original_with_its_contents`, `move_tool_drags_an_artboard_by_its_empty_area`, `moving_an_artboard_past_the_canvas_grows_it`, … |
+| 5e6cfa425d, 2159f6e640, 508e137b4c | 10-31 17:02Z → 11-01 12:07Z | Mohamed Mahjoub | `Claude Opus 5.5` / `Claude` | #10512 `feat/artboard-auto-nesting` | Move tool auto-nests into the drop board | 8 tests incl. `a_layer_moved_onto_another_artboard_joins_it`, `prevent_auto_nesting_keeps_the_layer_in_its_board` |
+| fda2e9feea … 713585646e (7) | 10-31 17:51Z → 11-02 22:24Z | Mohamed Mahjoub | `Co-authored-by: Claude` on all | #10538 `fix/paste-between-artboards` | 4 in-PR corrections ("true middle", "locked boards", "floored placement middle", "keep a clipped paste's clipping") | 12 tests incl. `content_centred_just_left_of_a_board_is_not_placed_in_it` |
+| b152f4175e / ca151c6b84 | c: 11-05 06:18 / 04:55 +0100 | Mohamed Mahjoub (GitHub) | `Claude Opus 5.5` / `Claude`, plus `FredApps` | squashes #10512 / #10538 | — | — |
+| e7b8c5a72d … 2bcb07f298 (6) → 3e27572e7a | 11-05 11:45 → 14:53 +0100 | FredApps (GitHub) | `Co-Authored-By: Claude Opus 5.5` on 5 of 6; PR text "Generated with Claude Code" (WF) | #11441 `fix/artboard-followups-10512-10538` | clipping group moves as one; off-board paste lands above; mask paste shift | 9 tests incl. `a_clipping_base_moved_onto_another_artboard_takes_its_clipped_layers`, `a_clipped_paste_off_the_board_lands_above_it_unclipped` |
+
+### 4. Verification actually used
+- **VERIFIED.** Each rule is pinned by a behaviour-named test. There are 29 named tests across #10512,
+  #10538 and #11441 (E09-H-003), plus 5 in #1531.
+- **VERIFIED. The follow-up states exactly which interaction the original tests missed:**
+  > "auto_nest moved the base alone and clip_group::settle released the layers that lost it" …
+  > "layer_place::insertion_point only checked the content centre when the anchor was the board itself."
+  (3e27572e7a)
+  Both are interactions between two features (clipping masks × auto-nest, paste anchor × board) that
+  neither PR's tests combined.
+- **VERIFIED (WF).** CodeRabbit gave 3 rounds on #11441, with 2+2 actionable comments that led to
+  340ae577bd and 2bcb07f298. 27 of 29 checks passed.
+- **Not verified.** No property or combinatorial test over layer kinds × board states. Coverage came
+  from a human trying cases on main.
+
+### 5. Review and integration path
+- **VERIFIED.** #10512 and #10538 were reviewed by maintainer FredApps, who also merged main into them
+  and added docs (5829929e81, 01ca6a69a9, b15ac4b016). Both were squashed with a `FredApps` co-author.
+  Elapsed: 4 d 12 h and 4 d 10 h. The follow-up #11441 took 2 h 08 min, written by the same maintainer
+  with Claude trailers (E09-H-003).
+
+### 6. Aftermath
+- **VERIFIED.** No further fixes to auto-nest or paste-between-boards after 11-05 14:00 (`git log
+  origin/main --no-merges --since=2026-11-05T14:00 -i --grep='artboard\|board'`). Later artboard commits
+  are new features (8040809f1f, 08a908d3f5, 1df674997b). Artboards appear in 124 non-merge main
+  commits, one of five features with at least 5 follow-up fixes (E07-026).
+
+### 7. What this case demonstrates about method
+- (a) **VERIFIED.** Every correction was encoded as a named test, and the follow-up message gives the
+  root cause in function names, so a later agent can find the invariant.
+- (a) **VERIFIED.** In-PR iteration (4 corrections in #10538) happened before merge, under human review.
+- (b) **VERIFIED.** 20 tests in the two original PRs did not cover feature *interactions*. A human
+  found three gaps on main within hours of merge.
+- (c) **INFERRED.** Transferable pattern: treat "tester on main" as a planned stage after
+  agent-heavy features, and convert each finding into a test with a root-cause note. Precondition:
+  someone actually exercises main.
+
+---
+
+## Case I (ninth) — Red main from two individually-green PRs (#5344 × #5616)
+
+### 1. What it is and why it was chosen
+Merge skew is the most frequent red-main cause: 11 of 21 incidents (E07-003; deliverable 07 §F1). This
+instance broke compilation, the strongest failure, and it has a precise fix message. It shows what
+"green PR" means without a merge queue.
+
+### 2. Trigger and specification
+- **VERIFIED.** #5344 (3ebc42a200, Zer0C00L01, merged 10-14 19:17Z) added a field `export_presets`
+  to `Persisted`. #5616 (c61cf9f0bd, nrq6993-a11y, trailer `Co-authored-by: Cursor`) rewrote
+  `load_presets_json`, adding test `a_damaged_preset_set_keeps_the_other_sets`. Its PR head 09bcae36ad
+  (2026-10-14 19:25 +0300 = 16:25Z) **does not contain #5344** (`git merge-base --is-ancestor
+  3ebc42a200 refs/pull/5616/head` → false). It merged on 10-17 01:20Z.
+
+### 3. Trace
+| sha | c: | author | AI attribution as written | PR | what changed | tests |
+|---|---|---|---|---|---|---|
+| 3ebc42a200 | 2026-10-14 15:17 −0400 | Zer0C00L01 | none recorded | #5344 | Export As presets; new `Persisted` field | (not examined) |
+| c61cf9f0bd | 2026-10-16 19:20 −0600 | nrq6993-a11y | `Co-authored-by: Cursor` | #5616 | per-set preset loading via `take()` | `presets/tests.rs` +26: `a_damaged_preset_set_keeps_the_other_sets` |
+| 351149f0df | 2026-10-17 08:32 −0600 | Joseph (00xJ0 co-author) | none recorded | #6906 | +1 line `export_presets` | relies on "the existing load step and round-trip test" |
+
+### 4–5. Verification and integration
+- **VERIFIED.** The fix message:
+  > "#5344 added the export_presets field to Persisted; #5616 rewrote load_presets_json … its Persisted
+  > initializer lacked the new field, so main stopped compiling (E0063 at presets/mod.rs:180)." (351149f0df)
+- **VERIFIED.** Main did not compile from 01:20Z to 14:32Z on 10-17 (13 h 12 min). 9 more first-parent
+  commits landed on top before the fix (`git rev-list --first-parent --count c61cf9f0bd..351149f0df^`).
+- INFERRED: both PRs passed CI against their own bases. The repository does not require PRs to be up
+  to date before merging, and there is no `merge_group` trigger (E07-003). #5616 merged 2.4 days after
+  its last push.
+
+### 6. Aftermath
+- **VERIFIED.** The process responses came later and were manual: integration batches from 10-18
+  (E07-002) and "(merge queue)" commits from 11-08 (7 on main; errata #2). Red-main commits fell to 0
+  in W43–W45 and spiked again on 11-11 (E07-005).
+
+### 7. What this case demonstrates about method
+- (b) **VERIFIED.** "Green" is a property of a PR **and a base**. #5616 was tested on a base 2.4 days
+  and one conflicting PR older than the one it landed on.
+- (b) **VERIFIED.** 9 commits landed on a non-compiling main, so their own post-merge runs were red for
+  reasons unrelated to them.
+- (a) **VERIFIED.** The fix names both PRs in the subject (`#5344 x #5616`), which turns incidents into
+  countable data (deliverable 07 used it).
+- (c) **INFERRED.** Transferable pattern: re-test on the merge result (merge queue or "update branch
+  required") once parallel landings exceed a few per hour. Precondition: CI is fast enough to
+  serialise.
+
+---
+
+## Cross-case comparison
+
+| Case | spec source | decomposition | implementer as attributed | tests in same change? | independent verification? | review type | time to merge | follow-up fixes |
+|---|---|---|---|---|---|---|---|---|
+| A MCP | in-repo protocol doc → FilmCraft #28 → user issues | bulk commits, then one PR per report batch | Brandon Thomas (none recorded at genesis; Claude Opus 5.5 from 10-01); storybored379 + Claude; BFlat squashes with Claude trailers; harrisonoconnorhover (none) | yes, from day 0 | partial: in-process client, wire test; bridge only vs fake server | squash/rebase by maintainer; #1533 + agent lint fix | #1533 2 h 31 min | ≥3 user-report PRs in week 2; flake fix |
+| B #1381 | community issue + Claude-generated diagnosis | 1 issue = 1 agent branch | author `Claude` (Opus 5.5, session link) | yes (all 4 siblings, correcting E09) | no: synthetic events only, no Wayland repro | none ("No reviews", WF); 4/7 checks | 4 h 18 min (siblings 42 min–5 h 11 min) | 0 found |
+| C never crash | AGENTS rule 9 + external `craftrules` standard | 12 one-commit per-crate branches, stacked | Brandon Thomas, `Claude Opus 5.5` on all 12 (trigger: Opus 4.8) | partly (#34 yes; #54, #58, #59 none) | yes in design (registry fuzzer), but not in CI until 10-17 | unknown; 11 squashes in 15 min | 2 h 50 min | panic_hunt hardening; "hostile numbers" series |
+| D PSD oracle | Photoshop's embedded composites; own corpus | by feature group, reported as oracle deltas | Brandon Thomas, Timothy Daly et al. (none recorded); extraction Dylan M. Taylor (none) | yes (floors and synthetic repros in same commit) | **yes**: external oracle, pinned sha256 corpora, CI job | squash; #13414 self-merged, bot only | #13414 7 h 16 min | floors raised 20×; write side still manual |
+| E egui 0.37 | 1,632-line committed plan (Codex paths) | plan sections; 2 PRs | skylartaylor (`codex/` branch, none recorded); Codebuff on 1 commit | yes (83 new test fns, fixtures) | partial: full gate locally; native/IME/perf declared open | CodeRabbit ×2 + human approval ×2 (WF) | 17 h 50 min (#9363) | 18 related commits incl. RTL regression |
+| F box blur | #211 budgets + cost model in commit | row PR + column PR | ebosido444-ai (none recorded → unknown) | yes (bit-exact differential + hash) | **yes**: base-tree worktree hashes | CodeRabbit + 2 humans, changes requested | ~11 d | measurement correction 1.89×→1.45×; radius sweep |
+| G Finding: | unnamed external finding store (UUID + CWE) | 1 finding = 1 PR (27) | Dylan M. Taylor (none recorded) | 11 of 27 | no (module tests only) | CodeRabbit; 1 approval seen; #8417 none | ~0.5–22 h | Nov `fix/sec-*` bundles, mostly unmerged |
+| H artboards | issues #1531, #10218, #8788; then a tester on main | 1 agent fix + 2 PRs + 1 follow-up PR | Claude; Mohamed Mahjoub + Claude; FredApps + Claude Opus 5.5 | yes (34 named tests) | human tester on main; CodeRabbit | maintainer review + squash | 4 d 10–12 h; follow-up 2 h 08 min | 4 in-PR corrections + 6-commit follow-up |
+| I merge skew | n/a (incident) | — | #5616 `Co-authored-by: Cursor`; fix Joseph | fix relied on existing test | no: CI not run on the merge result | squash, no up-to-date requirement | fix 13 h 12 min after break | process: batches, manual queue |
+
+## Patterns across cases (each recurs in ≥3 cases)
+
+1. **The test lands in the same change as the code, and is named for the behaviour.** A
+   (8a2f31c2c4, 7eb3b2e072), B (all four), C (bf111b524e, 69f0e25d5f), D (corpus_regressions.rs), E,
+   F, H. VERIFIED. **But it is not universal**: C #54/#58, G 16 of 27, and the backfill campaign
+   "eight fixes merged without one" (E07-015). The norm is a convention enforced by no gate.
+2. **External or differential oracles, where they exist, are the strongest verification in the
+   record.** D (Photoshop composites, 2/255), F (bit-exact against a base worktree), C (registry
+   fuzzer), A (wire-level error codes from a shared convention). VERIFIED. Cases without one (B, G, H)
+   rely on the author's own model of the bug, and in H that model was wrong (E09-H-001).
+3. **Verification gaps get declared rather than closed.** E ("Native/browser acceptance … remain
+   open"), F ("What this does not fix", pre-existing failures), D (write oracle "does not prove that
+   Photoshop can open the output", 499 extracted tests), C (opt-in fuzz). VERIFIED. This honesty is
+   valuable only if someone tracks the open gates. Nothing in the repository does (INFERRED, from
+   E05-071: the panic_hunt gap stayed open 13 days).
+4. **Human review is uneven. AI review is near-universal but advisory.** No human review: B, D
+   #13414, G #8417. Substantive human review: E, F, H. CodeRabbit found real defects in E
+   (accessible names), F (timing harness) and H (2+2 comments), and was merged over in G #8452.
+   VERIFIED (WF), matching E05-030 and E05-035.
+5. **Post-merge discovery is the main source of follow-ups.** A (user reports within a week), E (RTL
+   after 3.8 days), H (tester within hours), I (main broken 13 h). VERIFIED. Each follow-up became a
+   named test or a named incident, which is the project's main learning loop.
+6. **Agent attribution is visible at the commit level, but uneven.** Explicit trailers and session
+   links: A, B, C, H. Only a branch prefix or third-party tool: E (`codex/`, Codebuff), I (Cursor).
+   None recorded: D, F, G. VERIFIED. Per errata #8 and E05 §0, attribution fell after house rule 15
+   (11-06), so the cases after November are the least attributable.
+7. **Decomposition into one-issue or one-area PRs is the default shape.** B (1 issue = 1 branch), C (1
+   crate area = 1 branch), G (1 finding = 1 PR), A (report batches). VERIFIED. It made changes
+   individually small, but it also produced the parallel landings that cause merge skew (I; E07-003).
+
+## Confidence and gaps
+- **Weakest evidence:** review paths. They come from WebFetch summaries (B, E, F, G, H, D #13414) or
+  are unknown (C #33–#59, A #1533/#1668, D 10-05 PRs). The claim that 11 squashes in 15 minutes left no
+  room for review (C) is inference.
+- **Not checkable here:** whether the extracted craft-psd tests run anywhere (external repo); the
+  `Finding:` source; whether any "test fails without the fix" claim was actually run red. Case B's
+  red-before claim is from code reading only. No tests were executed in this synthesis.
+- **Attribution:** "ebosido444-ai" and the egui plan's `/home/codex` paths are suggestive only and are
+  reported as unknown or INFERRED.
+- **What would change conclusions:** PR pages showing substantive human review for C or G would
+  weaken pattern 4. Evidence that panic_hunt or the PSD write oracle ran in some untracked CI would
+  weaken pattern 3.
+
+## New evidence gathered during synthesis
+| Fact | Source | Label |
+|---|---|---|
+| #1323 fix includes 2 inline tests (corrects E09) | 988ad9558a (`transform_tool.rs`, `a_distort_corner_stops_before_the_box_folds_over`, `keep_convex_leaves_a_degenerate_start_alone`) | VERIFIED |
+| #439/#546/#548 squashes carry 1/6/5 Claude trailers (corrects E09 "—") | 55054b5fcc, 7eb3b2e072, 8f0f95959d (`git show -s --format=%B \| grep -ci 'co-authored-by: claude'`) | VERIFIED |
+| #13414 = 294 files, +755/−25,930 (E09 right, E04 wrong) | `git show --shortstat 74330157cb` | VERIFIED |
+| crates/psd held 499 `#[test]` attributes at the parent of #13414; psd corpus tests (−129, −60 lines) deleted | `git grep -c -E '^\s*#\[test' 74330157cb^ -- crates/psd`; `git show --stat 74330157cb` | VERIFIED |
+| Photoshop re-render oracle started at `PASS_FLOOR = 1` of 84 | 968baf639e:crates/engine/tests/photoshop_oracles.rs:23-24 (`PASS_FLOOR`) | VERIFIED |
+| io corpus floors unchanged by #13414 (import rename only) | `git show 74330157cb -- crates/io/tests/it/corpus.rs` | VERIFIED |
+| Bidi tests asserted PhotoCraft's own reordering, replaced after egui 0.37 regression | 73ac7d9a25^:crates/ui-egui/src/text/bidi_text.rs; 73ac7d9a25 | VERIFIED |
+| egui squash added 83 test fns, touched 46 test/fixture files | `git show 5c9192bbe2 \| grep -A2 '^\+\s*#\[test' …`; `--stat` | VERIFIED |
+| box-blur doc discloses 2 pre-existing algo test failures; commit body keeps uncorrected 1.73–1.89× | origin/main:docs/box-blur-performance.md:145-150; f0a816f844 | VERIFIED |
+| a616cda46c replaces f32 `assert_eq!` with bit comparison (signed zero) | a616cda46c | VERIFIED |
+| #5616 head lacks #5344; 9 first-parent commits landed on non-compiling main | `git merge-base --is-ancestor 3ebc42a200 refs/pull/5616/head`; `git rev-list --first-parent --count c61cf9f0bd..351149f0df^` | VERIFIED |
+| #5616 carries `Co-authored-by: Cursor` | c61cf9f0bd | VERIFIED |
+| panic_hunt at birth: 4 param sets × every `command_specs()` entry, `#[ignore]` | bf111b524e:crates/engine/tests/panic_hunt.rs:1-48 | VERIFIED |
+| #1531 agent fix shipped 5 tests | 7488ab413d | VERIFIED |
+| 11 of 27 `Finding:` commits add a test (recount agrees with E09) | loop over `git log origin/main --grep='^Finding:'` | VERIFIED |

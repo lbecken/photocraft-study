@@ -50,14 +50,14 @@ November (E06-013); up to 504 PRs in flight per day (E06-051).
 1. *No merge queue*: semantic merge skew between individually green PRs caused 11 of 21 catalogued
    red-main incidents (INFERRED classification); a manual "(merge queue)" practice appeared only on 11-08 (E07-003).
 2. *Human review is mostly absent or label-only* on sampled PRs; approval seen once in E06's sample of 10
-   and once in E05's sample of 6 (E06-041, E05-035). Accountability is a written rule, not a mechanism (E05-030).
+   and once in E05's sample of 6; about 4 in all ~22 sampled PR pages (E06-041, E05-035, errata #17). Accountability is a written rule, not a mechanism (E05-030).
 3. *Vacuous tests*: 57 GPU checks passed without comparing anything (E07-018); fixes merged without
    regression tests needed a backfill campaign (E07-015).
 4. *Surface before behaviour*: "625/625 menu items live" while basics were broken (E07-013, E07-017).
 5. *Session memory is private*: `log/devlog.md` and `plan/` are gitignored (E02-004, E01-005).
 6. *Many rules are stated-only*: check-then-claim, review-the-diff, report-only-what-ran, licence
    allowlist, no-agent-attribution (E02 §4). Practice diverges exactly there (E02 §4).
-7. *Gates that look real but cannot fail*: 0 of 88 perf budgets enforced (E04-051), stale fuzz matrix
+7. *Gates that look real but cannot fail*: 0 of 102 perf-budget rows (88 scenarios + 14 benches) enforced (E04-051, errata #11), stale fuzz matrix
    (E05-023), path filters on non-existent files (E05-033).
 8. *Shared tracker docs as conflict hot spots*, including committed conflict markers (E07-020).
 
@@ -99,7 +99,7 @@ oracles instead of by human reading (E04-008, E04-010, E04-012).
 | 1.11 | **Behaviour metrics next to wiring metrics** | `[PC-PARTIAL E07-013]` — wiring metric (625/625 "live") over-claimed; behaviour metric added after user reports | `[PROPOSED]` for each wiring count, track a behaviour count (commands with ≥1 end-to-end test asserting an effect). Answers E07-013, E07-017. |
 | 1.12 | **Compile-time completeness** (destructure structs in serializers so a new field breaks the build) | `[PC-VERIFIED E04-033]` (`AGENTS.md:191-194`) | Use `let Foo { a, b, c } = foo;` in every serializer. |
 | 1.13 | **Never-crash baseline from day 1**: `unsafe_code = "forbid"`, clippy deny `unwrap/expect/panic` outside tests, last-resort `catch_unwind` around dispatch | `[PC-PARTIAL E07-009]` — added on day 5, after user crash reports (trigger INFERRED), as a 12-PR sweep | `[PROPOSED]` put it in the first commit instead. Answers E07-009 (F6). |
-| 1.14 | **Perf budgets that can fail** | `[PC-PARTIAL E04-051]` — 88 scenarios, 0 enforced; baseline machine class may never match CI (E05-028) | `[PROPOSED]` enforce on a fixed runner class; unenforced budgets stay visible with `enforce = false` and a measured note (as E09-F-004). |
+| 1.14 | **Perf budgets that can fail** | `[PC-PARTIAL E04-051]` — 102 rows (88 scenarios + 14 benches), 0 enforced (errata #11); baseline machine class may never match CI (E05-028) | `[PROPOSED]` enforce on a fixed runner class; unenforced budgets stay visible with `enforce = false` and a measured note (as E09-F-004). |
 | 1.15 | **Golden images / bless command** | `[PC-PARTIAL E04-035]` — planned, never built | `[PROPOSED]` build `xtask bless` with review-required diffs if visual output matters. |
 
 Day-0 test: an agent with no GUI must be able to (a) list all commands, (b) run any one headless with
@@ -551,7 +551,7 @@ Attribution policy `[PROPOSED]`: require trailers in commits (machine-readable, 
 check) and decide PR-text disclosure explicitly. PhotoCraft's "No agent attribution" in PRs
 (`AGENTS.md:20`) coexists with a product feature crediting models from trailers and was not uniformly
 followed (`[PC-PARTIAL E02-011, E06-042]`); the richer `Model-Effort:` trailer reached only 25 non-merge commits
-(27 including merges; E03-005, E02-016).
+(27 including merges), all by one contributor — a personal convention, not project practice (E03-005, E02-016, errata #18).
 
 ---
 
@@ -594,7 +594,7 @@ followed (`[PC-PARTIAL E02-011, E06-042]`); the richer `Model-Effort:` trailer r
 - **Strongest**: architecture preconditions (§1), gate composition (§7.2), parallel-agent etiquette
   (§4.2–4.3), failure classes and their observed fixes (§10) — all from git and file contents at the pin.
 - **Weakest**: everything about human review, approvals and supervision rests on WebFetch summaries of
-  ~16 PRs (E05 §0.3, E06 §6); branch-protection settings are invisible. If PhotoCraft enforces required
+  ~22 PR pages (E05 §0.3, E06 §6, E09; errata #17: 4 explicit human approvals in total); branch-protection settings are invisible. If PhotoCraft enforces required
   reviews server-side, §9's "hollow spot" is overstated.
 - **Not checkable**: orchestration tooling, number of concurrent agents, token/money cost, supervision
   hours, the private devlog/plan contents, external reusable workflows (`craft-common-actions`).

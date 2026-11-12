@@ -24,3 +24,7 @@ Corrections found while synthesizing; where an evidence file and this list disag
 | 18 | `Model-Effort:` trailers | All 27 commits (25 non-merge) are by one contributor (Trevor Brown) and were merged by David Mann — a single person's convention, not a project practice. | D05 |
 | 19 | Date conventions | Evidence files mix author dates (local tz) and committer UTC dates, so some events differ by a day between files. `02-chronology.md` uses committer UTC at the pin: `6401cfdbe1` = 10-20 (E05: 10-17), `0379569d00` = 10-30 (E02: 10-29), first `Model-Effort:` `b29fdc5a29` = 11-08 (E03: 11-07), v0.20.1 = 11-03 and v0.20.2 = 11-05 (E05 table: 11-02 / 11-04). Prefer the chronology's dates. | D02 |
 | 20 | Landed-PR totals | 3,285 distinct PR numbers (E03) vs 3,288 landings (D02): three squash numbers landed twice. | D02 |
+| 21 | E09 "#1323 fix shipped without a test" | Wrong: `988ad9558a` adds two inline tests. | D04 (checked in clone) |
+| 22 | E09 "PRs #439, #546, #548 carry no AI trailer" | Wrong: they carry 1, 6 and 5 Claude trailers respectively. | D04 (checked in clone) |
+| 23 | E04 line stats for #13414 | Wrong; E09's figure is right: 294 files, +755 / −25,930. 499 PSD tests left the repository with the move to `craft-psd`. | D04 |
+| 24 | Box-blur speedup | The commit body of `f0a816f844` still says 1.73–1.89×; the corrected 1.45× appears only in the doc and the follow-up commit. | D04 |
