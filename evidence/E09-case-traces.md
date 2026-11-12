@@ -163,7 +163,7 @@ Tests in campaign commits (VERIFIED from `--stat`): #34 adds `crates/codecs/test
 | sha (main) | date | author | trailer | PR / branch tip | files summary | tests / oracle |
 |---|---|---|---|---|---|---|
 | f225c290cc, 11b175e22b | 2026-10-04 12:58 -0400 | Brandon Thomas | — | `fix/psd-adjustment-roundtrip` (unmerged tips) | vibA, blnc, blwh, phfl, mixr adjustment blocks | "Corpus: export round-trip step and pass floors" |
-| 574d0d3d53 | 2026-10-05 08:01 -0400 | Brandon Thomas | — (squash; branch tip 15d63afbc7 has no body) | #195 / `feat/psd-tools-corpus` | `xtask/psd_tools.rs`, `xtask/psd-tools-corpus.sha256` (309 lines), `crates/io/src/*`, `crates/psd/src/layer.rs` | `crates/io/tests/corpus.rs` (+465/-?), `corpus_regressions.rs` (+167), `compose/src/tests.rs`; MIXED floor = 133 |
+| 574d0d3d53 | 2026-10-05 08:01 -0400 | Brandon Thomas | — (squash; branch tip 15d63afbc7 has no body) | #195 / `feat/psd-tools-corpus` | `xtask/psd_tools.rs`, `xtask/psd-tools-corpus.sha256` (309 lines), `crates/io/src/*`, `crates/psd/src/layer.rs` | `crates/io/tests/corpus.rs` (465 lines changed), `corpus_regressions.rs` (+167), `compose/src/tests.rs`; MIXED floor = 133 |
 | 1d9d92341f | 2026-10-05 10:52 -0400 | Brandon Thomas | — | #224 / `fix/psd-effects` | `compose/effects.rs`, `gpu/compose.wgsl`, `io/examples/oracle_diff.rs` | `compose/src/tests.rs` (+47), `gpu/tests/parity.rs` (+18); subject "(113 -> 118 oracle passes)"; floor 145 |
 | 8bac8926a3 | 2026-10-05 11:48 -0400 | Brandon Thomas | — | #233 / `fix/psd-strokes` | stroke effects | floor 146 |
 | 968baf639e | 2026-10-05 17:47 -0400 | Brandon Thomas | — | #190 / `feat/photoshop-oracle-corpus` | `.github/workflows/ci.yml` (+23, corpus job), `xtask/src/corpus.rs`, `corpus_pins.rs`, `pinned.rs`, `photoshop-corpus.sha256` (256), `psd-corpus.sha256` (170), `docs/development.md` (+74) | new `crates/engine/tests/photoshop_oracles.rs` (+133); floors PSD_TOOLS 229, PHOTOSHOP 126 |
@@ -290,7 +290,7 @@ Chosen because the doc is the most complete before/after record with a review-dr
 | group | shas (main) | a: | c: | PRs | CWE mix |
 |---|---|---|---|---|---|
 | first | 42d8aad56f | 10-21 21:44 -0400 | same | #8417, merge commit 9852baa4ba (10-22 19:27 -0400) | CWE-407 |
-| burst of 25 | 7c78c951e4 … f65832931b | 10-21 21:47 → 22:43 -0400 | 10-22 07:10–07:12 -0400 (committer Dylan) | #8420–#8452 range (rebase-merged; e.g. #8452 head 0785fd574b) | CWE-407 ×12, CWE-400 ×9, CWE-770 ×3, CWE-409 ×1, CWE-789 ×1 |
+| burst of 25 | 7c78c951e4 … f65832931b | 10-21 21:47 → 22:43 -0400 | 10-22 07:10–07:12 -0400 (committer Dylan) | #8420–#8452 range (rebase-merged; e.g. #8452 head 0785fd574b) | CWE-407 ×11, CWE-400 ×9, CWE-770 ×3, CWE-409 ×1, CWE-789 ×1 (all 27: 407×12, 400×9, 770×3, 409×2, 789×1; `grep -oE 'CWE-[0-9]+' | uniq -c`) |
 | last | ef4e13dc2d | 10-22 06:22 -0400 | 10-22 19:44 | #8505, merge ee0d23f77a | CWE-409 |
 
 Example tests (VERIFIED, diff grep): ef4e13dc2d `crates/io/tests/it/svg.rs` (+46): `gzip_compressed_embedded_svg_decompresses_once_with_a_size_cap`, `resolve_data_rejects_nested_gzip_and_handles_text_plain_svgz`; 42d8aad56f inline `trailing_descriptor_applies_outsets_to_first_matching_slice`; f65832931b none (+11 in `pattern.rs`).
@@ -311,7 +311,7 @@ Example tests (VERIFIED, diff grep): ef4e13dc2d `crates/io/tests/it/svg.rs` (+46
 
 ### E09-G-004 — The later `fix/sec-*` branches are a different series without `Finding:` trailers
 - Label: VERIFIED
-- Method: `git log -1 --format='%(trailers:key=Finding)'` on all 20 `origin/fix/sec-*` tips → empty; commits dated 2026-11-03 → 11-11, e.g. 59158ffdf2 "fix(io): bound Krita default pixels, XMP nesting, XCF RLE runs, SVG DTDs …", 2be2838f79 "address review: budget packed depth-1 mask source plus output". Batching differs: these are multi-finding bundles per area (`sec-io-parser-bounds`, `sec-engine-misc2`) with "address review" commits; 16 of 20 are still ahead of main (unmerged) at the pin.
+- Method: `git log -1 --format='%(trailers:key=Finding)'` on all 20 `origin/fix/sec-*` tips → empty; commits dated 2026-11-03 → 11-11, e.g. 59158ffdf2 "fix(io): bound Krita default pixels, XMP nesting, XCF RLE runs, SVG DTDs …", 2be2838f79 "address review: budget packed depth-1 mask source plus output". Batching differs: these are multi-finding bundles per area (`sec-io-parser-bounds`, `sec-engine-misc2`) with "address review" commits; 18 of 20 tips are still ahead of main (`git rev-list --count origin/main..<tip>` > 0) at the pin.
 
 ---
 

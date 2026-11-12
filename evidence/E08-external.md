@@ -232,6 +232,29 @@ All quotes come from the Algolia API (`https://hn.algolia.com/api/v1/items/<id>`
 - Data: case-insensitive regex for claude|codex|agent|anthropic|built with|written|vibe|llm|opus over the extracted text. Hits are only product-facing ("Agent-ready … built for automation and AI agents", "written entirely in Rust", "Built the hard way. Every Crafting App is written from scratch in Rust"). /news has 2 posts (2026-01-16, 2026-01-30), neither about the Crafting Apps. The Craft Anything page markets "work with a coding agent to build … your own project" (an ArtCraft product that itself promotes agent-built clones).
 - Method: `curl` + `python3 -I scratchpad/work/E08x.py <file> <regex>`
 
+### E08-028 — Org RFC-0006 "coding agents": "much of the current PR volume comes from coding agents"
+- Label: VERIFIED (via WebFetch, verbatim quotes requested)
+- Source: https://github.com/storytold/craft-contrib/blob/main/rfcs/0006-coding-agents.md (accessed 2026-11-12; no author or date shown on the page)
+- Quote: "The craft apps welcome AI-assisted contributions, and much of the current PR volume comes from coding agents." Also "Running agents on hundreds of issues across eleven repositories taught us which instructions prevent those mistakes." Observed failure modes: "duplicate PRs, fixes for bugs already fixed on `main`, PRs left as drafts, or code that uses functions that don't exist." On attribution: "That line is redundant here, and a repository rule may not require it."
+- Notes: This is the most direct **P1 statement about maintenance by agents** and about agent failure modes. It is the origin of house rules 1–15 (E08-008/009). It also states that `CLAUDE.md` should import `@AGENTS.md`. The RFC gives **no** agent count limit, tooling or cost (cost appears only as "spending money" on the stop-and-ask list). The run on "hundreds of issues across eleven repositories" has no date or agent count. Lead for the PR streams: test the duplicate-PR and already-fixed rates.
+
+### E08-029 — Public repository metadata on 2026-11-12
+- Label: VERIFIED (WebFetch summary)
+- Source: S30 https://github.com/storytold/photocraft; S29 https://github.com/storytold
+- Data: About = "PhotoCraft: An open-source photo editor written from scratch in pure Rust". 78.9k stars, 14.0k forks, 335 watching. Issues tab 2.8k, PRs tab 1.3k (open counts as shown on the tabs). "12,487 Commits" (the local main has 12,396 at the pin; the page may be newer). The org has 80 repositories, and craft-libs is listed. The org description is "Open Source Tools and Models for Makers, Builders, and Creatives". Neither page mentions AI development.
+- Notes: The About text changed from "clean-room reimplementation of Adobe Photoshop" (as quoted by the press in early October and by the Gitee/Passw mirrors) to "photo editor written from scratch". The README still says "clean-room reimplementation" (`README.md:17`). The date of the About change could not be checked, because GitHub API access is blocked.
+
+### E08-030 — Release notes credit contributors and show "Integration batch" bundles but no AI disclosure
+- Label: VERIFIED (WebFetch summary, partial page)
+- Source: S32 https://github.com/storytold/photocraft/releases
+- Data: v0.21.0 (11-06) through v0.23.1 (11-12) are published by github-actions and list 47, 61, 71 and 11 contributors. The notes include "Integration batch 13: 13 parity epic PRs on main" and "Integration batch 19: epic PRs (WIP)". Tags v0.22.0 and v0.23.1 are GPG-signed by dylanmtaylor. No AI, agent or Claude mention appears in the visible text.
+- Notes: "Integration batch … epic PRs" is a P1 workflow signal of batching many PRs onto main. Lead for the merge-workflow streams. The local tag list shows 27 tags from v0.1.0 (2026-10-01) to v0.23.1 (`git for-each-ref refs/tags`).
+
+### E08-031 — No public statements found from other maintainers
+- Label: VERIFIED (negative result)
+- Source: WebSearch "PhotoCraft maintainer David Mann OR Dylan Taylor OR aiongg …" (2026-11-12). HN Algolia searches were made only for `echelon`.
+- Notes: The search found only a release-note credit for davidmann4 (PR #2981, via releasebot.io). There is no method statement by David Mann (2,523 commits), aiongg (1,113) or Dylan M. Taylor (release signer).
+
 ---
 
 ## 5. Claims matrix
