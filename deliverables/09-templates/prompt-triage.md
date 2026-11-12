@@ -27,8 +27,9 @@ implementer sessions that would otherwise be spent on duplicate or stale work.
 4. If an open PR addresses it, comment "being worked on in #PR" and add `in progress`.
 5. For epics, propose a split into child issues with "main files" per child, in a free / being worked
    on / merged table.
-6. Scheduled pass: claims with no branch push for {{CLAIM_TIMEOUT, default 24 h}} get a reminder; PRs
-   with no author response get the 7/14/30-day reminders. Closure is a human decision.
+6. Scheduled pass: claims with no branch push for {{CLAIM_TIMEOUT, default 24 h}} are released (remove
+   `in progress`, comment on the issue). PRs follow the response clock: respond within 7 days, reminder at
+   14, closure eligible at 30. Closure is a human decision.
 
 ## Constraints and their reasons
 - Never close, assign blame, or promise dates; those are human calls.

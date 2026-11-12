@@ -1,5 +1,5 @@
-<!-- USAGE: Copy to specs/<issue>.md. The planner fills it; the owner approves it for tier medium/high before
-     anyone claims the task. Implementer and test author both work from this file only.
+<!-- USAGE: Copy to specs/<issue>.md. The planner fills it; a maintainer (medium) or the owner (high) approves it
+     before anyone claims the task. Implementer and test author both work from this file only.
      Playbook: 08-playbook.md §3 (spec, claim), §4.2, §5, §9. PROPOSED artifact. -->
 
 # Spec: {{TITLE}} (#{{ISSUE}})

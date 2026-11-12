@@ -7,7 +7,7 @@
 | 03 | Architecture and process reconstruction | done | `03-architecture-and-process.md` |
 | 04 | Feature case studies | **deferred — evidence-level only** | `../evidence/E09-case-traces.md` (8 cases with commit tables and cross-case comparison) |
 | 05 | AI agent and human role maps | **deferred — evidence-level only** | `../evidence/E06-workflow-roles.md`; partly covered by `03` Part B and `08` §2 |
-| 06 | Testing/CI/release analysis | **deferred — evidence-level only** | `../evidence/E05-test-ci-release.md`; partly covered by `07` and `08` §7–8 |
+| 06 | Testing/CI/release analysis | done | `06-testing-ci-release.md` |
 | 07 | Failure and productivity analysis | done | `07-failures-productivity.md` |
 | 08 | AI Software Engineering Playbook | done | `08-playbook.md` |
 | 09 | Prompts and templates | done | `09-templates/` (16 files) |

@@ -32,9 +32,9 @@ demonstrably does, an HTML comment names the evidence ID.
 ## How the pieces fit (one task)
 
 1. Triage (`prompt-triage.md`) labels the issue and sets a provisional tier from `risk-tiers.md`.
-2. Planner (`prompt-planner.md`) writes `task-spec.md`; owner approves for medium/high.
+2. Planner (`prompt-planner.md`) writes `task-spec.md`; a maintainer approves it for medium, the owner for high.
 3. Implementer (`prompt-implementer.md`) claims, works the loop, opens a draft PR, writes `handoff.md`.
-4. Test author (`prompt-test-author.md`, separate session) writes `test-plan.md` and tests that fail on base.
+4. Test author (`prompt-test-author.md`, separate session; tier medium/high) writes `test-plan.md` and tests that fail on base.
 5. Reviewer (`prompt-reviewer.md`) fills `review-checklist.md`; human approves per tier.
 6. Integrator (`prompt-integrator.md`) lands via merge queue or batch; incidents go to `incident-postmortem.md`.
 7. Release agent (`prompt-release.md`) prepares; human publishes. Tier-high decisions get an `adr.md`.

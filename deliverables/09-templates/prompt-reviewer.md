@@ -1,6 +1,6 @@
 <!-- USAGE: Prompt for the verifier/reviewer agent. Run in a session separate from implementer and test author.
-     Optionally run a second copy with the "attacker" stance for tier high (mirrors the reviewer+attacker pair
-     stated in PR #9386, E06-022). Output: filled review-checklist.md. Playbook: 08-playbook.md §2, §8, §9. PROPOSED. -->
+     For tier high, a second copy with the "attacker" stance is required (risk-tiers.md; mirrors the reviewer+attacker
+     pair self-reported in PR #9386, E06-022). Output: filled review-checklist.md. Playbook: 08-playbook.md §2, §8, §9. PROPOSED. -->
 
 # Reviewer brief
 
@@ -24,7 +24,7 @@ is as valuable as an approval.
 1. Read the spec, then the diff, then the tests, then the PR evidence.
 2. Re-run the gate yourself if the PR's "Not run" list is non-empty or the evidence is stale.
 3. Check that each new test fails without the fix: revert the core change locally or run
-   `cargo mutants --in-diff`. A test that still passes is a blocking finding.
+   `git diff {{BASE_SHA}}...HEAD > pr.diff && cargo mutants --in-diff pr.diff`. A test that still passes is a blocking finding.
 4. Look at behaviour: run the command via CLI/control channel or open the screenshot evidence.
 5. Check scope: files outside the spec's ownership list, contract changes, dependency or CI edits,
    generated files hand-edited, ratchets lowered, tests skipped.

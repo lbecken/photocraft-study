@@ -18,7 +18,8 @@ tests from the spec and a reviewer will try to break your change, so aim for beh
 correct, not merely green.
 
 ## How to work
-Write a failing test for the first criterion, record that it failed, then implement. Loop: edit,
+First confirm your claim is posted on the issue and no other open PR covers it (AGENTS.md §4); if
+one does, stop and report. Write a failing test for the first criterion, record that it failed, then implement. Loop: edit,
 `cargo check`, run focused tests, then look at the actual behaviour through the control channel or the
 CLI (`{{CLI}} run <command-id> '<json>'`, `ui.screenshot`) — a passing test that never reaches the code
 proves nothing. When the criteria hold, run the full gate `cargo xtask ci`. Open a definition before
@@ -37,7 +38,7 @@ using it rather than guessing its signature. <!-- E02 §2.1 rule 3; E04-024 -->
 
 ## Stop conditions
 Stop and write a handoff when: the gate is green and the PR is drafted; the same test fails after three
-cycles with no new information; you reach {{MAX_CYCLES, default 8}} edit–test cycles; a stop-and-ask
+cycles with no new information; you reach {{MAX_CYCLES: 8 for tier low/medium, 12 for high}} edit–test cycles; a stop-and-ask
 item applies; or your context is about 70% used.
 
 ## Output format

@@ -1,6 +1,6 @@
 <!-- USAGE: Copy to docs/adr/NNNN-<slug>.md for every tier-high decision (contracts, persistence, dependencies,
      CI, security, licensing). Number sequentially; never delete — supersede instead. PhotoCraft's decision log
-     (docs/decisions.md) had 2 dated prose entries, no status field, and one entry disappeared (E02 §5); this
+     (docs/decisions.md) had 2 dated prose entries, no status field, and a third entry seen on side branches is absent at HEAD (E02-025); this
      template adds the missing fields. Playbook: 08-playbook.md §9, §11. PROPOSED artifact. -->
 
 # ADR {{NNNN}}: {{TITLE}}
@@ -34,7 +34,7 @@ writes go through `atomic_write`; a flush failure fails the save except on {{lis
 - Negative / accepted risks: {{…}}
 - Contracts affected: {{command ids, schemas, layer table, file formats}}
 - Mechanical enforcement added: {{lint / xtask check / test name}}, or "rule only, because …"
-  <!-- prefer a check: rules without checks diverge, E02-016 -->
+  <!-- prefer a check: rules without checks diverge, E02 §4 -->
 
 ## Verification
 - How we will know it works: {{tests, corpus, metric and threshold}}

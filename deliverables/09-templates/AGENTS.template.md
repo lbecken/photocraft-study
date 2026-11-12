@@ -29,7 +29,7 @@ Layering is enforced by `cargo xtask layers`. A new crate must be registered in 
 
 ## 3. Golden rules
 1. **Everything is a command.** UI, CLI, control channel and MCP dispatch commands by id; no logic in
-   click handlers (`cargo xtask ui-dispatch` checks this). <!-- E04-010, E04-032 -->
+   click handlers (`cargo xtask ui-dispatch` checks this). <!-- E04-010, E04-012 -->
 2. **Never crash.** No `unwrap`/`expect`/`panic!` outside tests, no `unsafe`. Every crash fix comes with
    a test that panicked before the fix. <!-- E07-009 -->
 3. **Tests are the gate.** Every change adds a test that fails without it. Tests assert an observable
@@ -44,7 +44,7 @@ Layering is enforced by `cargo xtask layers`. A new crate must be registered in 
 1. Read `docs/scorecard.md` and the issue queue; take the highest-ranked unclaimed item.
 2. Check, then claim: search open PRs for `#N`; if none, comment `claim: <role> <session-id> <branch>`
    and add label `in progress`. Release the claim if you stop. <!-- E02 §2.1 rule 2 -->
-3. Work only from an approved `specs/<issue>.md` for tier medium and high.
+3. Work only from an approved `specs/<issue>.md` for tier medium (maintainer approves) and high (owner approves).
 
 ## 5. Definition of done
 Run `cargo xtask ci` (identical to CI) and paste the summary into the PR. It runs:
@@ -56,7 +56,7 @@ Also: UI changes attach before/after screenshots to the PR description (not the 
 updated if a number moved; handoff note written.
 
 ## 6. Parallel agents
-- One git worktree and one `CARGO_TARGET_DIR=target/agent-<name>` per agent; delete when done. <!-- E06-050 -->
+- One git worktree and one `CARGO_TARGET_DIR=target/agent-<name>` per agent; delete when done. <!-- target dir: E06-050; worktree: PROPOSED -->
 - Edit only files listed as owned in your spec. Registries/manifests: one-line surgical edits, re-read first.
 - New feature → new module (`<area>_cmds.rs` with `specs()`), never grow a shared file. <!-- E06-050 -->
 - Write manifests atomically (temp file outside the workspace, then `mv`).

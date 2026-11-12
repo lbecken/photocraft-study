@@ -25,7 +25,7 @@ That pair of results is the evidence that the test tests something.
 2. Write the tests. Drive behaviour through the command registry or control channel where possible,
    because that is the same surface users and other front-ends use.
 3. Run the tests on base (expect failure) and on head (expect pass). Record both outputs.
-4. Mutation spot-check: run `cargo mutants --in-diff {{DIFF}}` or delete/invert the core line of the
+4. Mutation spot-check: run `cargo mutants --in-diff {{DIFF_FILE, e.g. git diff BASE...HEAD > pr.diff}}` or delete/invert the core line of the
    fix by hand; at least one of your tests must fail. Record surviving mutants.
 
 ## Constraints and their reasons

@@ -52,7 +52,7 @@ test, no test for this environment, check is advisory only, etc.}}
 |---|---|---|---|---|
 | Mechanical check / ratchet / test | {{…}} | | | |
 | Rule only (justify why no check is possible) | {{…}} | | | |
-<!-- prefer mechanical: stated-only rules are where practice diverged, E02-016 -->
+<!-- prefer mechanical: stated-only rules are where practice diverged, E02 §4 -->
 
 ## 7. Metric impact
 - Added to metrics: red-main minutes {{N}}; escaped regression {{yes/no}}; vacuous-test finding {{yes/no}}.
