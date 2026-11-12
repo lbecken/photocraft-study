@@ -155,3 +155,63 @@ Rank checks by how much an agent can trust a green result:
 
 INFERRED: PhotoCraft's agents had level 1 (via Photoshop's files) for free and leaned on level 6
 for the headline number; the IDE must invest in levels 1–2 *before* fan-out.
+
+---
+
+## 5. Proposed IDE architecture for agent-checkability (PROPOSED)
+
+Design goal: every behaviour an agent could change must be reachable headlessly, through one
+registry, and checkable by an oracle from §4. Layers are enforced by an `xtask layers` analogue
+from the first commit (copying E04-031).
+
+### 5.1 Layer diagram
+
+```
+ L8  apps/ide (desktop shell)   apps/ide-cli   apps/ide-lsp   apps/ide-dap   apps/ide-mcp
+        |                          |              |              |              |
+ L7  ui-shell (egui/other; editor views, panels, keymaps, themes)   control-channel server
+        |                                                            |
+ L6  workspace-server  (headless: open project, run actions, events, command log, replay)
+        |                     \
+ L5  action-registry (ActionSpec: id, schema, enablement, run) <-- plugin-host (sandboxed, versioned API)
+        |
+ L4  refactor / intentions / inspections / formatting / completion   (one crate per family)
+        |
+ L3  semantic: incremental query engine, name resolution, types, index   (per-language crates)
+        |
+ L2  syntax: lexer, lossless trees, per-language grammars
+        |
+ L1  text: rope, line index, edits/diffs        vfs: file ids, snapshots, watcher abstraction
+        |
+ L0  base: ids, interning, cancellation token, diagnostics model, test-time deterministic scheduler
+ ---------------------------------------------------------------------------------------------
+ test-only: testkit (fixtures, snapshot+bless, fault-injecting VFS, replay, latency sampler)
+```
+
+### 5.2 Rules to enforce in CI
+
+| Rule | Check | Copies PhotoCraft (VERIFIED) or fixes a weakness |
+|---|---|---|
+| Edges point downward only; unregistered crate = error | `xtask layers` over `cargo metadata` | Copies E04-031 |
+| No UI crates below L7; no blocking I/O or thread spawning below L6 (only via L0 scheduler/VFS) | `xtask layers` + clippy `disallowed-methods`/`disallowed-types` | Extends E04-032 (`disallowed-types` was used for a UI widget) |
+| Every UI mutation dispatches an action id | Lexical scan with shrink-only allowlist **plus** runtime assertion in debug builds | Copies E04-012; runtime half fixes its admitted incompleteness |
+| `ActionSpec` params and results are typed and schema-validated; schema exported as JSON | Unit test: every registered action has a schema; fuzzer generates from it; CLI/MCP reject invalid params | **Fixes** E04-003 (schema planned, shipped as free-text "JSON-ish" doc) |
+| Every action is fuzzed on fixture states with invariants checked | `action_hunt` (panic_hunt analogue) in the gate | Copies + strengthens E04-012 |
+| Incremental == from-scratch after fuzzed edits | Consistency test in gate, not skippable | New (no PhotoCraft analogue beyond E04-037 pattern) |
+| Tests prove they ran (no silent skip; zero-match filter = failure) | Gate wrapper parses runner output | Copies E05-024 fix; avoids E07-018 |
+| Plugin API surface snapshot diff | `xtask api-check` | New |
+| Generated docs (action catalog, feature matrix, scorecard) are fresh | `--check` | Copies E04-050 |
+| Latency budgets enforced on fixed runner | `xtask perf --enforce` on dedicated hardware | **Fixes** E04-051 / E05-028 |
+| Serialisers destructure structs | Code pattern + review | Copies E04-033 |
+| Workspace lints: forbid unsafe outside an allowlisted crate set, deny unwrap outside tests, complexity ceiling | `[workspace.lints]`, `clippy.toml` | Copies E04-032 (unsafe allowlist is an adaptation: rope/interning may want unsafe) |
+
+### 5.3 The action registry (IntelliJ `AnAction` analogue)
+
+- **Shape (PROPOSED):** `ActionSpec { id, label, menu_path, default_keys, params: Schema, result: Schema, enabled: fn(&Ctx)->bool, run: fn(&mut Workspace, Params, Cancel)->Result<Out>, undo_kind }`. PhotoCraft's `CommandSpec` has id/label/menu/shortcut/params-doc/enabled/run/journal (E04-010) — the same shape minus typed schemas and cancellation.
+- **Consumers:** menus, keymaps, command palette, control channel, CLI `run`, MCP `action_run`, LSP `workspace/executeCommand`, plugins, command log replay. One registry means fuzzing, docs and agent access scale with feature count, as PhotoCraft's MCP inherited ~805 commands through two generic tools (E04-016, E04-010 — count is a regex estimate).
+- **Context:** IDE actions depend on caret, selection, focused file, project model. Make context an explicit, serialisable parameter (not ambient UI state) so headless replay and fuzzing can construct it. INFERRED from E04-008: PhotoCraft's headless tests worked because commands took the `Session` plus JSON.
+- **Read vs write split:** queries (goto, find usages, hover) are actions with no undo and must run on snapshots concurrently; writes go through a single writer with transactional undo. This is a deliberate departure from PhotoCraft's snapshot history (E04-003), which would be too costly for multi-file refactors over large projects (INFERRED from scale, not measured).
+
+### 5.4 Headless mode
+
+`ide-cli open <project> --run <action> --params <json>`, `ide-cli serve` (JSON-RPC, like PhotoCraft's `serve`, E04-009), `ide-cli replay <log>`, and `ide-cli check <corpus>` (run diagnostics and compare with `cargo check`). Dev agents should be *told* in AGENTS.md to verify through these, mirroring PhotoCraft rule 6 ("Verify UI changes visually", E04-020), and the PR template should ask for the command transcript.
