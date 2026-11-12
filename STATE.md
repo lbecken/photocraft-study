@@ -3,7 +3,7 @@
 _Last updated: 2026-11-12 (session 01)_
 
 ## Phase
-**Phase 1 — evidence gathering** (in progress)
+**Phase 2 — synthesis** (in progress; Phase 1 evidence complete)
 
 ## Plan
 1. Phase 0 — verify source, scaffold repo ✅
@@ -18,24 +18,24 @@ _Last updated: 2026-11-12 (session 01)_
 | E00 source identity | done |
 | E01 genesis | done |
 | E02 agent instructions | done (opus, complete file) |
-| E03 git quant | data+scripts done; write-up running (sonnet) |
-| E04 architecture | re-running (sonnet) |
+| E03 git quant | done |
+| E04 architecture | done |
 | E05 test/CI/release | done (opus, complete file) |
-| E06 workflow & roles | re-running (sonnet) |
-| E07 failures | re-running (sonnet) |
-| E08 external | re-running (sonnet) |
-| E09 case traces | re-running (sonnet) |
+| E06 workflow & roles | done |
+| E07 failures | done |
+| E08 external | done |
+| E09 case traces | done |
 
 ## Deliverable status
 | # | Deliverable | Status |
 |---|---|---|
 | 01 | Evidence ledger + uncertainty register | pending |
-| 02 | Development chronology | pending |
+| 02 | Development chronology | drafting |
 | 03 | Architecture & process reconstruction | pending |
-| 04 | Feature case studies | pending |
+| 04 | Feature case studies | drafting |
 | 05 | AI agent & human role maps | pending |
-| 06 | Testing/CI/release analysis | pending |
-| 07 | Failure & productivity analysis | pending |
+| 06 | Testing/CI/release analysis | drafting |
+| 07 | Failure & productivity analysis | drafting |
 | 08 | AI Software Engineering Playbook | pending |
 | 09 | Prompts & templates | pending |
 | 10 | IDE transferability assessment | pending |
