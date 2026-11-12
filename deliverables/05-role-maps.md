@@ -40,7 +40,7 @@ Terms used below:
    unknown) and a driver/briefer/writer split (`Model-Effort:`, one contributor only). Each is evidenced
    below together with what it cannot show.
 6. **Humans kept merge, release publication, and in late months labels and change requests.** In the
-   16 PR pages sampled, visible human approval is rare: 3 explicit approvals in total (E06-041, E05-035).
+   16 PR pages sampled, visible human approval is rare: 4 PRs with an explicit approval (#7848, #11641, #8452, #9363; E06-041, E05-035, E09).
    The documented accountability rule is not mechanically enforced.
 7. **Attribution policy conflicts with itself.** House rule 15 says "No agent attribution" in PRs.
    The product's About ▸ Models screen is built from `Co-Authored-By` trailers
@@ -326,7 +326,7 @@ and ticket-craft.
 | Implement | R O: 76% AI-attributed | R O | R O | R O: 49.6% of non-merge commits attributed; 1.0% under AI identity | C O: 19 `coderabbitai[bot]` co-author lines (all refs) | — |
 | Write tests | R O | R O: backfill campaign (72e11802d4) | R O | R O: 80.8% of AI-attributed commits touch tests vs 74.4% of non-attributed (E03 §7, heuristic) | — | — |
 | Run local gate | — | U | U: self-reported "Validation"/"Not run" sections (#11059, #8452) | R V: "Before you finish" list addressed to agents (`AGENTS.md:145-168`); "Report only what ran" (`:12`); execution U | — | — |
-| Review | U: early merges "No reviews" (#33, #1261) | R O: FredApps approvals, tanish2k09 change requests; rare (3 approvals in 16 pages) | — | R O (self-reported): reviewer + attacker agents (#9386); first-pass automated review (eliets2, #12237) | R O: CodeRabbit on all sampled PRs from 10-19 (E06-040), advisory | R O: required checks pass at merge (check counts, E05-035) |
+| Review | U: early merges "No reviews" (#33, #1261) | R O: FredApps approvals, tanish2k09 change requests; rare (4 approved PRs in 16 pages) | — | R O (self-reported): reviewer + attacker agents (#9386); first-pass automated review (eliets2, #12237) | R O: CodeRabbit on all sampled PRs from 10-19 (E06-040), advisory | R O: required checks pass at merge (check counts, E05-035) |
 | Approve | A O (to 11-02) | A O: approval or "ready to merge" label (#11062); "a person is accountable" V (`AGENTS.md:6`) | — | — | — (not blocking, E05-030) | C O: checks gate merges (INFERRED, E05-035) |
 | Merge | R/A O: 2 merge clicks; squash merges of #1261, #2792 | R/A O: 597 of 603 merge clicks by 8 people (`E03_mergepr_by_merger.csv`) | — | R O (rare): 14 first-parent commits committed by `Claude` (E03-006) | — | — |
 | Resolve conflicts | — | A O: batch mergers | — | R O: Claude-trailered conflict merges (38609e5615, 2c82295e4c) | — | — |
@@ -342,3 +342,168 @@ accountability rule, and no mechanism ties it to a named person per PR. INFERRED
 CODEOWNERS and approval policy (E02 §6) and the samples above.
 
 ---
+## 5. Supervision and accountability
+
+Finding: supervision is written down as norms for each agent operator, added on 2026-11-06. It is
+enforced only through required CI checks and the release environment. Human review before merge is
+visible in a minority of the sampled PRs.
+
+### 5.1 Documented (rule)
+
+| Rule (verbatim excerpt) | Location | Since | Check |
+|---|---|---|---|
+| "**A person is accountable.** Whoever runs an agent answers for what it opens and for its review comments." | `AGENTS.md:6` | 7d8648dfcb, 11-06 | none |
+| "**Review the diff before opening a pull request.**" / "**Report only what ran.**" | `AGENTS.md:10`, `:12` | 11-06 | none |
+| "**`main` changes through a pull request.** Do not push to it. Branch protection enforces this." | `AGENTS.md:13` | 11-06 | branch protection not visible in git |
+| "**Stop and ask only about** licensing outside the allowlist, publishing, releases, a new remote, secrets, spending money, destructive git, and anything else hard to undo. Otherwise keep working." | `AGENTS.md:14` | 11-06 | releases are partly mechanical (draft + `release` env, E02 §4) |
+| "Respond in 7 days … A maintainer decides closure; it is never automatic." | `AGENTS.md:19` | 11-06 | none |
+| "**No agent attribution.** A pull request does not say an agent wrote it. A repository rule may not require that." | `AGENTS.md:20` | 11-06 | none |
+| "**Human** marks what an agent can't finish alone." | `docs/gaps.md:15-16` | 939c8f2c70, 10-10 | — |
+
+Before 11-06 no AGENTS.md revision listed human-approval points (E02-009, checked diff by diff).
+Org RFC-0006 explains the rules as answers to agent failure modes: "duplicate PRs, fixes for bugs
+already fixed on `main`, PRs left as drafts, or code that uses functions that don't exist"
+(craft-contrib, external repo, WebFetch, E08-028).
+
+### 5.2 Observed
+
+| Observation | Evidence | Label |
+|---|---|---|
+| Self-merges with no reviews | #113 (echelon, release PR), #13414 (dylanmtaylor, 24 checks), #1344/#1421 (bflatastic, agent-authored) | OBSERVED (WebFetch), E05 §0.3, E09-B-002 |
+| Merges with "No reviews" and failing checks | #33 "2 of 5 checks passed"; #1421 "4 of 7 checks passed" | OBSERVED (WebFetch), E06 §6, E09-B-002 |
+| Labels as approval | "ready to merge" = "Reviewed: correct, complete and tested; waiting for a maintainer to merge". Applied and then merged by the same maintainer (#11062) | OBSERVED, E06-030/041 |
+| Agent review replacing human approval on a batch | #9386: agent reviewer + attacker claimed; merged by aiongg; no human approval visible | OBSERVED (self-reported method), E06-022 |
+| Explicit approvals | FredApps on #7848, #11641, #8452. Dylan M. Taylor approved #9363 twice | OBSERVED, E06 §6, E05 §0.3, E09-E-002, E09-G-003 |
+| Human gate before merge | #13396 "Please don't merge yet: a manual test in the real app is planned" | OBSERVED, E06-043 |
+| Post-merge human testing | skylartaylor found three artboard problems on main after #10512/#10538, fixed in #11441 | OBSERVED, E09-H-002 |
+| Direct pushes to main after PRs began | Dylan's ~30 `security(...)` commits on 10-22; release commits; all before rule 8 | OBSERVED, E06-026 |
+
+Rate: across the 16 PR pages sampled (10 in E06, 6 in E05), 4 merged or decided PRs show an explicit
+human approval (#7848, #11641, #8452, #9363). The others show labels, comments or nothing. The sample
+was chosen by hand, not at random, so this is not a rate estimate (INFERRED).
+
+### 5.3 The "no human review" remark vs the documented rule
+
+- **Developer statement (self-reported, scope ambiguous):** "We're leaning in with 100% AI software factory and no human review. We're making lots of revenue too. The era of human always in the loop software is over." (HN 50434834, 2026-11-10, account `echelon`; E08-016).
+- **Documented rule, in force four days earlier:** "A person is accountable" (`AGENTS.md:6`, 11-06).
+- **Reconciliation (INFERRED):**
+  1. The remark does not name PhotoCraft, and "revenue" points more to ArtCraft's commercial product (E08-016).
+  2. The rule demands *accountability*, not *review*: an operator can answer for an agent's PR without anyone reading it.
+  3. The observed record has both. There are merges with no visible review (§5.2) and maintainer approvals and change requests, the latter mostly after mid-October.
+- **Conclusion:** the record neither proves nor refutes the remark for PhotoCraft. Founder-era merges (#33, #1261, #2792: "No reviews") match it. The maintainer era partly does not.
+
+### 5.4 The attribution conflict
+
+| Side | Text / data | Source |
+|---|---|---|
+| Product credits models from trailers | "**About ▸ Models** credits the AI models named in `Co-Authored-By` trailers." Snapshot counts: anthropic/claude-opus/5.5 736 commits, etc. | `docs/contributors.md:3-4`; `contributors/contributors.json` (head 9d3ba499ad); E06-006, E08-010 |
+| Credits are regenerated per release | "nothing regenerated contributors/contributors.json before a release" → fixed | daa9a01955 (11-05), E05-064 |
+| House rule 15 | "No agent attribution. A pull request does not say an agent wrote it." | `AGENTS.md:20`, 11-06 |
+| Practice after the rule | `Co-Authored-By: Claude` on 498 of 1,799 main commits since 11-06 (vs 4,145 of 10,418 before); "Generated with Claude Code" still in davidmann4's #13396 (11-12) | E02-016, E06-042 |
+
+INFERRED: the rule addresses PR *text*, not commit trailers (E02-011). So the two are compatible
+in the letter but opposed in effect. Everything that discourages disclosure erodes the data the
+Models screen and any audit depend on. The falling trailer share after 11-06 cannot be attributed to
+the rule, because the contributor mix changed too (E02-016, E05-073).
+
+---
+
+## 6. What cannot be established
+
+| Question | Why not | Closest evidence |
+|---|---|---|
+| Number of agents running at any moment | Agents run under human git identities; session trailers cover a minority of commits; author dates survive rebases | Self-reported "8 parallel agents" (10-02) and "10–20 concurrent agents" (10-10) without method (E08-003/005); ≤15 distinct session ids on one day (E06-011); 504 landed PRs in flight on 10-13 (E06-051) |
+| Orchestration tooling | No harness config on any ref; `plan/` and `log/devlog.md` gitignored | "vanilla Claude Code" (HN 50029182); `Model-Effort` driver/briefer/writer (one contributor); fork CLAUDE.md "Delegation" never merged (E02-022) |
+| How much each human reads before merge | Squash mergers are not in git; branch protection not visible; ≤16 PR pages sampled via summaries | §5.2 |
+| Autonomy level per agent | No permission files; the stop-and-ask list is prose | `AGENTS.md:14`; anti-stall "Do not ask for it and do not stop when it is absent" (`:186`, E02-010) |
+| AI share of the ~50% unattributed commits | Absence of a trailer = unknown; rule 15 discourages disclosure | Codex-identity commits in 0%-trailer authors' PRs (§2.2) |
+| Who operated d43db3e153 (Claude release commit) and the security-finding tool | No attached human or tool named | E06-005, E09-G-002 |
+| Whether ticket-craft or CodeRabbit used LLMs on this repo | Configuration lives outside the repo | E06-033, `.coderabbit.yaml` |
+| Whether "reviewer + attacker" agents were used beyond batch 8 | Review outputs not committed; only one PR page read | E06-022, 03 U6 |
+| Whether `davidmann4` issues were agent-filed | No attribution on the list page | E06-030 |
+
+---
+
+## 7. Role design lessons and a PROPOSED role model
+
+### 7.1 Lessons (INFERRED, tied to evidence)
+
+1. **Implementation scales with agents. Merge authority did not.** 582 authors fed 8 merge-clickers, and one person took 59% of merge clicks (E03-008). Median merge-commit PR lifetime was 52 h, and 68 h for PRs landed in November (E06-013). The bottleneck moved to integration, which the project then automated with agent-built batches (§2.5).
+2. **When the integrator is also the AI-heavy author and the merger, no second party is visible.** David Mann merged fork PRs with no approval shown (E05-035), and his batch PR #9386 relied on agent review (E06-022). Red-main clusters followed merge waves (11-11: 11 "Fix main" commits, E03-013). This is a separation-of-duties gap, not a quality verdict.
+3. **Rules that name a role but not a person are unenforceable.** "A person is accountable" has no CODEOWNERS file, approval count or per-PR accountable field behind it (E02 §6). Compare the gates that did change behaviour: `panic_hunt`, lavapipe fail-on-skip and panel-commands, all mechanical (E05-071).
+4. **Agent review exists, but it leaves no record.** The reviewer/attacker method (#9386) is the most interesting role in the data, and the least auditable: its findings were not committed (03 U6).
+5. **Provenance is the cheapest role evidence, and it was partial and later discouraged.** Session trailers cover 274 commits on main (errata #1). `Model-Effort` was used by one contributor. Rule 15 pushes against disclosure (§5.4). Without these trailers the questions in §6 cannot be answered even in principle.
+6. **Bots took on triage and first-pass review successfully but stayed advisory.** CodeRabbit findings changed code and even rules (0d9a9a5a70), yet did not block merges (#12237) (E05-030). The design choice to keep it advisory is defensible. The gap is that no human approval took its place.
+7. **Humans kept the irreversible steps:** release publication, signing secrets, stop-and-ask items and the "Needs a human" list (§1.2). This held up. The one exception is the AI-authored release commit d43db3e153, which was still published by a human-held draft step by rule.
+
+### 7.2 PROPOSED role model
+
+**PROPOSED — not a PhotoCraft practice.** It is aligned with `08-playbook.md` §2 (Planner, Implementer,
+Independent test author, Verifier, Integrator, Release agent, Triage agent, Human owner) and keeps
+that playbook's separation rules ("No role approves work produced in its own session"). It differs from
+08 §2 in four places, listed after the table.
+
+| Role | Kind | Responsibility | Must never | Gap it fixes (evidence) |
+|---|---|---|---|---|
+| Human owner / accountable person | human, named per PR | listed in an `Accountable:` trailer; approves at the risk tier set in 08 §9 | approve a PR whose agent session they ran, for tier ≥ medium | accountability rule without a named person (§5.1, lesson 3) |
+| Planner / spec author | agent or human | task spec with owned files and acceptance tests (08 §2) | write production code | epics as work queues exist (#13458), but specs are not committed (03 B.9) |
+| Implementer | agent | code + tests + gate log + "not run" list | push to main; mark own work reviewed | "Report only what ran" is prose only (§5.1) |
+| Independent verifier (reviewer + attacker) | agent, separate session | reviews against the spec; reverts the implementation and confirms its tests fail; **commits the review record** (`reviews/<PR>.md` or a PR-comment link in a trailer) | review its own session's work | #9386 method unrecorded (lesson 4) |
+| Integrator | agent | builds the batch, resolves conflicts with per-file notes, regenerates generated files, runs the gate on the union | squash away member provenance | matches observed batches 7–20 (E06-022) |
+| **Merge steward** | human, ≠ the integrator's operator | merges a batch only after checking the verifier records and the union gate; owns post-merge green-main for 24 h | merge a batch they authored or operated | author = integrator = merger (lesson 2); 11-11 red-main cluster (E03-013) |
+| Release manager | human | publishes the draft; holds signing secrets | delegate publishing | already true by rule (§1.2) |
+| Triage bot | bot | labels, duplicates, claim links, split proposals | close issues or set `priority: critical` without a human | ticket-craft (E06-033) |
+| Review bot | bot | first-pass findings in agent-consumable form | count as an approval | CodeRabbit advisory (E05-030) |
+
+Provenance trailers, kept rather than banned (PROPOSED). Every agent-produced commit carries:
+- `Co-Authored-By: <model>`;
+- `Agent-Session: <id>`;
+- `Agent-Role: implementer|verifier|integrator|…` (a generalised `Model-Effort:`);
+- `Accountable: <handle>`.
+
+A CI check rejects commits whose body names an agent tool but lacks `Accountable:`. PR prose may stay
+free of attribution, so the intent of rule 15 is kept for PR text. The audit data that About ▸ Models
+and §6 need is kept too.
+
+**Where this differs from 08 §2, and why:**
+1. It adds a separate human **merge steward**. 08 §2 gives merge rights to the "Human owner" generally. Here the evidence shows that one human acting as AI-heavy author, integrator and merger was the actual pattern (§3.3), so the model makes the merger distinct from the integrator's operator.
+2. It requires the verifier to **commit** its review record, because the one observed instance left none.
+3. It adds an `Accountable:` trailer. 08 §13 covers provenance in general; this names the person.
+4. It keeps the playbook's independent test author as optional. PhotoCraft gives no evidence for or against that role, so its value here is unproven. 08 keeps it for other reasons (E07-018).
+
+---
+
+## Confidence and gaps
+
+- **Strongest:** authorship, merge-click and trailer counts (git, scripted, reproducible); `Model-Effort` and Codex-identity landing paths (recomputed here); the rule texts (hash-verified AGENTS.md).
+- **Weakest:** everything about review. It rests on WebFetch summaries of 16 hand-picked PR pages, with no branch-protection data. The operator links (BFlat ↔ Claude commits; the founder ↔ d43db3e153) rest on committer fields and timezones. The "reviewer + attacker" method is a single self-report.
+- **Not checkable:** squash-merge clickers (2,690 PRs), permission and autonomy settings, `plan/` and `log/devlog.md`, third-party bot configuration, prompts.
+- **What would change conclusions:** branch-protection settings with required approvals (would weaken lessons 2–3); committed review records from batch agents (would turn lesson 4 around); a full crawl of PR pages for approvals (would replace the sample-based §5.2).
+- **Evidence inconsistencies resolved:**
+  - Session counts follow errata #1 (274/238; E08's 304 not reproduced).
+  - E06 lists BFlat as 84/86 non-merge while E03 gives 84/87 (alias merging); E03 is used.
+  - E02-016 counts 27 `Model-Effort` commits and E03 counts 25: the difference is merges (25 non-merge + 2 merges, verified here).
+  - E06-025's statement that `Codex` "is not on the in-repo `codex/*` branches" holds, but the identity *does* sit on fork `codex/*` branches (yoriswind) and in aiongg's PR #8577 (new).
+  - E06 says aiongg "carries no AI attribution". That is correct for trailers, but 13 Codex-identity commits reached main through his PR.
+
+## New evidence gathered during synthesis
+
+Run at pin `74330157cb` in the upstream clone. Scripts are in
+`/tmp/claude-0/-home-user-photocraft-study/7ff807c1-b52f-5813-9884-82f19c193950/scratchpad/work/D05/`.
+
+1. **`Model-Effort:` authorship.** `git log main --grep='^Model-Effort:' --format='%an|%P'` gives 27 commits, all by Trevor Brown (25 non-merge + 2 merges), first b29fdc5a29 (2026-11-07), last cbd96a4de6 (2026-11-11).
+2. **Model-Effort landing.** `landing.py <clone> '^Model-Effort:' grep` maps each commit to the first-parent commit that brought it in. All 27 landed via `Merge pull request #… from TrevorBrown-dev/…` commits authored by David Mann: #12815 (6), #12298 (5), #12212 (5), #12402 (3), #13073 (2), #12299 (2), #13215, #13150, #12382, #12274 (1 each).
+3. **`Codex` identity landing.** `landing.py <clone> '^Codex <' author` gives 24 commits on main, author dates 10-17 → 11-07:
+   - 13 via merge 6d807ba34c "Merge pull request #8577 from aiongg/r4" (2026-10-22, merged by aiongg);
+   - 5 via #11852, 4 via #11221 and 1 via #11711, all from `yoriswind/codex/*` and merged by David Mann;
+   - 1 via #11168 (hnoerenberg, merged by FredApps).
+4. **`Claude` identity landing.** Same script with `'^Claude <'`:
+   - 14 commits directly on first-parent (12 with committer BFlat, 2 with committer Claude);
+   - via davidmann4 integration batches #10145 (14), #9386 (6), #8663 (3), #9775 (3);
+   - via Lcoding15 fork PRs #10300 (9), #10744 (9), #10406 (7), #10730 (7), #10695 (4), #10738 (1);
+   - via `storytold/community/*` PRs merged by BFlat: #1894 (4), #1633 (4), #1778 (2).
+   `Claude Opus 5.5` identity: 2 commits via #1896 (BFlat).
+5. **Per-author distribution (§3.6).** `bimodal.py <clone> data/E03_alias_map.csv`: non-merge commits on main, AI identities excluded, AI = co-author regex per E03 C7 or session/"Generated with Claude Code" footer. Results:
+   - authors with ≥20 commits (n=65): 0–5% 20, >5–25% 9, >25–50% 7, >50–75% 2, >75–<95% 5, ≥95% 22;
+   - authors with ≥50 commits (n=28): 10 / 3 / 4 / 1 / 3 / 7.
+   Spot check against E03: David Mann 964/978, aiongg 0/430 (match).
