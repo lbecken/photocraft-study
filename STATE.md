@@ -16,15 +16,15 @@ _Last updated: 2026-11-12 (session 01)_
 | Stream | Status |
 |---|---|
 | E00 source identity | done |
-| E01 genesis | pending |
-| E02 agent instructions | pending |
-| E03 git quant | pending |
-| E04 architecture | pending |
-| E05 test/CI/release | pending |
-| E06 workflow & roles | pending |
-| E07 failures | pending |
-| E08 external | pending |
-| E09 case traces | pending |
+| E01 genesis | running (session 01) |
+| E02 agent instructions | running (session 01) |
+| E03 git quant | running (session 01) |
+| E04 architecture | running (session 01) |
+| E05 test/CI/release | running (session 01) |
+| E06 workflow & roles | running (session 01) |
+| E07 failures | running (session 01) |
+| E08 external | running (session 01) |
+| E09 case traces | running (session 01) |
 
 ## Deliverable status
 | # | Deliverable | Status |
@@ -42,3 +42,7 @@ _Last updated: 2026-11-12 (session 01)_
 
 ## Backlog / next steps
 - See newest file in `handoffs/`.
+
+## Blockers
+- **Push to `origin` fails (HTTP 403: Claude GitHub App lacks access to `lbecken/photocraft-study`).**
+  Commits are local only until the owner installs/re-links the GitHub App. Retry `git push -u origin claude/magical-hypatia-jwtvty` each session.
