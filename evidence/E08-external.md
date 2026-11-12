@@ -49,8 +49,13 @@ post (x.com/iamsupersocks/status/2107560346269401548). That link is UNVERIFIED.
 | S25 | OMG! Ubuntu "ArtCraft free Photoshop AI clone" | Joey Sneddon | 2026-10 (upd. 10-15) | P2/P3 | OK (WebFetch summary) |
 | S26 | XDA "I tried several vibe-coded Photoshop alternatives…" | Patrick Hearn | 2026-10-29 | P3 | OK (WebFetch summary) |
 | S27 | Notebookcheck, AppleInsider, TweakTown, pasqualepillitteri.it (21619) | various | 2026-10 | P2/P3 | **FAILED** (403 / 403 / 403 / 502) |
-| S28 | t3n.de, kunalganglani.com, techaeris, pbxscience, levelup.gitconnected (member-only), alternativeto | various | n/d | — | **NOT RETRIEVED**: web search returned no article from t3n or kunalganglani; techaeris link has no title; levelup is paywalled; others not fetched for lack of time |
-| S29 | GitHub org/wiki/discussions/releases pages | GitHub | — | P1 | see §6 (added after quota reset) |
+| S28 | t3n.de, kunalganglani.com ("PhotoCraft: The Vibe-Coded Rust Photo Editor [2026]"), techaeris, pbxscience, levelup.gitconnected (member-only), alternativeto | various | n/d | — | **NOT RETRIEVED**: no t3n article found by search; kunalganglani gave 403 (Cloudflare) to both WebFetch and curl; techaeris link has no title; levelup is paywalled; others not fetched |
+| S29 | https://github.com/storytold (org page) | GitHub/ArtCraft | — | P1 metadata | OK (WebFetch summary) |
+| S30 | https://github.com/storytold/photocraft (repo page) | GitHub | — | P1 metadata | OK (WebFetch summary) |
+| S31 | https://github.com/storytold/craft-contrib and `rfcs/0006-coding-agents.md` | ArtCraft maintainers (author not shown) | n/d | **P1** | OK (WebFetch summary + verbatim quotes on request) |
+| S32 | https://github.com/storytold/photocraft/releases | github-actions | 2026-11-06 → 11-12 | P1 | OK (first 100k chars only) |
+| S33 | https://github.com/storytold/photocraft/wiki, /discussions | GitHub | — | — | No wiki tab; Discussions 404 (not enabled) |
+| S34 | Product Hunt "PhotoCraft"; HN 46614201; photocraftonline.org | unrelated makers | 2026-01 / 2026-10 | n/a | **Name collisions**: an unrelated iOS app by Deva Vinoth, and a third-party site. Excluded |
 
 ---
 

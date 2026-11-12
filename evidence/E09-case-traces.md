@@ -206,4 +206,189 @@ Tests in campaign commits (VERIFIED from `--stat`): #34 adds `crates/codecs/test
 ### Case D summary
 Spec = Photoshop-authored files + their embedded composites; decomposition by feature group (effects, strokes, type, adjustments) each reported as oracle-pass deltas; floors ratchet; CI corpus job. The `fix/psd-*` branch tips carry no message bodies, so method is visible only in tests/docs.
 
-<!-- CASES E-H -->
+---
+
+## Case E — egui 0.37 migration (planned, multi-step)
+
+### Commit-level table
+
+| sha | date | author | AI attribution as written | branch / PR | summary | tests / verification stated |
+|---|---|---|---|---|---|---|
+| 14c059c971 | 2026-10-25 02:14 +0100 | skylartaylor | none in trailers; branch `codex/…` | `codex/egui-037-photocraft-20261023` (PR #9363) | "M0.37: migrate PhotoCraft to egui 0.37"; 331 files, +15,728/−3,374; **adds `docs/egui-037-migration-plan.md` (1,632 lines)** | body: "All nine CI stages passed: 11,580 passing test executions, zero failures and 91 ignored across 93 summaries. Native/browser acceptance and paired app performance remain open." |
+| c6d87dc1ea | 10-25 03:41 +0100 | skylartaylor | none | same | "reconcile current PhotoCraft main and qualify CI" (merge) | — |
+| 47d552dced | 10-25 06:55 +0100 | skylartaylor | none | same | reconcile upstream modal/autosave changes (merge) | — |
+| b1f73ab821 | 10-25 14:33 -0400 | Dylan M. Taylor | none | same | merge origin/main | — |
+| 6e4f85e161 | 10-25 14:37 -0400 | Dylan M. Taylor | "Generated with Codebuff" / `Co-Authored-By: Codebuff` | same | "CodeRabbit review follow-ups on the migration": accessible names, eager font order | — |
+| 54a0bc46fa | 10-25 14:48 -0400 | Dylan M. Taylor | none | = `refs/pull/9363/head` | rustfmt | — |
+| 5c9192bbe2 | c: 2026-10-25 13:04:35 -0600 (GitHub) | skylar taylor-barrick | squash body: `Co-authored-by: Dylan M. Taylor`, `Co-authored-by: Codebuff` | main, 1 parent | squash of #9363 | fixtures `apps/photocraft/tests/fixtures/ui-0.14/0.15/0.37.ron`; `crates/engine/src/tests.rs` (+22) |
+| 6f6e0d1793 … 3f2229b9ad (12 commits) | 10-25 20:07 +0100 → 10-26 06:42 +0100 | skylartaylor / skylar taylor-barrick | none | `codex/egui-037-photo-followup-20261025` = `refs/pull/9518/head` | "Reconcile the published squash merge while preserving qualified follow-up fixes", font validation, coverage workflow pins, "cover CJK fallback and font cache edge cases" | coverage + font tests |
+| d641b96a52 | 2026-10-26 13:16 -0600 | skylar taylor-barrick | — | merge commit, PR #9518 | 14 commits merged | — |
+
+### E09-E-001 — The plan was committed with the first migration commit and carries Codex-workspace paths
+- Label: VERIFIED (authorship/paths); INFERRED (that a Codex agent drafted the plan — only the branch prefix and paths support it)
+- Source: `git log --all -- docs/egui-037-migration-plan.md` → earliest 14c059c971 (skylartaylor); 14c059c971:docs/egui-037-migration-plan.md:45 "checkout `/home/codex/work/CraftApps/egui037-migration-20261022/egui`", :277 "`/home/codex/work/ssd2/task-evidence/egui037-migration-20261022/lifecycle-source-audit.md`", :40 "Those revisions are **historical, read-only evidence**. They are not accepted revisions".
+- Notes: plan structure: decision summary (§1), dependency model and rollback (§2), source audit (§3), breaking changes mapped to files (§4), E1–E21b fork-patch audit (§5), winit patch audit (§6), craft-libs PR 199 (§7). Lines :106–107 require paired same-machine perf comparisons and forbid using the committed macOS `perf/baseline.json`. Plan later edited by others through 90d1468a7d (2026-11-07, Qingfei).
+
+### E09-E-002 — Verification: full local CI-stage run + CodeRabbit + human approval; explicit "open gates"
+- Label: VERIFIED (commit body), VERIFIED-WF (PR page)
+- Source: 14c059c971 body (above); https://github.com/storytold/photocraft/pull/9363 (WF): "all nine local CI stages passed, with 11,592 passing test executions" (differs from the commit's 11,580 — later re-run); open gates "native GUI/IME testing, PRIMARY clipboard, packaged browser/runtime checks, and paired performance acceptance"; "human review and a human merge are required"; CodeRabbit 7 actionable comments (accessibility/font order) then 1; dylanmtaylor approved twice; "14 of 16 passed" checks.
+- Notes: WF says "merge commit"; git shows 5c9192bbe2 has one parent and committer GitHub → squash (git evidence preferred).
+
+### E09-E-003 — Tool attribution is mixed: `codex/` branch, Codebuff trailer, no Codex/Claude trailer
+- Label: VERIFIED
+- Source: 6e4f85e161 body "Generated with Codebuff / Co-Authored-By: Codebuff <noreply@codebuff.com>"; `%(trailers)` empty on all skylartaylor commits.
+- Notes: per brief rule 4 the only attributions are the branch name (`codex/*`) and Codebuff on one commit.
+
+### E09-E-004 — Fallout: a dozen adaptation/regression commits in the following days
+- Label: VERIFIED
+- Method: `git log origin/main --since=2026-10-25T19:00 -i --grep='egui 0.37\|egui037\|M0.37\|0\.37'`
+- Data: 8812fe1e73 + 178d6c2235 (David Mann, merge + rustfmt "the egui 0.37 merge"); ef20eca473, bcbf693cf6 (Hector Villarreal, 10-25, "Tests: egui 0.37's Id::unique", "Preset menus: egui 0.37's dropdown label"); 5295017732/ea0a447df1/c484971fdf (Khawar Zamman Wani, 10-26, "Adapt to egui 0.37 renames" ×3 on different branches); b078e0e8a6 (#9575, aiongg, "review follow-ups to the shared docking and egui 0.37 merges"); 73ac7d9a25 (10-28, David Mann) "Arabic layer names and title read right to left again on egui 0.37" (a regression); #9518 follow-up branch (12 commits).
+- Elapsed: 14c059c971 (01:14Z 10-25) → squash (19:04Z) 17h50m; → #9518 merge (19:16Z 10-26) 42h; → RTL regression fix 73ac7d9a25 (10-28) ~3.8 days.
+
+---
+
+## Case F — Box blur performance (docs/box-blur-performance.md)
+
+Chosen because the doc is the most complete before/after record with a review-driven correction; budget rows are explicit.
+
+### Commit-level table (PR #10426, merged by 4ed05762c0 "Merge pull request #10426 from ebosido444-ai/perf/box-line-kernel", 2026-11-11 00:18:50 -0700, Tanish Manku)
+
+| sha | a: / c: | author | trailer | files | tests |
+|---|---|---|---|---|---|
+| a616cda46c (parent, row-pass work, PR #10425 per WF) | a: 2026-11-06 02:59 +0300 | ebosido444-ai | none | `crates/algo` | "compare the row-pass outputs by bits, so a signed-zero regression fails" |
+| f0a816f844 | a: 10-31 07:52 +0300 / c: 11-06 03:00 +0300 | ebosido444-ai | none | `crates/algo/src/fxutil.rs` (+99), **new `docs/box-blur-performance.md` (+145)** | `fxutil::tests::cols_match_the_strided_walk` (bit-exact vs old walk) |
+| 7082689b38 | a: 10-31 08:38 / c: 11-06 03:00 | ebosido444-ai | none | fxutil.rs, doc (+28/−21) | timing harness fix |
+| e5301fc35a | a: 11-01 13:58 / c: 11-06 03:00 | ebosido444-ai | none | — | "sweep the radii in the column-gather differential check" |
+
+### E09-F-001 — Hypothesis stated as a cache-traffic model, with the equivalence oracle defined in the same commit
+- Label: VERIFIED
+- Source: commit f0a816f844
+- Quote: "A column walk reads one sample per row at a stride of `w * n`, so every sample pulls its own cache line … 8x the image's traffic" / "`fxutil::tests::cols_match_the_strided_walk` compares every `f32` bit against the strided walk … and all 16 `bench_filters2` rows hash identically to the base tree."
+
+### E09-F-002 — Benchmark method and numbers as recorded in the doc
+- Label: VERIFIED
+- Source: origin/main:docs/box-blur-performance.md:71–98 (§Timings), :133–141 (§Reproduce)
+- Data: i5-10300H, Windows 11, rustc 1.98.1, median of 5 (base) / 3 runs; base tree = `origin/main` in a detached worktree; 6000×4000 RGBA8: Reduce Noise 2430.8 → 1638.3 ms (1.48×), Tilt-Shift 2161.0 → 1532.9 (1.41×), Relight 3285.7 → 2405.3 (1.37×), Oil Paint 1.04×, Lighting Effects 0.95×. Doc also lists "discarded variants" and a "What this does not fix" section (:103).
+
+### E09-F-003 — Review caught a measurement bug that inflated a published number
+- Label: VERIFIED (commit), VERIFIED-WF (who asked)
+- Source: commit 7082689b38 "From review: `cols_timing` ran the strided pass and then the strip pass on the same buffer … the 324x324 window measures 1.45x, not the 1.89x the old harness reported."; https://github.com/storytold/photocraft/pull/10426 (WF): CodeRabbit asked for independent input copies (and Criterion — declined); FredApps asked for multi-radius/odd-width equivalence and hardware details; tanish2k09 requested changes (rebase on #10425, confirm the doc is wanted), label "waiting on author"; 19 checks passed.
+
+### E09-F-004 — The budget is not met and stays non-enforced; the doc says so
+- Label: VERIFIED
+- Source: origin/main:perf/budgets.toml:647–663 (P66 Relight, P67 Reduce Noise: `issue = 211`, `budget_ms = 1000`, `enforce = false  # 3.7 s / 2.8 s measured 2026-10-22`); :5–8 header ("`enforce = false` marks a target the code doesn't meet yet … flip it to true in the PR that meets it"; "never invent a number"); docs/box-blur-performance.md:105–106 ("their `perf/budgets.toml` targets (1 s on 24 MP) are not reachable from a kernel change"); :19–20 "no `perf/budgets.toml` entry" changed.
+- Perf-nightly: origin/main:.github/workflows/perf-nightly.yml:3–7,17 (`cron: "23 3 * * *"`, fixed macOS runner, regression = p50 +15 % vs `perf/baseline.json`; budgets.toml `regression_pct = 15.0`, `baseline_min_runs = 5`).
+- AI attribution: none in trailers or (per WF) PR text; the handle "ebosido444-ai" is a name only → **unknown**.
+- Elapsed: first authored 10-31 04:52Z → merge 11-11 07:18Z = ~11 d 2.5 h (rebased 11-06).
+
+---
+
+## Case G — Security-hardening findings with `Finding:` trailers
+
+### Commit-level table (summary; all author Dylan M. Taylor; no AI trailer on any)
+
+| group | shas (main) | a: | c: | PRs | CWE mix |
+|---|---|---|---|---|---|
+| first | 42d8aad56f | 10-21 21:44 -0400 | same | #8417, merge commit 9852baa4ba (10-22 19:27 -0400) | CWE-407 |
+| burst of 25 | 7c78c951e4 … f65832931b | 10-21 21:47 → 22:43 -0400 | 10-22 07:10–07:12 -0400 (committer Dylan) | #8420–#8452 range (rebase-merged; e.g. #8452 head 0785fd574b) | CWE-407 ×12, CWE-400 ×9, CWE-770 ×3, CWE-409 ×1, CWE-789 ×1 |
+| last | ef4e13dc2d | 10-22 06:22 -0400 | 10-22 19:44 | #8505, merge ee0d23f77a | CWE-409 |
+
+Example tests (VERIFIED, diff grep): ef4e13dc2d `crates/io/tests/it/svg.rs` (+46): `gzip_compressed_embedded_svg_decompresses_once_with_a_size_cap`, `resolve_data_rejects_nested_gzip_and_handles_text_plain_svgz`; 42d8aad56f inline `trailing_descriptor_applies_outsets_to_first_matching_slice`; f65832931b none (+11 in `pattern.rs`).
+
+### E09-G-001 — 27 unique findings, one PR per finding, landed within ~22 h
+- Label: VERIFIED
+- Method: `git log origin/main --grep='^Finding:'` → 27; `--all` → 52 (pre-rebase PR-head copies + main copies); unique `Finding` values → 27; `git for-each-ref refs/pull` subjects `^security\(` → 36 PRs (#8417–#8452, #8504, #8505, #8938–#8958).
+- Notes: subjects follow `security(<crate>): <change>`; body = mechanism + fix; final trailer `Finding: <uuid> (CWE-NNN)`.
+
+### E09-G-002 — The producing tool is not named anywhere in the repo or PRs examined
+- Label: VERIFIED (absence)
+- Source: `git grep -n -iE 'Finding:|CWE-' origin/main -- '*.md'` → no hits; PR #8417 and #8452 (WF) cite only the UUID + CWE, "It doesn't name the scanner, audit tool, or AI agent". 0 of 27 messages contain Claude/Codex/Generated (`grep -ciE`).
+- Notes: UUID-per-finding + CWE strongly suggests an external finding tracker (INFERRED, low confidence); attribution: **unknown**.
+
+### E09-G-003 — Fix + test pattern and review
+- Label: VERIFIED
+- Data: 11 of 27 finding commits add a `#[test]` (`git show | grep -E '^\+\s*#\[(tokio::)?test'`). PR bodies list "Validation: `cargo fmt`, `cargo test -p photocraft-compose --lib pattern` (5 passed)" (#8452, WF). Review: CodeRabbit on each; #8452 approved by FredApps, CodeRabbit raised an unaddressed aggregate-memory concern; #8417 "No reviews", "15 of 21 checks passed" (WF).
+
+### E09-G-004 — The later `fix/sec-*` branches are a different series without `Finding:` trailers
+- Label: VERIFIED
+- Method: `git log -1 --format='%(trailers:key=Finding)'` on all 20 `origin/fix/sec-*` tips → empty; commits dated 2026-11-03 → 11-11, e.g. 59158ffdf2 "fix(io): bound Krita default pixels, XMP nesting, XCF RLE runs, SVG DTDs …", 2be2838f79 "address review: budget packed depth-1 mask source plus output". Batching differs: these are multi-finding bundles per area (`sec-io-parser-bounds`, `sec-engine-misc2`) with "address review" commits; 16 of 20 are still ahead of main (unmerged) at the pin.
+
+---
+
+## Case H — Artboards: a feature that needed repeated correction
+
+(Flatpak self-update was considered: fc6fcf67d8 → Release 0.22.1 83ef781382 → c5ff2474b2 → squash eee667f1d9 "Fix Flatpak updates and bump to 0.23.1 (#13322)", all 2026-11-11, Dylan M. Taylor, no message bodies → thinner; artboards chosen.)
+
+### Commit-level table
+
+| sha | date | author | trailer as written | PR / branch | summary | tests added |
+|---|---|---|---|---|---|---|
+| 7488ab413d | 2026-10-09 03:22Z | Claude | `Co-Authored-By: Claude Opus 5.5`, `Claude-Session: …01UHgFEH…` | `claude/fix-1531-artboards` | "duplicate artboards beside the original, drag boards with the Move tool" | (see diff) |
+| 3e8d54896d | c: 10-09 10:54 +0700 | BFlat / GitHub | `Co-authored-by: Claude` | squash #1584 | same | — |
+| 5e6cfa425d, 2159f6e640, 508e137b4c | 10-31 17:02Z → 11-01 12:07Z | Mohamed Mahjoub | `Claude Opus 5.5` / `Claude` | PR #10512 (issue #10218), `feat/artboard-auto-nesting` | Move tool auto-nests layers into the board they're dropped on; "true, floored middle" | 8 tests incl. `a_layer_moved_onto_another_artboard_joins_it`, `prevent_auto_nesting_keeps_the_layer_in_its_board`, `move_tool_drag_onto_another_artboard_nests_the_layer_there` |
+| 5829929e81, 01ca6a69a9, b15ac4b016 | 11-05 04:06–05:39 +0100 | FredApps | none | same PR | maintainer merges main; "Document the auto-nesting rule and exclusions" | — |
+| b152f4175e | c: 11-05 06:18 +0100 | Mohamed Mahjoub / GitHub | `Claude Opus 5.5`, `FredApps` | squash #10512 | — | — |
+| fda2e9feea … 713585646e (7) | 10-31 17:51Z → 11-02 22:24Z | Mohamed Mahjoub | `Co-authored-by: Claude` on all | PR #10538 (issue #8788), `fix/paste-between-artboards` | iterations: "copied layers and true middle", "locked boards and the placement midpoint", "floored placement middle, pastes join smaller boards", "keep a clipped paste's clipping on a board" | 12 tests incl. `paste_into_another_artboard_keeps_the_place_on_the_board`, `content_centred_just_left_of_a_board_is_not_placed_in_it`, `a_clipped_paste_joining_a_board_stays_clipped_only_over_a_layer` |
+| ca151c6b84 | c: 11-05 04:55 +0100 | Mohamed Mahjoub / GitHub | `Claude`, `FredApps` | squash #10538 | — | — |
+| e7b8c5a72d, e6060a8e15, 243e21ecda, c1c83a3715, 340ae577bd, 2bcb07f298 | 11-05 11:45 → 13:53 +0100 | FredApps | `Co-Authored-By: Claude Opus 5.5` on 5 of 6 | `fix/artboard-followups-10512-10538` = `refs/pull/11441/head` | "(#10512 follow-up)", "(#10538 follow-up)", clippy, two review-driven commits | 9 tests incl. `a_clipping_base_moved_onto_another_artboard_takes_its_clipped_layers`, `paste_into_a_position_locked_artboards_own_mask_keeps_the_place_on_the_board`, `a_clipped_paste_off_the_board_lands_above_it_unclipped` |
+| 3e27572e7a | c: 2026-11-05 14:53:49 +0100 | FredApps / GitHub | `Claude Opus 5.5`, `FredApps` | squash #11441 | — | — |
+
+### E09-H-001 — Root-cause notes in the follow-up are explicit about what the original PRs missed
+- Label: VERIFIED
+- Source: commit 3e27572e7a (squash body of #11441)
+- Quote: "Dragging the base of a clipping mask onto another artboard left its clipped layers on the old board, released, covering that whole board (auto_nest moved the base alone and clip_group::settle released the layers that lost it)."; "the clip has no source board, so board_shift doesn't move it onto B, and layer_place::insertion_point only checked the content centre when the anchor was the board itself."
+
+### E09-H-002 — Corrections came from three sources: in-PR iteration, a post-merge tester, and bot review rounds
+- Label: VERIFIED (git), VERIFIED-WF (#11441 page)
+- Data: #10538 needed 4 "Paste between artboards: …" correction commits before merge (git); #11441 description (WF): three problems "that skylartaylor found on `main` after #10512 … and #10538"; "Generated with Claude Code"; CodeRabbit 3 review rounds, 2+2 actionable comments → commits 340ae577bd, 2bcb07f298 ("Keep the board shift for a mask paste into a position-locked artboard; an off-board paste above an artboard lands unclipped"); 27 of 29 checks passed.
+
+### E09-H-003 — Elapsed times and what stabilized it
+- Label: VERIFIED (times), INFERRED (stabilization)
+- Data: #10538 first commit 10-31 17:51Z → squash 11-05 03:55Z = 4 d 10 h; #10512 10-31 17:02Z → 11-05 05:18Z = 4 d 12 h; follow-up #11441 10:45Z → 13:53Z (12:53Z) = 2h08m; first commit → last follow-up = 4 d 19 h 51 m.
+- Method: `git log origin/main --no-merges --since=2026-11-05T14:00 -i --grep='artboard\|board'` → no further fixes to auto-nest/paste-between-boards; later artboard commits are new features (8040809f1f Actions mapping, 08a908d3f5 Guide Layout, 1df674997b PDF isolation).
+- INFERRED: stabilization came from the test-per-rule pattern (29 named behaviour tests across the three PRs) after a human found semantic gaps the tests had not encoded. Overall `git log origin/main --no-merges -i --grep=artboard` → 124 commits, 47 in the two weeks of 2026-W40/41.
+
+---
+
+## Cross-case comparison
+
+| ID | Case | spec source | decomposition | who/what implemented (as attributed) | test evidence in same commit? | independent verification | review type | time to merge (first commit → main) | # follow-up fixes |
+|---|---|---|---|---|---|---|---|---|---|
+| E09-X-A | MCP / control | in-repo `docs/control-protocol.md` (one-shot) → FilmCraft #28 conventions → user issues #415, #503–#514 | bulk commits, then per-feature PRs | Brandon Thomas (no trailer in genesis; Claude Opus 5.5 from 10-01); storybored379 + Claude (#1668); harrisonoconnorhover (#1533) | yes (tests/mcp.rs from day 0; mcp_wire.rs with #1668) | in-process client + fake bridge server; no golden transcripts | #1533 rebase-merged by BFlat; others squash | doc→server 4h35m; #1533 2h31m | ≥3 user-report PRs on 10-07; Claude clippy fix cff8daf185 |
+| E09-X-B | #1381 Wayland IME | community issue (hash-mc) | 1 commit + merge from main | author `Claude` (Claude Opus 5.5, session id) | yes (`empty_ime_events_never_delete_the_selection`); #1323 sibling: no | CI only (4 of 7 checks passed, WF) | none ("No reviews", WF); maintainer squash | 4h18m (siblings 42m–5h11m) | 0 found |
+| E09-X-C | Never crash | shared standard `craftrules/standards/never-crash.md` + fuzz findings (bf111b524e) | 12 per-area branches, 1 commit each, stacked | Brandon Thomas, `Co-authored-by: Claude Opus 5.5` on all 12 (trigger: Opus 4.8) | partly (#34 malformed.rs; #54/#58/#59 none) | panic_hunt fuzz (opt-in), clippy deny attrs, scorecard count 28/28 | unknown (pages not fetched); serial squashes in 15 min | 2h50m | 180 later "panic" commits; #869 reuses name |
+| E09-X-D | PSD oracle/corpus | Photoshop's embedded composites; own Photoshop-authored corpus | by feature group, each reported as oracle-pass delta | Brandon Thomas (no trailers), later Timothy Daly, others; extraction Dylan M. Taylor (none) | yes (floors raised in same commit) | pinned sha256 corpora, 2/255 tolerance, CI corpus job | squash; #13414 squash | #13414 7h16m | 20 floor raises; extraction fixtures |
+| E09-X-E | egui 0.37 | 1,632-line plan in-repo (Codex-workspace paths) | plan §§ E1–E21b, W-patches; 2 PRs | skylartaylor (`codex/*` branch, no trailer); Codebuff on 1 commit | CI-stage summary in body; fixtures | 9-stage local CI run; open gates listed | CodeRabbit ×2 + human approval ×2 (WF) | 17h50m (#9363); 42h (#9518) | ~10 adaptation/regression commits incl. RTL regression 73ac7d9a25 |
+| E09-X-F | Box blur perf | #211 budgets (`perf/budgets.toml` P66/P67) | row pass (#10425) + column pass (#10426) | ebosido444-ai (no trailer → unknown) | yes (bit-exact differential test, hash equality of 16 bench rows) | before/after on base worktree; perf-nightly | CodeRabbit + FredApps + tanish2k09 (changes requested) | ~11 d 2.5 h | 1 measurement correction (1.89× → 1.45×) + radius sweep |
+| E09-X-G | Security findings | external finding IDs (UUID + CWE), tool unnamed | 1 PR per finding (27), ~36 `security(` PRs | Dylan M. Taylor (no AI attribution) | 11 of 27 | CI (incl. corpus, wasm, SonarCloud per WF) | CodeRabbit; FredApps approval on #8452; #8417 none | ~0.5–22 h (burst rebase 10-22 07:10) | later `fix/sec-*` series (Nov), mostly unmerged |
+| E09-X-H | Artboards | issues #8788, #10218; post-merge tester report (skylartaylor) | 2 PRs + 1 follow-up PR | Mohamed Mahjoub + Claude trailers; FredApps + Claude Opus 5.5 ("Generated with Claude Code") | yes (29 named tests over 3 PRs) | human tester on main; CodeRabbit 3 rounds | maintainer squash (FredApps) | 4 d 10–12 h; follow-up 2h08m | 4 in-PR corrections + 1 follow-up PR (6 commits) |
+
+---
+
+## Open questions / uncertainties
+- Review path for the 12 never-crash PRs (#33–#59), #1668, #1533, #195/#224/#190 not fetched (WebFetch budget); "unknown".
+- The tool that produced the `Finding:` UUIDs (E09-G-002) is not stated anywhere examined.
+- Whether a Codex agent wrote the egui plan rests only on the `codex/` branch prefix and `/home/codex/…` paths (E09-E-001).
+- `ebosido444-ai` handle may indicate an AI-operated account; no explicit attribution → unknown (E09-F-004).
+- PR #10426 has 7 commits per WF; only 3 are between the merge parents in git (the rest presumably landed with #10425). Not reconciled.
+- WF reported #1421 and #9363 as merge commits; git shows single-parent squashes. Git evidence preferred.
+- #1248 → 77a258b9a0 follow-up linkage is inferred only.
+
+## Leads for other streams
+- `claude/integ-batch-1..11` (2026-10-08/09, author `Claude`): AI-run integration of community PRs with fix-ups (94c003452f scorecard regen, 7406c26bd4 clippy) — maintainer-side agent pipeline (E05/E02).
+- Model strings vary: `Claude Opus 4.8` (bf111b524e), `Claude Opus 5.5`, `Claude Sonnet 5.5` (cd40d7875e), `GPT-6 (Codex)` (7fd610741b), `Codebuff` (6e4f85e161).
+- "crafts' shared conventions (FilmCraft #28)" and `../craftrules/standards/never-crash.md`: cross-repo standards (org-level practice).
+- Only 3,475 of 12,396 main commits are first-parent: heavy merge-commit integration later (e.g. "Merge approved PhotoCraft PR #5744" d34c7a92e0).
+- `xtask/src/scorecard.rs` turns rules into counted metrics (never-crash coverage, parity count).
+
+## Methods-relevant takeaways
+- Turn a rule into a counted metric: never-crash deny-attribute coverage is computed by the scorecard (E09-C-003) — transferable as "lint coverage as a tracked number".
+- External oracles + ratcheting floors define "correct" for format work without a human judging pixels (E09-D-001, D-002, D-003).
+- A campaign can be decomposed into one-commit, per-crate branches landed serially in minutes when each is mechanical (E09-C-004).
+- Agent-authored bug fixes carry a fixed message shape (symptom → root cause → behaviour) and a session-link trailer, giving traceability back to the agent session (E09-B-001).
+- Same-commit regression tests were the norm but not enforced: #1323 shipped without one, and 16 of 27 security fixes added no `#[test]` (E09-B table, G-003).
+- Perf claims are recorded in per-change docs with hardware, method, base-tree reproduction and "what this does not fix"; reviewers caught a harness bug that changed a published number (E09-F-002, F-003).
+- Budgets that are not yet met are kept visible as `enforce = false` with a measured note, never deleted (E09-F-004).
+- Large migrations used a committed plan with explicit open acceptance gates, and the PR stated what it did not claim (E09-E-001, E-002).
+- Post-merge human testing still found semantic gaps in agent-assisted features that had many tests; the follow-up encoded each gap as a named test (E09-H-002, H-003).
+- AI bot review (CodeRabbit) was used on most PRs examined and drove real changes (E09-E-002, F-003, H-002), but some PRs merged with no human review and failing checks (E09-B-002).
