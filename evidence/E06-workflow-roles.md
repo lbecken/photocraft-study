@@ -377,10 +377,16 @@ Sample chosen to avoid E05's (#113, #7809, #11641, #12237, #13234, #13414).
 - Data: human approval seen once (#7848, FredApps), change request once (#11059, tanish2k09), "ready to merge" label applied then merged by the same maintainer (#11062). Early merges by echelon/bflatastic happen with "No reviews". Integration-batch PR #9386 states agent-based review ("two independent agents per PR") and no visible human approval before aiongg merged.
 - Notes: house rule 1 "A person is accountable. Whoever runs an agent answers for what it opens" (AGENTS.md:6) and rule 14's 7/14/30-day response clock (AGENTS.md:19, added 11-06) codify this. The `waiting on author` label text ("Closed after 14 days") differs from rule 14 ("closure eligible at 30 … never automatic").
 
-### E06-042 — AI disclosure in PR text drops over time while commit trailers continue
-- Label: VERIFIED (sample) / INFERRED (trend)
-- Data: "Generated with Claude Code" in 5/6 sampled PRs up to #9386 (10-25). 0/4 sampled PRs after (#7848 text, #11059, #11062, #12945). #7848 still carries Claude trailers in commits.
-- Notes: consistent with house rule 15 "No agent attribution. A pull request does not say an agent wrote it." (AGENTS.md:20, added 2026-11-06 by 7d8648dfcb, copied from storytold/craft-contrib). The trend predates the rule, so causation is not established.
+### E06-042 — AI disclosure in PR text depends on the author, not the period; it continues after the "No agent attribution" rule
+- Label: VERIFIED (sample)
+- Data: "Generated with Claude Code" appears in #33, #1335, #1344, #2792 (echelon, bflatastic, vangel76) and in davidmann4's integration PRs #9386 (10-25) and #13396 (11-12, draft). It is absent from #1261, #7848 (text; Claude trailers in commits), #11059, #11062, #12945.
+- Notes: house rule 15 "**No agent attribution.** A pull request does not say an agent wrote it." (AGENTS.md:20, added 2026-11-06 by 7d8648dfcb, copied from storytold/craft-contrib). The lead integrator's 11-12 PR still discloses, so the rule is not uniformly followed, or is read as a ban on *requiring* attribution ("A repository rule may not require that"). INFERRED; sample of 11.
+
+### E06-043 — Integration PRs ask the bot for review and record a manual-test plan; human review is still not visible
+- Label: VERIFIED via WebFetch summary
+- Source: PR #13396 (davidmann4:integration-mcp, draft, opened 2026-11-12)
+- Data: "Please don't merge yet: a manual test in the real app is planned for 2026-11-13". The author asked CodeRabbit for a review ("review plz and take this carrot"). CodeRabbit posted 16 actionable comments, "Merge Risk: Moderate", and suggested reviewers wanikhawar, fredapps, aiongg (none assigned). Follow-up commit "Batch: CodeRabbit findings on the MCP connection". Self-reported gate "12,514 of 12,521 passing, with the 7 failures explained". Included PRs #11363 (ingling) and #5525 (Furoxfufu), whose authors appear as co-author trailers.
+- Notes: shows the loop "integrator agent fixes → bot review → agent addresses bot findings → human manual test before merge".
 
 ---
 
