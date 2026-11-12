@@ -47,5 +47,5 @@ _Last updated: 2026-11-12 (session 01)_
 - 2026-11-12: Opus weekly quota exhausted mid-run (resets 2026-11-14 16:00 UTC); remaining streams re-launched on Sonnet. Sonnet-produced evidence (E03 write-up, E04, E06–E09) should get an Opus/Fable spot-check of citations in Phase 3.
 
 ## Blockers
-- **Push to `origin` fails (HTTP 403: Claude GitHub App lacks access to `lbecken/photocraft-study`).**
-  Commits are local only until the owner installs/re-links the GitHub App. Retry `git push -u origin claude/magical-hypatia-jwtvty` each session.
+- None. (Push to origin works since 2026-11-12 19:00 UTC.)
+- Model quotas have interrupted subagents twice (Opus weekly, then Opus 5-hour limit). Interrupted agents can be resumed with SendMessage; if not, relaunch from the prompts in `handoffs/`.
