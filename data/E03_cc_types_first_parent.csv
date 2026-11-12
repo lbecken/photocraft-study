@@ -1,0 +1,15 @@
+type,first_parent_nonmerge
+(none),2069
+fix,447
+perf,85
+feat,75
+security,48
+i18n,42
+docs,35
+ci,20
+test,19
+tests,15
+refactor,8
+chore,4
+style,3
+build,1

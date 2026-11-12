@@ -1,0 +1,7 @@
+category,pr_heads
+ancestor+number_absent,35
+ancestor+number_in_fp_subject,608
+ancestor+number_mentioned_elsewhere,908
+not_ancestor+number_absent,2238
+not_ancestor+number_in_fp_subject,2662
+not_ancestor+number_mentioned_elsewhere,29

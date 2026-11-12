@@ -1,0 +1,9 @@
+week,nonmerge,ai_coauthor_any_line,ai_coauthor_in_last_paragraph,ai_author_identity,claude_session,copilot_session,model_effort,generated_with_line,any_ai_attribution,no_ai_attribution,human_coauthor,nonmerge_first_parent,nonmerge_first_parent_any_ai
+2026-W40,124,105,105,0,0,0,0,0,105,19,10,118,99
+2026-W41,1524,954,938,19,69,31,0,5,957,567,493,1376,909
+2026-W42,1916,1011,1011,19,60,0,0,3,1021,895,351,937,524
+2026-W43,1734,847,847,7,45,0,0,8,856,878,161,242,118
+2026-W44,1125,415,415,6,17,0,0,0,415,710,55,36,6
+2026-W45,1517,676,676,30,38,0,16,3,687,830,116,93,36
+2026-W46,389,89,89,0,9,0,9,0,89,300,28,69,8
+TOTAL,8329,4097,4081,81,238,31,25,19,4130,4199,1214,2871,1700

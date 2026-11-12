@@ -1,0 +1,31 @@
+sha,day_utc,author,ins,del,files,first_parent,ai_any,subject
+501b7f3459,2026-10-26,aiongg,107573,107472,460,False,False,refactor(engine): move the *_cmds modules under cmd/
+acc88b3203,2026-11-08,Martin Ball,7,145893,40,False,True,chore(i18n): delete the in-repo catalogs and their packer
+a6428d3dfb,2026-10-22,aiongg,56476,56170,572,False,False,Build each crate's integration tests as one binary
+36199e41c3,2026-10-26,aiongg,50193,50150,222,False,False,refactor(ui-egui): move tools modules under tools/
+b6afd0953d,2026-10-26,aiongg,49346,49316,248,False,False,refactor(ui-egui): move dialogs modules under dialogs/
+0b2c35c024,2026-10-26,aiongg,28958,28932,128,False,False,refactor(ui-egui): move panels modules under panels/
+536a7346fb,2026-10-01,Brandon Thomas,44421,768,213,True,False,"more algorithms, progress"
+c9ae745010,2026-10-26,aiongg,21179,21166,108,False,False,refactor(ui-egui): move canvas modules under canvas/
+16941f7198,2026-09-30,Brandon Thomas,42241,0,241,True,False,one-shot
+ae92ac20bf,2026-09-30,Brandon Thomas,37990,404,181,True,False,continued wip
+aa87012aab,2026-10-02,Brandon Thomas,34545,689,162,True,True,"Analysis, notes, proof views, workspaces (+ in-progress work of other agents)"
+74330157cb,2026-11-12,Dylan M. Taylor,804,25979,296,True,False,Use craft-psd for PSD/PSB format code (#13414)
+46c1347951,2026-10-29,FredApps,23418,0,4,False,False,"Document 108-PR selection, partial integration checkpoint and testing protocol"
+f7eb6ea9e7,2026-10-04,Brandon Thomas,11237,11468,345,False,True,Format: adopt the craft-family rustfmt.toml and format the workspace
+a197e018c7,2026-10-23,Matthias Schlich,16500,2999,2,False,False,feat(filters): Lens Flare brightness and size as in Photoshop
+82da13f531,2026-10-29,FredApps,16922,1088,4,False,False,Record 70-head compile checkpoint and behavior-specific regression protocol draft
+086bdba303,2026-10-26,aiongg,7618,7626,34,False,False,refactor(ui-egui): move menus modules under menus/
+e47ee81e38,2026-10-26,aiongg,7518,7510,46,False,False,refactor(ui-egui): move input modules under input/
+c0fb32db24,2026-10-29,David Mann,14435,13,12,False,True,"Finnish, Danish and Norwegian Bokmål interface languages, combined from the community catalogs"
+94acf1700b,2026-10-26,aiongg,7014,6890,17,False,False,refactor(ui-egui): split canvas.rs into canvas/
+b786bb01c1,2026-10-26,aiongg,6709,6704,34,False,False,refactor(ui-egui): move prefs modules under prefs/
+048e8a833b,2026-10-23,Matthias Schlich,5312,7278,1,False,False,feat(filters): Lens Flare 105 mm and Movie Prime fitted over several positions
+255ecc81d0,2026-10-29,FredApps,1129,10501,157,False,False,Remove 21 requested PR contributions from the 108-PR integration
+5c9192bbe2,2026-10-25,skylar taylor-barrick,8720,1589,246,True,True,Migrate PhotoCraft to egui 0.37 (#9363)
+bb39b4a8dd,2026-10-25,David Mann,69,9539,70,False,False,"Revert ""Merge PR #1199: Add optional local models for subject matting and object selection"""
+8cc050b012,2026-10-26,aiongg,4740,4639,16,False,False,refactor(ui-egui): split panels.rs into panels/
+5d54be710c,2026-10-31,Taxperia,9362,5,13,False,False,i18n: add Azerbaijani and Romanian UI languages
+620fef4291,2026-10-10,mighty-programmer,8849,33,56,False,False,Add optional local matting and object selection models
+32f1af86c8,2026-11-03,yoriswind,8471,134,102,False,False,Checkpoint Actions editor candidate for current-main integration
+cfe8a1d991,2026-10-26,aiongg,4329,4195,12,False,False,refactor(engine): split atn_cmds.rs into atn_cmds/

@@ -1,0 +1,9 @@
+model_effort_value,lines
+Opus 5.5 drove; Opus 5.5 briefed; Sonnet 5.5 wrote at medium,12
+Opus 5.5 drove and briefed; Sonnet 5.5 wrote at medium,6
+"Opus 5.5 drove and wrote (review fix, no brief)",2
+Opus 5.5 drove and wrote,2
+Opus 5.5 drove; Fable 5.1 briefed; Sonnet 5.5 wrote at medium,2
+Opus 5.5 drove; Fable 5.1 decided; Sonnet 5.5 wrote at medium,1
+Opus 5.5 drove and wrote (CI fix),1
+Opus 5.5 drove and resolved,1
