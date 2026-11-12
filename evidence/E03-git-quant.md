@@ -123,7 +123,7 @@ Independent check: `git log main --no-merges -i -E --grep='co-authored-by:.*(ant
 | Claude Opus 4.8 (1M context), Qwen 3.8 Flash, Claude Haiku 4.5, DeepSeek, Devin | 1 each | 1 each | 1 each | 10-05…10-14 | |
 
 Days are committer-date UTC of the commits carrying the string (a squash commit's date is its merge date, C4). A commit can carry several strings, so the column does not sum to 4,097.
-First occurrences (by committer date): Claude Opus 5.5 `1f1ddb2a47` (2026-10-01); Claude Opus 4.8 `0c2d4bfd1a` (2026-10-02); Claude Opus 5.5 (1M context) `b6a95b6c8d` (2026-10-04); Copilot `1cb5af9218` (2026-10-07); GPT-6 `61c52c08db` (2026-10-12); Claude Fable 5.2 `e530d6c9f4` (2026-11-10). Command: `git log main -i -F --grep='<string>' --reverse --format='%h %cs' | head -1`.
+First occurrences (by committer date): Claude Opus 5.5 `1f1ddb2a47` (2026-10-01); Claude Opus 4.8 `0c2d4bfd1a` (2026-10-02); Claude Opus 5.5 (1M context) `b6a95b6c8d` (2026-10-04); Copilot `1cb5af9218` (2026-10-07); GPT-6 `61c52c08db` (2026-10-12; first *plain* `GPT-6` — the first GPT-6-family line is `GPT-6 (Codex)` on `7fd610741b`, 2026-10-09, previously not stated (corrected 2026-11-12, see errata #29)); Claude Fable 5.2 `e530d6c9f4` (2026-11-10). Command: `git log main -i -F --grep='<string>' --reverse --format='%h %cs' | head -1`.
 
 AI author identities (E03_ai_author_identity.csv): `Claude` 62 non-merge + 32 merge commits (first `3bab0d4f52`, 2026-10-09); `Codex` 18 + 6; `Claude Opus 5.5` 1 + 1. Committer `Claude` on 102 commits.
 Session trailers: `Claude-Session:` 238 non-merge commits, **62 distinct values**, `f94bb1dc9b` (2026-10-08) … `54ea149f2f` (2026-11-10). `Copilot-Session:` 31 commits, 5 distinct values, only 2026-10-07/08. `Model-Effort:` 25 commits (2026-11-07 … 2026-11-11), 8 distinct values:
@@ -188,8 +188,8 @@ Distribution is bimodal: authors are mostly near 0 % or >90 %. 0 % means "no exp
 
 ### E03-005 — Structured multi-model trailers appear only in the last week
 - Label: VERIFIED
-- Source: commits `b29fdc5a29` (2026-11-07) … `cbd96a4de6` (2026-11-11); `data/E03_model_effort_values.csv`
-- Data: 25 commits with `Model-Effort:`; 8 distinct values, e.g. "Opus 5.5 drove; Opus 5.5 briefed; Sonnet 5.5 wrote at medium" (12).
+- Source: commits `b29fdc5a29` (2026-11-07 author date; 11-08 committer UTC, errata #19) … `cbd96a4de6` (2026-11-11); `data/E03_model_effort_values.csv`
+- Data: 25 commits with `Model-Effort:` (non-merge; 27 incl. merges, all by Trevor Brown, merged by David Mann (cross-ref 2026-11-12, see errata #18)); 8 distinct values, e.g. "Opus 5.5 drove; Opus 5.5 briefed; Sonnet 5.5 wrote at medium" (12).
 - Notes: documents a driver/briefer/writer role split in the commit metadata itself (→ E02/E06 for whether it is a documented convention).
 
 ### E03-006 — AI agents commit under their own identity rarely
@@ -228,7 +228,7 @@ Top authors (canonical, all commits incl. merges; first/last = author date UTC; 
 
 (Rows 13–40 in CSV.) Top-1 author = 20.4 % of all commits; top-10 = 51.4 % (6,376/12,396).
 
-**Who merges.** All 598 first-parent `Merge pull request` commits have committer `GitHub`; the *author* of a web-flow merge commit is the person who clicked merge: David Mann 356, Tanish Manku 71, aiongg 68, FredApps 48, Dylan M. Taylor 26, skylar taylor-barrick 19, BFlat 8, Brandon Thomas 2, five others 1 each (603 incl. 5 side). Source owners of those 603: **111 distinct owners; `storytold` 23 (3.8 %)**, forks 580 — top davidmann4 76, hectorviov 65, rmsff 60, aiongg 28, RickiNano 26 (`E03_mergepr_by_source_owner.csv`). Who squash-merged a squash PR is **not recoverable** from git (author = PR author, committer = GitHub).
+**Who merges.** All 598 first-parent `Merge pull request #N from` commits (599 by a plain `^Merge pull request` subject match, errata #35) have committer `GitHub`; the *author* of a web-flow merge commit is the person who clicked merge: David Mann 356, Tanish Manku 71, aiongg 68, FredApps 48, Dylan M. Taylor 26, skylar taylor-barrick 19, BFlat 8, Brandon Thomas 2, five others 1 each (603 incl. 5 side). Source owners of those 603: **111 distinct owners; `storytold` 23 (3.8 %)**, forks 580 — top davidmann4 76, hectorviov 65, rmsff 60, aiongg 28, RickiNano 26 (`E03_mergepr_by_source_owner.csv`). Who squash-merged a squash PR is **not recoverable** from git (author = PR author, committer = GitHub).
 Local merge-commit makers (committer = author): David Mann 1,176, aiongg 615, FredApps 146, vangel76 97, Khawar Zamman Wani 93, yoriswind 92 (`E03_merge_commit_committers.csv`).
 
 ### E03-007 — 582 contributors in 6 weeks, front-loaded
@@ -240,11 +240,11 @@ Local merge-commit makers (committer = author): David Mann 1,176, aiongg 615, Fr
 ### E03-008 — Merge-button concentration
 - Label: VERIFIED
 - Source: `data/E03_mergepr_by_merger.csv`
-- Data: David Mann authored 356 / 603 (59 %) web-flow merge-PR commits; 97 % of merged merge-style PRs came from fork branches.
+- Data: David Mann authored 356 / 603 (59 %) web-flow merge-PR commits; 96.2 % (580 / 603) of merged merge-style PRs came from fork branches (previously stated 97 %; `data/E03_mergepr_by_source_owner.csv`, 23 from `storytold`) (corrected 2026-11-12, see errata #40).
 
 ## 5. PR flow (E03_pr_daily.csv, E03_pr_weekly.csv, E03_pr_heads_status.csv)
 
-- Landed PRs identified from first-parent subjects: **2,687 distinct squash PR numbers** (2,690 commits; 3 numbers recur) + **598 merge-commit PRs** = **3,285** distinct numbers, no overlap; 4 more first-parent non-PR merges carry `(#N)`.
+- Landed PRs identified from first-parent subjects: **2,687 distinct squash PR numbers** (2,690 commits; 3 numbers recur) + **598 merge-commit PRs** = **3,285** distinct numbers, no overlap (3,288 landings, since three squash numbers recur, errata #20; 598 uses the regex `^Merge pull request #(\d+) from`, 599 by plain subject match, errata #35); 4 more first-parent non-PR merges carry `(#N)`.
 - Peak PR-landing days (UTC): 10-09 332, 10-13 311, 10-10 258, 10-12 245, 10-11 224.
 - `refs/pull/N/head`: **6,480** heads, numbers 8 … 13,454.
 
@@ -527,9 +527,9 @@ Top files by non-merge commits touching: `crates/ui-egui/src/lib.rs` 623, `crate
 - Why the landing style flipped from squash (W41–W42) to merge commits (W45–W46) is not established.
 
 ## Leads for other streams
-- E06: merge-PR concentration (David Mann 356/603 merges); 97 % of merge-PR sources are forks; `Merge PR #N into …` subjects (24) and `Integration:`-prefixed subjects (381; `git log main --format=%s | grep -cE '^Integration:'`); `integration*` branches; release branch `origin/release` carries v0.22.0–v0.23.1.
+- E06: merge-PR concentration (David Mann 356/603 merges); ≈96 % (580 / 603) of merge-PR sources are forks (previously stated 97 %, errata #40); `Merge PR #N into …` subjects (24) and `Integration:`-prefixed subjects (381; `git log main --format=%s | grep -cE '^Integration:'`); `integration*` branches; release branch `origin/release` carries v0.22.0–v0.23.1.
 - E06/E09: `aa87012aab` (2026-10-02, Brandon Thomas) subject "(+ in-progress work of other agents)"; FredApps 108-PR integration docs `46c1347951`, `82da13f531`, `255ecc81d0` (2026-10-29).
-- E02: `Model-Effort:` trailers (`b29fdc5a29` … `cbd96a4de6`, 2026-11-07…11) with "drove / briefed / wrote" roles — check whether AGENTS.md/docs prescribe them; AGENTS.md size 4.6 kB → 25.0 kB, +5.5 kB in W45.
+- E02: `Model-Effort:` trailers (`b29fdc5a29` … `cbd96a4de6`, 2026-11-07…11 author dates; 11-08…11 UTC, errata #19) with "drove / briefed / wrote" roles — check whether AGENTS.md/docs prescribe them; AGENTS.md size 4.6 kB → 25.0 kB, +5.5 kB in W45.
 - E07: 2026-11-11 "Fix main" cluster (11 commits, e.g. `a3c2f2e299`, `71aad480b6`) after a merge wave; revert `bb39b4a8dd` (2026-10-25); duplicate fix commits `cb5243bf78`/`b97f342e16`.
 - E05: `a6428d3dfb` (2026-10-22) "Build each crate's integration tests as one binary" (572 files); `#[test]` count 18,014 at pin; `docs/scorecard.md` most-touched doc.
 - E04: removal of `crates/psd`/`crates/heif` in favour of external `craft-*` crates (pin `74330157cb`, `21bb9fda63`); aiongg module reorganisation 2026-10-26 (`501b7f3459` et al.).
@@ -537,7 +537,7 @@ Top files by non-merge commits touching: `crates/ui-egui/src/lib.rs` 623, `crate
 
 ## Methods-relevant takeaways
 - Machine-readable AI attribution in commit trailers (co-author + session id + model/effort role line) makes AI involvement measurable at scale; here it covers ~50 % of commits (E03-003, E03-004, E03-005).
-- Adopting a richer, structured trailer (`Model-Effort:` with driver/briefer/writer roles) late shows the convention can evolve without tooling changes — but only 25 commits use it, so adoption needs enforcement to be useful (E03-005).
+- Adopting a richer, structured trailer (`Model-Effort:` with driver/briefer/writer roles) late shows the convention can evolve without tooling changes — but only 25 commits use it (non-merge; 27 total, all one contributor, errata #18), so adoption needs enforcement to be useful (E03-005).
 - Landing-style choice matters for metrics: squash merges keep main's first-parent history one-change-per-PR; merge commits import sync merges and inflate commit counts 3–4× — pick one and measure on PRs, not commits (E03-001, E03-002).
 - A high-throughput, many-contributor AI-assisted project kept typical changes small (median +52/−5, 2 files) and ~78 % of commits touching tests (E03-011).
 - Very frequent tagging (median 1.6 days) with a split to a `release` branch once main velocity rose (E03-015).

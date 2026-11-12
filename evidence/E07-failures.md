@@ -53,7 +53,7 @@ the **original** commit. "—" = no trailer, so attribution is unknown.
 | 2de7a9c042 | 11-07 | c1662d4911 "Export: split nested groups…" (Triwarr; —) | ~30 h | none | #11647 (aae9b7ea61) |
 | 70cb31610b | 10-12 | 2b5f0f5984 Levels Alt→Reset (funkvay-star; —) | ~16 h | "#3871 brings Alt+Cancel Reset to every adjustment dialog … so this PR keeps only the clipping display" | #3693 (41aa2b86f5). Superseded by #3871 (67e4b8a499) |
 | 8f6f1d0cdb | 10-14 | 511f864778 (itself a "revert arrow-key guard" refactor) (safvanedge; —) | 28 min | none | integration-batch-10 (#10145) |
-| b390bef334 | 11-08 | d3e8039f76 (object not in clone) | n/a | none | #11895 (b479d94e21) |
+| b390bef334 | 11-08 | d3e8039f76 (object not in clone; row unverified, errata #9) | n/a | none | #11895 (b479d94e21) |
 | 17663b160d | 10-31 | contributors display-name entry (qvest-ssels; revert carries Opus 5.5 trailer) | n/a | none | #10395 |
 
 Other subjects the grep matched are not reverts of commits (e.g. 81925d7769 "Raw Defaults resolution on
@@ -105,7 +105,7 @@ Merge times come from the first-parent committer date (`$W/prmap.json`, built fr
 ### E07-003 — The dominant red-main cause is semantic merge skew between PRs that were each green
 - Label: VERIFIED (facts in rows 2, 4, 5, 8, 9, 13–16, 19); INFERRED (classification "dominant": 11 of the 21 incidents)
 - Source: the commit messages quoted above. Typical wording: "#9781 and #10983 each defined … merged minutes apart" (06650357d8). "Two PRs that landed together each added …" (29e4039c72).
-- Notes: There is no GitHub merge queue. The current `.github/workflows/ci.yml` has no `merge_group` trigger (`grep -rln merge_group .github/` returns nothing). Nine commits labelled "(merge queue)" by David Mann (11-08 → 11-11, e.g. fda05f7b02 "On main + #10448, so main's gate stays green after the merge") show a **manual** queue instead: main is merged into the PR and gates are re-run before merging. Cross-ref E05-052.
+- Notes: There is no GitHub merge queue. The current `.github/workflows/ci.yml` has no `merge_group` trigger (`grep -rln merge_group .github/` returns nothing). Nine commits across all refs (7 on main (cross-ref 2026-11-12, see errata #2)) labelled "(merge queue)" by David Mann (11-08 → 11-11, e.g. fda05f7b02 "On main + #10448, so main's gate stays green after the merge") show a **manual** queue instead: main is merged into the PR and gates are re-run before merging. Cross-ref E05-052.
 
 ### E07-004 — Process change 1: main's CI runs were being cancelled, so red main went unseen
 - Label: VERIFIED
@@ -193,7 +193,7 @@ Merge times come from the first-parent committer date (`$W/prmap.json`, built fr
   > "[`parity-estimate.md`] (~82%) counts feature surface and overstates user-facing readiness; treat it as an upper bound."
 - Estimates it gave: feature surface 55–70%, "a working professional could switch today" 20–35%. Same day: 433b84fae7 (#186, `docs/where-we-stand`), and 10203e7a60 (#184, `docs/no-tauri`) "AGENTS.md: no Tauri, Electron or webview shells".
 - HEAD: README still says "that measures wiring, not behaviour" (`74330157cb:README.md:312`). `docs/target-app-parity.md:283`: "Menu coverage (96%) overstates true parity".
-- Notes: There is drift inside the correction itself. The revision table in `docs/target-app-parity.md:646` records the 10-05 assessment as "surface 60–70%, ready for real work 25–35%". The original commit says 55–70% and 20–35%. VERIFIED discrepancy. Cause unknown.
+- Notes: The revision table in `docs/target-app-parity.md:646` records the 10-05 assessment as "surface 60–70%, ready for real work 25–35%". The original commit says 55–70% and 20–35%. This is two same-day commits, not drift: 433b84fae7 (#186, 54 min after #182) replaced 55–70/20–35 with 60–70/25–35 (previously stated "drift inside the correction itself … cause unknown") (corrected 2026-11-12, see errata #3).
 
 ### E07-014 — "Settings that do nothing" became a measured, ratcheting metric (66/129 → 8/199)
 - Label: VERIFIED
@@ -300,7 +300,7 @@ Phrase counts (main, `git log main -i -F --grep=<p> | wc -l`): stub 11, placehol
 | Perspective Crop | 017d1aea1c (#2864, 10-11) | fd99c1f464, 22cacbf198, 193f495e5a (10-17); 5225b592fe (10-18); 745f535fda (10-19); 40c720f38e … fd0d543d0d (11-07, Hector Villarreal, 10 commits, several "CodeRabbit review"); 0a8eb9d6c8/3e81a3bcc4 (11-09); 76fb4cc58a (#13065, 11-11); PR #12237 merged 11-12 | 33 non-merge main commits matching `perspective crop\|pcrop`, 10-11 → 11-11 |
 | Artboards | Artboard tool 2e0c426692 (#2862, 10-11); earlier PSD work 10-05 | overflow fixes 64da6bb455 (#1181), ba4dc112bb; #1531 duplicate/drag 3e8d54896d; `fix/artboard-followups-10512-10538` → 3e27572e7a (#11441, 11-05): "(#10512 follow-up)", "(#10538 follow-up)" | 124 non-merge commits mention artboard. 15 on 11-06 alone |
 | Flatpak self-update | update check disabled in Flatpak 6b551c11e8 (10-22) | f1866aed06 (#9982, network), 2fccdcba8e (#9983, comment correction), 0d9a0f6613 (#10206, enable checks), 3ff283af35 (#10393, version pins), 83ef781382 "Release 0.22.1: fix Flatpak update permissions" (`patch/flatpak-update-0.22.1`, unmerged), eee667f1d9 (#13322, 11-11) "Fix Flatpak updates and bump to 0.23.1" | 6 PRs over 20 days. v0.22.0 (11-09) → v0.23.0 → v0.23.1 (both 11-11) |
-| egui 0.37 migration | 5c9192bbe2 (#9363, 10-25), 246 files +8,720/−1,589 | 178d6c2235 "rustfmt the egui 0.37 merge", b078e0e8a6 (#9575 review follow-ups), c484971fdf (renames), 3f2229b9ad (CJK fallback), 73ac7d9a25 (10-28) "Arabic layer names … read right to left again on egui 0.37" | 18 commits matching `egui ?0?\.37\|egui037\|M0\.37`, 10-25 → 11-05 |
+| egui 0.37 migration | 5c9192bbe2 (#9363, 10-25), 246 files +8,720/−1,589 | 178d6c2235 "rustfmt the egui 0.37 merge", b078e0e8a6 (#9575 review follow-ups), c484971fdf (renames), 3f2229b9ad (CJK fallback), 73ac7d9a25 (10-28) "Arabic layer names … read right to left again on egui 0.37" | 18 non-merge commits matching `egui ?0?\.37\|egui037\|M0\.37`, 10-25 → 11-05 by author date; these include the migration itself (squash 5c9192bbe2, PR-head commits 6e4f85e161, 54a0bc46fa), so they are not all follow-ups (previously presented as follow-ups (corrected 2026-11-12, see errata #39)) |
 | Windows save durability | 82270711de (#230, 10-05) | E07-021 chain: 851ca348a7, 0b779b4fec (+ its own follow-up), 1253e79d68, #11189 (3 commits) | ≥5 PRs, 10-05 → 11-11 |
 
 ---
@@ -350,7 +350,7 @@ Phrase counts (main, `git log main -i -F --grep=<p> | wc -l`): stub 11, placehol
 | 10-10 | nextest `gpu` test group | check | 3092d3b6f9 |
 | 10-11 | panel buttons must route via command ids (`xtask panel-commands`) | check | 4165c57f92 |
 | 10-18 → | integration batches by maintainers | process | 5c89f16b60 … 6b0f7762e1 |
-| 10-18 | CodeRabbit appears (first commit mention) | review bot | `git log main --grep=CodeRabbit` (earliest 10-18). 311 "CodeRabbit review" commits |
+| 10-18 | CodeRabbit appears (first commit mention) | review bot | `git log main --grep=CodeRabbit` (earliest 10-18). 255 "CodeRabbit review" commits on main (`-i --grep='CodeRabbit review'`; previously stated 311 (corrected 2026-11-12, see errata #33)) |
 | 10-21 → 10-27 | SonarCloud + deny complexity lints | check | 8e518d8169, 604da9d06b |
 | 10-25 | regression-test backfill | test backfill | 72e11802d4 |
 | 11-06 | shared house rules (check-then-claim, report only what ran, review the diff, better PR) | rule | 7d8648dfcb |
@@ -374,7 +374,7 @@ Phrase counts (main, `git log main -i -F --grep=<p> | wc -l`): stub 11, placehol
 - `docs/egui-037-migration-plan.md` references `plan-reviews/photocraft-v1.md` "independent review" and "evidence ledger". This is a multi-agent planning/review practice (E02 / planning stream).
 - 21 `fix/sec-*` branches remain ahead of main at the pin. Their merge status (PRs open/closed) is a lead for the PR-lifecycle stream.
 - `agent-346022` and `ebosido444-ai` are author handles that look like agents (602344bae0, 1a86826ab7). This is an attribution lead, but not evidence of AI use by itself.
-- The 10-05 parity-number discrepancy (55–70/20–35 vs 60–70/25–35) is relevant to the metrics-integrity stream.
+- The 10-05 parity-number discrepancy (55–70/20–35 vs 60–70/25–35) is two same-day commits (#182, #186), not drift (corrected 2026-11-12, see errata #3).
 - integration-batch-8 merged 37 PRs in one merge (cece50d513). This is a throughput/review-depth lead for E05-035.
 
 ## Methods-relevant takeaways

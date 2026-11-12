@@ -130,7 +130,7 @@ post (x.com/iamsupersocks/status/2107560346269401548). That link is UNVERIFIED.
 - Label: VERIFIED
 - Source: commit 653a177e6f (2026-11-06, tronicum) `ATTRIBUTION.md` (later moved to craft-i18n by acc88b3203, 2026-11-08)
 - Quote/Data: "@tronicum with Claude Code, AI-assisted (machine-translated); not yet reviewed by a native speaker"
-- Notes: This is the only explicit "built with Claude Code" disclosure text found in the repo's prose docs. It covers translations only.
+- Notes: One of two explicit "with Claude Code" disclosure texts in the repo's prose docs (previously stated "the only"): a331258dff (2026-11-05, Nine, #10290) added a Bosnian row "with Claude Code (AI-assisted)" one day earlier (corrected 2026-11-12, see errata #34). Both cover translations only.
 
 ### E08-012 — The repository's first commit is literally named "one-shot", adding 42,241 lines
 - Label: VERIFIED
@@ -159,7 +159,7 @@ All quotes come from the Algolia API (`https://hn.algolia.com/api/v1/items/<id>`
 ### E08-015 — Tooling: "vanilla Claude Code", "occasionally Codex", no hand-written code since February
 - Label: VERIFIED (statements)
 - Source: HN 50029182 (2026-10-10): "We're using vanilla Claude Code for ArtCraft apps [1], but we are especially careful not to touch Ghidra." HN 49977572 (2026-10-06): "Now it's Claude Code and ever so occasionally Codex. I never do work in IDEs by hand anymore. I stopped writing code entirely in February". HN 50325139 (2026-11-01): "Every time Anthropic limits what we can do, I start switching more of my process to open weights. Planning with Claude, implementation with Kimi."
-- Git: "Claude Code" use is CORROBORATED. There are 304 main commits with a `Claude-Session:` trailer and 3 with "Generated with [Claude Code]". "Codex" appears in 15 co-author trailers. Kimi does not appear in any trailer surfaced by the trailer grep. **UNCORROBORATED**: the Kimi remark may not concern PhotoCraft.
+- Git: "Claude Code" use is CORROBORATED. There are 274 main commits (238 non-merge; previously stated 304, which does not reproduce (corrected 2026-11-12, see errata #1)) with a `Claude-Session:` trailer and 3 with "Generated with [Claude Code]". "Codex" appears in 15 co-author trailers. Kimi does not appear in any trailer surfaced by the trailer grep. **UNCORROBORATED**: the Kimi remark may not concern PhotoCraft.
 - Notes: "vanilla" implies no custom orchestration harness. That is a developer claim with no detail.
 
 ### E08-016 — "100% AI software factory and no human review" (HN 50434834, 2026-11-10)
@@ -262,7 +262,7 @@ All quotes come from the Algolia API (`https://hn.algolia.com/api/v1/items/<id>`
 | # | Claim about method | Sources (class) | Git corroboration |
 |---|---|---|---|
 | C1 | Built mainly with Claude Opus 5.5 | E08-014 (P1); S13–S17 (P2) | CORROBORATED-BY-GIT (Opus 5.5 is the dominant trailer; 226/301 founder commits have Claude trailers) |
-| C2 | Uses "vanilla Claude Code" | E08-015 (P1) | CORROBORATED-BY-GIT for Claude Code (304 `Claude-Session:` trailers); "vanilla" UNCORROBORATED |
+| C2 | Uses "vanilla Claude Code" | E08-015 (P1) | CORROBORATED-BY-GIT for Claude Code (274 `Claude-Session:` commits on main; previously 304, errata #1); "vanilla" UNCORROBORATED |
 | C3 | Occasionally Codex; other models | E08-015 (P1); E08-010 (P1) | CORROBORATED (15 Codex, 40 GPT-6, Cursor, Copilot trailers) |
 | C4 | "Planning with Claude, implementation with Kimi" | E08-015 (P1, scope unclear) | UNCORROBORATED (no Kimi trailer seen) |
 | C5 | Photoshop was "one-shotted" | E08-013 (P1); S16, S20, S24 (P2/P3) | Partly: a commit literally named "one-shot" (+42,241 lines). "Whole thing" CONTRADICTED by alpha status and 12k later commits |

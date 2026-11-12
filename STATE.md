@@ -1,9 +1,9 @@
 # Project state
 
-_Last updated: 2026-11-12 (end of session 01)_
+_Last updated: 2026-11-12 21:30 UTC (session 01, all phases complete)_
 
 ## Phase
-**Phase 2 — synthesis: 6 of 10 deliverables done; 4 deferred (02, 04, 05, 06) for budget.** Phase 1 evidence complete.
+**All phases complete: 10 of 10 deliverables written, independently reviewed, errata applied.** See `deliverables/VERIFICATION.md`.
 
 ## Plan
 1. Phase 0 — verify source, scaffold repo ✅
@@ -29,22 +29,22 @@ _Last updated: 2026-11-12 (end of session 01)_
 ## Deliverable status
 | # | Deliverable | Status |
 |---|---|---|
-| 01 | Evidence ledger + uncertainty register | done (generated) + errata |
-| 02 | Development chronology | deferred — evidence in E01/E02/E05/E07 |
-| 03 | Architecture & process reconstruction | done |
-| 04 | Feature case studies | deferred — evidence in E09 |
-| 05 | AI agent & human role maps | deferred — evidence in E06 |
-| 06 | Testing/CI/release analysis | deferred — evidence in E05 |
-| 07 | Failure & productivity analysis | done |
-| 08 | AI Software Engineering Playbook | done |
-| 09 | Prompts & templates | done (16 files) |
-| 10 | IDE transferability assessment | done |
+| 01 | Evidence ledger + uncertainty register | done (generated) + 40 errata |
+| 02 | Development chronology | done, reviewed |
+| 03 | Architecture & process reconstruction | done, reviewed |
+| 04 | Feature case studies | done, reviewed (9 cases) |
+| 05 | AI agent & human role maps | done, reviewed |
+| 06 | Testing/CI/release analysis | done, reviewed |
+| 07 | Failure & productivity analysis | done, reviewed |
+| 08 | AI Software Engineering Playbook | done, reviewed |
+| 09 | Prompts & templates | done, reviewed (16 files) |
+| 10 | IDE transferability assessment | done, reviewed |
 
-## Backlog / next steps
-1. Write deferred deliverables 02, 04, 05, 06 (prompts in `handoffs/2026-11-12-session-01.md`; one subagent each, read `deliverables/SYNTHESIS-BRIEF.md`).
-2. Orchestrator review pass of 03/07/08/10 for cross-deliverable consistency (they were written in parallel; 10 refers to 08 by topic only). Apply `deliverables/01c-errata.md` back into the evidence files (E05, E07, E08).
-3. Playbook 08: human review, approval tiers, role separation, token budgets and orchestration are PROPOSED (no PhotoCraft evidence) — consider validating them against a second case study.
-4. Deepen thin evidence: PR-page sample is small (~27 PRs, WebFetch summaries); batch-8 revert reasons (PR #9386); tool behind `Finding:` trailers; Reddit and several press pages were blocked.
+## Backlog / next steps (optional follow-ups; nothing is blocking)
+1. Strengthen review/approval evidence: it rests on ~22 model-summarised PR pages. With GitHub API access to storytold/photocraft, pull review states and merge actors for all landed PRs.
+2. Validate the playbook's PROPOSED parts (approval tiers, role separation, token budgets, metric thresholds) on a real project or a second case study; they have no PhotoCraft evidence.
+3. Two loose ends from the close-out: Codex-identity commit `9fdcbf93c2` fits neither landing path in errata #16; E02's Opus 5.5 x18 / 4.8 x2 split was not rechecked.
+4. Unreachable sources: private `plan/` and `log/devlog.md`, Discord, Reddit, several press pages (403).
 5. Re-pin and diff if upstream has moved past `74330157c`.
 
 ## Notes

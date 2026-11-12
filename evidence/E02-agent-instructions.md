@@ -74,19 +74,19 @@ not human).
 | 31 | ca18689304 | 10-10 (authored) | Diego Chagas | — | via #2945 | +2/−2 | Corpus now includes GIMP XCF oracles | XCF import |
 | 32 | 6649b78526 | 10-22 | Dylan M. Taylor | — | #8234 | +1/0 | Golden rule 10 "Time goes through chrono" | "Follow-up to storytold/cadcraft#1785" (cross-repo incident) |
 | 33 | 604da9d06b | 10-27 | Dylan M. Taylor | — | #9770 | +1/−1 | Clippy wording. New crates need `[lints] workspace = true` | "Enforce Rust coding standards via Clippy" (Sonar branch) |
-| 34 | 0379569d00 | 10-29 | Dylan M. Taylor | — | #10228 | +5/0 | New "## CI workflows" section: only call craft-common-actions at `@main`, and no CI changes in feature/fix PRs | Message: "AGENTS.md (and CLAUDE.md where present) gets a CI workflows section" |
+| 34 | 0379569d00 | 10-29 (author; 10-30 UTC, errata #19) | Dylan M. Taylor | — | #10228 | +5/0 | New "## CI workflows" section: only call craft-common-actions at `@main`, and no CI changes in feature/fix PRs | Message: "AGENTS.md (and CLAUDE.md where present) gets a CI workflows section" |
 | 35 | 6d737c219e | 10-31 | aiongg | — | #10420 | +5/−9 | Removes all `../craftrules` paths and scripts (never-crash std, progress-docs, release playbook, `contributors.py`) | Retirement of craftrules (see rule 13 below) |
-| 36 | 7d8648dfcb | 11-06 | FredApps | — | #11632 (branch `house-rules`) | +54/−2 | Prepends the House rules and Rust blocks from `craft-contrib@dde09ea31e`. Drops local rule 10 (chrono, now Rust rule 5) and the old `plan/` bullet (now core rule 9 and a new §7 bullet). Adds `house-rules.yml` | Org-wide standardisation: "The house-rules workflow checks the copy" |
+| 36 | 7d8648dfcb | 11-06 | FredApps | — | #11632 (branch `house-rules`) | +54/−2 | Prepends the House rules and Rust blocks from `craft-contrib@dde09ea31e` (external repo). Drops local rule 10 (chrono, now Rust rule 5) and the old `plan/` bullet (now core rule 9 and a new §7 bullet). Adds `house-rules.yml` | Org-wide standardisation: "The house-rules workflow checks the copy" |
 | 37 | 0cc411241b | 11-11 | David Mann | CB | #13206 | +1/−1 | Rule 6: before/after screenshots go in the PR description, never the repo. Deletes 9 PR captures (1.9 MB) | Repo bloat from PR screenshots |
 | 38 | 0d9a9a5a70 | 11-11 | David Mann | CB | #13206 | +1/−1 | Rule 6 allows a doc's own before/after comparison | "CodeRabbit on #13206" (bot review comment) |
 
 Observations (VERIFIED from the table):
-- **Authorship.** 23 of 38 revisions are by Brandon Thomas (counted from the table). All of rev 1–22 except
+- **Authorship.** 22 of 38 revisions are by Brandon Thomas (previously stated 23): revs 1–19, 21, 22 and 26 (corrected 2026-11-12, see errata #27). All of rev 1–22 except
   #20 are his. From rev 23 on, the editors are maintainers and contributors (David Mann, Dylan M. Taylor,
   FredApps, aiongg, …).
-- **AI trailers.** 21 revisions carry a Claude co-author trailer: Opus 5.5 ×18, of which 2 are "(1M
-  context)", and Opus 4.8 ×2. One more (#20) carries a Copilot trailer. 15 carry none. Method: manual
-  count of the trailer column.
+- **AI trailers.** 19 revisions carry a Claude co-author trailer (previously stated 21; the model split
+  Opus 5.5 ×18 / Opus 4.8 ×2 below was from the same manual count and is not rechecked). One more (#20) carries a Copilot trailer. 18 carry none (previously stated 15). Method: manual
+  count of the trailer column; recount by `grep -ciE 'co-authored-by: *claude'` over each body of `git log 74330157cb --follow -- AGENTS.md` (corrected 2026-11-12, see errata #27).
 - **Triggers that can be identified:**
   - issue #493 (rev 23);
   - storytold/cadcraft#1785 (rev 32);
@@ -458,6 +458,7 @@ MCP server (HEAD:docs/development.md:363).
   Overall: `Model-Effort:` 27 commits; `Co-Authored-By: Claude` 4,727 commits.
 - Method: `git log main [--until|--since] -i --grep='Co-Authored-By: Claude' --format=%H | wc -l` (and the same for the other trailers)
 - Notes:
+  - Window boundary: date-only `--since/--until` use the current time of day, so the two windows cover 12,217 of 12,396 commits. With an exact cutoff at 7d8648dfcb's commit time, 1,805 commits follow it (499 with a Claude co-author) (cross-ref 2026-11-12, see errata #28). `Model-Effort:` 27 = 25 non-merge, all one contributor (cross-ref 2026-11-12, see errata #18).
   - Rule 15 governs PR text, so commit trailers do not strictly violate it.
   - The trailer share fell from ~40% to ~28%. INFERRED and confounded (who contributes changed); this is
     not proof of rule effect. Hand to the trailer stream.
@@ -531,9 +532,9 @@ MCP server (HEAD:docs/development.md:363).
 ### E02-026 — Rule changes are mostly co-authored with Claude and made in feature PRs
 - Label: VERIFIED
 - Source: §1 table
-- Data: 21 of 38 AGENTS.md revisions carry a Claude co-author trailer, 1 a Copilot trailer. Most edits ride
+- Data: 19 of 38 AGENTS.md revisions carry a Claude co-author trailer (previously stated 21), 1 a Copilot trailer. Most edits ride
   along with feature PRs (#67, #190, #239, #255, #353, #898, #3498, #5941, …).
-- Notes: AI involvement here counts only explicit trailers. The other 15 are "unknown".
+- Notes: AI involvement here counts only explicit trailers. The other 18 are "unknown" (previously stated 15) (corrected 2026-11-12, see errata #27).
 
 ### E02-027 — Machine-specific agent notes persist in docs despite rule 13
 - Label: VERIFIED

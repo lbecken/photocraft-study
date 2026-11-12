@@ -76,8 +76,8 @@ Method: for each `git tag --sort=creatordate` tag, I took the tag commit, its au
 | v0.17.0 | 10-28 | b8c3f3aa8e | Brandon Thomas | 1179 | yes | yes | |
 | v0.18.0 | 10-30 | 8a87a457ab | Brandon Thomas | 914 | yes | yes | |
 | v0.19.0 | 11-01 | 2df9f80770 | Brandon Thomas | 231 | yes | yes | |
-| v0.20.1 | 11-02 | 327c4cc82e | Brandon Thomas | 267 | yes | yes | |
-| v0.20.2 | 11-04 | 7c12f64715 | Dylan M. Taylor | 5 | no | **no** | first tag off the `release` branch |
+| v0.20.1 | 11-02 (local; 11-03 UTC, errata #19) | 327c4cc82e | Brandon Thomas | 267 | yes | yes | |
+| v0.20.2 | 11-04 (local; 11-05 UTC, errata #19) | 7c12f64715 | Dylan M. Taylor | 5 | no | **no** | first tag off main; on no remote branch, not on `release` (previously "first tag off the `release` branch", ambiguous (corrected 2026-11-12, see errata #30)) |
 | v0.21.0 | 11-06 | efb7ebd0c0 | FredApps | 1156 | yes | no | |
 | v0.22.0 | 11-09 | 5000240c6e | Dylan M. Taylor | 1420 | no | no | |
 | v0.23.0 | 11-11 | 9963efcb2f | FredApps | 1291 | no | no | "Release: PhotoCraft v0.23.0 (main 78e478adda)" |
@@ -127,9 +127,9 @@ That is 27 tags in 42 days.
 | 10-15 | e22c4ec7ab / 1a4167936e | David Mann / skylar | nextest in CI with `ci` profile (#6117/#6118) | hang limit, failures repeated at end |
 | 10-15 | b2fafcf68c, branch `ci/direct-timeout-limits-20261015` | skylartaylor | "comfortable runtime limits to unbounded jobs" | n/a |
 | 10-15 | df055f3dcb | Zuujis | "fix the tests that keep main red" (#5941) | E05-052 |
-| 10-15 | 0cc421d0d5 → cddb6fa21c | Dylan M. Taylor | FreeBSD and Nix delegated to the shared workflow | n/a |
+| 10-15 | 0cc161e2a8 → cddb6fa21c (previously stated `0cc421d0d5`, which does not exist (corrected 2026-11-12, see errata #13)) | Dylan M. Taylor | FreeBSD and Nix delegated to the shared workflow | n/a |
 | 10-17 | 45afd2e9d7 | Ivan | panic_hunt runs in CI | E05-071 |
-| 10-17 | 6401cfdbe1, 8f9ebc3136 | aiongg | git deps must come from `storytold` (CI and release) | n/a |
+| 10-17 (author; 6401cfdbe1 is 10-20 UTC, errata #19) | 6401cfdbe1, 8f9ebc3136 | aiongg | git deps must come from `storytold` (CI and release) | n/a |
 | 10-18 | 9185b64b94 | Dylan M. Taylor | Dependabot (cargo + actions, daily, grouped) | n/a |
 | 10-21 | 8e518d8169 | Dylan M. Taylor | SonarCloud via the shared workflow | n/a |
 | 10-21 | 5933793982 | Dylan M. Taylor | fuzz input script-injection fix (S7630 BLOCKER) | E05-040 |
@@ -138,7 +138,7 @@ That is 27 tags in 42 days.
 | 10-23 | 9acf9a0cf9, a75a414310 | aiongg | Linux gate = shared `gate.yml` running `cargo xtask ci` | E05-010 |
 | 10-23 | 5521968828 | Dylan M. Taylor | Sonar on main not cancelled | "so coverage is published" |
 | 10-26 | ddf9ca1e2d (branch `fix/nextest-0.9.150`) | skylar | nextest pinned 0.9.150 | "GHSA-vc25-qg58-w57c" |
-| 10-29 | 0379569d00 | Dylan M. Taylor | AGENTS.md "CI workflows" section; workflows only call craft-common-actions @main (#10228) | E05-012 |
+| 10-29 (author; 10-30 UTC, errata #19) | 0379569d00 | Dylan M. Taylor | AGENTS.md "CI workflows" section; workflows only call craft-common-actions @main (#10228) | E05-012 |
 | 10-29 | 8c8c4b95f5 | FredApps | nextest `fail-fast = false` | "a single run exposes remaining regressions" |
 | 11-05 | daa9a01955 | Luis | contributor credits refreshed per release | E05-064 |
 | 11-06 | 2ff8f419cb | FredApps | GPU tests on lavapipe, fail on skips (#7975) | E05-024 |
@@ -307,7 +307,7 @@ That is 27 tags in 42 days.
 - Label: VERIFIED
 - Source: `tests/interactions/guide-edit/*.json` (10 scenario files; added in a3ea9a4277, 2026-11-05, #9190). `docs/integration-testing/` holds 12 files (approved-selection.json, integration-checkpoint.md, per-pr-regressions.md, windows-portable-test-protocol.md, …), committed by FredApps 2026-10-29 (46c1347951, 4a51aa83f6, 595d631372).
 - Quote: "At selection freeze, GitHub showed 108 open, non-draft, unmerged PRs, each with the latest FredApps review APPROVED at its exact current head … and successful current-head check rollup." (`approved-bugfix-parity-2026-10-29.md`) and "A zero-match run is BLOCKED, never PASSED." (`per-pr-regressions.md`)
-- Notes: this documents a batch-integration protocol: approve about 100 PRs, merge them into one integration branch, run full-sweep CI on a fork, then build a portable artifact. It is relevant to stream E03/E04 (review and merge). The fork-run links point to `FredApps/photocraft` Actions.
+- Notes: the two quotes come from two commits: the "FredApps review APPROVED" quote from `46c1347951`, the "zero-match … BLOCKED" quote from `4a51aa83f6` (cross-ref 2026-11-12, see errata #31). This documents a batch-integration protocol: approve about 100 PRs, merge them into one integration branch, run full-sweep CI on a fork, then build a portable artifact. It is relevant to stream E03/E04 (review and merge). The fork-run links point to `FredApps/photocraft` Actions.
 
 ### E05-023: Fuzzing, property tests and snapshot tests
 - Label: VERIFIED
@@ -342,7 +342,7 @@ That is 27 tags in 42 days.
 - Source: `74330157cb:perf/budgets.toml:1-28`; `perf/baseline.json`; `perf-nightly.yml:3-13`
 - Data: 14 `[[bench]]`, 88 `[[scenario]]`, 5 `not_measurable`, and every `enforce` value is `false`, with 0 `enforce = true` (`grep -nE 'enforce\s*=' perf/budgets.toml`). Regression threshold is 15% of p50 and 1 ms. The baseline `machine_class` is `macos-aarch64-apple-m4-pro-apple-m4-pro` (Apple M4 Pro, 14 cores). Its only commits are 0f955e6c82 and 3423864502 (both 2026-10-05).
 - Quote: "It fails when an enforced budget … breaks or a scenario's p50 regresses more than 15 % against perf/baseline.json from the same machine class (other classes are never compared" (`perf-nightly.yml:5-7`)
-- Notes: the nightly job runs on GitHub `macos-15`, which is not the M4 Pro class, and `baselines_never_cross_machine_classes` is a unit test (`xtask/src/perf.rs:1515`). INFERRED: with zero enforced budgets and no matching baseline, the nightly perf job cannot currently fail on performance. It only reports. The steps for recording a runner baseline were documented in 9010154943 (2026-10-25, #7494). Performance evidence otherwise lives in 20+ `docs/*-performance.md` files, `docs/benchmarks/`, and dispatch-only before/after jobs in ci.yml (`ci.yml:502-750`).
+- Notes: 14 + 88 = 102 rows, 0 enforced; deliverables use "0 of 102 rows (88 scenarios + 14 benches)" (cross-ref 2026-11-12, see errata #11). The nightly job runs on GitHub `macos-15`, which is not the M4 Pro class, and `baselines_never_cross_machine_classes` is a unit test (`xtask/src/perf.rs:1515`). INFERRED: with zero enforced budgets and no matching baseline, the nightly perf job cannot currently fail on performance. It only reports. The steps for recording a runner baseline were documented in 9010154943 (2026-10-25, #7494). Performance evidence otherwise lives in 20+ `docs/*-performance.md` files, `docs/benchmarks/`, and dispatch-only before/after jobs in ci.yml (`ci.yml:502-750`).
 
 ### E05-029: Coverage is produced in the shared Sonar workflow and is not a CI gate
 - Label: VERIFIED (via WebFetch summary of `https://github.com/storytold/craft-common-actions/blob/main/.github/workflows/sonarcloud.yml`, accessed 2026-11-12)
@@ -383,7 +383,7 @@ That is 27 tags in 42 days.
 ### E05-035: Human approval before merge is not consistently present on sampled PRs
 - Label: VERIFIED (via WebFetch summaries of the 6 PR pages, accessed 2026-11-12)
 - Data: see table 0.3. 1 of 6 shows an explicit human approval (#11641, FredApps). 2 are self-merged by the author (#113 echelon, #13414 dylanmtaylor) with no reviews. 2 fork PRs were merged by davidmann4 with no approval shown. Check counts at merge were 6 (#113, 2026-10-05), 19 (fork PRs), 21–24 (same-repo PRs).
-- Notes: INFERRED: required checks gate merges, and required approving reviews either are not configured or are bypassed by maintainers. I could not read branch-protection settings directly. House rule 8 says "Branch protection enforces this" for pushes to main (`AGENTS.md:13`). Fork PRs show fewer checks, which fits Sonar skipping (E05-029) and path filters. #12237 contains an "explicitly automated" first-pass human-account review (eliets2), which is a lead for E04.
+- Notes: Whether required checks gate merges is unresolved (previously stated "INFERRED: required checks gate merges"; E06/E09 samples show merges with 2 of 5 and 4 of 7 checks passed, and skipped jobs may count as not passed) (corrected 2026-11-12, see errata #14). Required approving reviews either are not configured or are bypassed by maintainers (INFERRED). The PR-page sample here is 6; with E06 and E09 pages it is about 22, with 4 explicit human approvals (cross-ref 2026-11-12, see errata #17). I could not read branch-protection settings directly. House rule 8 says "Branch protection enforces this" for pushes to main (`AGENTS.md:13`). Fork PRs show fewer checks, which fits Sonar skipping (E05-029) and path filters. #12237 contains an "explicitly automated" first-pass human-account review (eliets2), which is a lead for E04.
 
 ---
 
@@ -449,7 +449,7 @@ That is 27 tags in 42 days.
   - 2db6b7d8f9 (2026-10-12, Release 0.8.1): "The previous release build failed in craft-common-actions, not in this repo: riscv64 packaging got --formats deb,rpm,tar … Linux jobs lacked the ALSA headers … Windows signing needed the AZURE_* secrets". The related secret plumbing is 3d6050b931 (#3794, branch `release-pass-azure-secrets`).
   - d43db3e153 (2026-10-12, author identity "Claude", Release 0.8.2): "0.8.1's Web job failed: photocraft-web's wasm was 25,587,059 bytes, over … 24 MiB gate". The structural fix was the wasm split into gzip parts behind a boot module (df055f3dcb, #5302).
   - eee667f1d9 (2026-11-11, #13322): "Fix Flatpak updates and bump to 0.23.1". The tag v0.23.1 is merge 45066c4829 "Merge tested main for v0.23.1", with conflicts in Cargo.toml/Cargo.lock.
-- Notes: v0.8.0 and v0.8.1 have no tags (`git tag` list), which fits failed builds. That is INFERRED.
+- Notes: v0.8.0 and v0.8.1 have no tags (`git tag` list), which fits failed builds. That is INFERRED. Likewise 0.11.0, 0.15.0 and 0.20.0 were bumped but never tagged, each followed by a same-day platform fix (failed build INFERRED) (cross-ref 2026-11-12, see errata #15).
 
 ### E05-063: The nightly release dry run was added after a release-day failure
 - Label: VERIFIED
@@ -466,7 +466,7 @@ That is 27 tags in 42 days.
 - Label: VERIFIED
 - Data:
   - Tags v0.1.0 through v0.20.1 are commits authored by Brandon Thomas (one by BFlat, one by "Claude").
-  - From v0.20.2 on, the tag commits are on the `release` branch and not ancestors of main. They are by Dylan M. Taylor (3) and FredApps (2).
+  - From v0.20.2 on, the tag commits are not ancestors of main. Only v0.22.0–v0.23.1 are on the `release` branch; v0.20.2 and v0.21.0 are on no remote branch (previously stated "from v0.20.2 on, the tag commits are on the `release` branch" (corrected 2026-11-12, see errata #30)). They are by Dylan M. Taylor (3) and FredApps (2).
   - Of 29 first-parent version-bump commits to `Cargo.toml` on main, 26 carry a Claude co-author or session trailer (`git log main --first-parent -G'^version = "0\.' -- Cargo.toml`, plus a trailer grep).
   - The `release` branch has 3,165 first-parent commits, mostly merges of PRs (`git log --first-parent origin/release | wc -l`).
 - Notes: version bumps were mostly agent-assisted. Publishing a draft is a manual GitHub UI action by a maintainer (docs). Who published each release is not observable from git. Release branches: `release-0.2.0` (45f927d571, the PR #113 head), `release-0.10.0` (86125ed8f1), `release-bump-0.23.0` (af98c28ded), `release-sync-0.23.0` (e6abeaba74 → main as 8a909b2673 "Release: PhotoCraft v0.23.0 on main (#13345)"). The last two show a bump-on-release-then-sync-to-main pattern in November, which reverses the documented main-first flow. That is INFERRED from the subjects.
@@ -528,7 +528,7 @@ That is 27 tags in 42 days.
 
 ## Open questions / uncertainties
 - **Branch protection and required checks**: I could not read them, since the GitHub API is blocked. Check counts (6 → 19–24) and human-approval absence come from WebFetch summaries of 6 PRs only. Whether approvals are required and bypassed, or not required at all, is unknown.
-- **E05-003 row "0cc421d0d5"**: I did not verify that sha. The FreeBSD delegation commit observed in the log is `0cc0d0212c7a`? No. The log line is "0cc0…" and I did not re-check it. The verified commits for that change are cddb6fa21c (nix switch, 2026-10-15) and the log line "ci: delegate FreeBSD workflow to craft-common-actions and add nix check" (2026-10-15, Dylan M. Taylor). Treat that row's sha as unverified.
+- **E05-003 row "0cc421d0d5"** — resolved: the commit is `0cc161e2a8` (2026-10-15, Dylan M. Taylor); neither `0cc421d0d5` nor `0cc0d0212c7a` exists in the clone (corrected 2026-11-12, see errata #13). Original note: I did not verify that sha. The FreeBSD delegation commit observed in the log is `0cc0d0212c7a`? No. The log line is "0cc0…" and I did not re-check it. The verified commits for that change are cddb6fa21c (nix switch, 2026-10-15) and the log line "ci: delegate FreeBSD workflow to craft-common-actions and add nix check" (2026-10-15, Dylan M. Taylor). Treat that row's sha as unverified.
 - The contents of the shared `craft-common-actions` workflows (release.yml, house-rules.yml, nix.yml, freebsd.yml) were not read, except the summaries of sonarcloud.yml and gate.yml via WebFetch. Signing, notarization and Flatpak publishing details live there.
 - I could not determine whether the nightly perf, FreeBSD, ARM64 and release dry-run jobs are currently green, because I had no Actions access.
 - The purpose of the `ci/snapshot-*` branches is undocumented (E05-014, INFERRED).
@@ -538,7 +538,7 @@ That is 27 tags in 42 days.
 ## Leads for other streams
 - E03/E04 (review and merge): the batch-integration protocol in `docs/integration-testing/` (FredApps, 108 → 87 approved PRs, fork CI, approval receipts; 46c1347951, 595d631372, 2026-10-29), and integration merge commits like 53dbfe280c "Integrate 16 reviewed performance and usability PRs". Also the automated "first-pass review" from a human account (eliets2 on #12237), and CodeRabbit "Prompt for AI Agents" blocks.
 - E01/E02 (agent attribution): author identity "Claude" on release commit d43db3e153 and on branches `claude/fix-main-*` with `Claude-Session:` trailers. The `codex/` branch #7809 carries Claude trailers, so branch prefix and tool disagree. House rule 15 bans agent attribution (7d8648dfcb), and author `agent-346022` appears on 649b1d5d92.
-- Governance: house rules are copied from `storytold/craft-contrib` at dde09ea31e2e with a sha256, and `house-rules.yml` checks them (`AGENTS.md:1,22`). craftrules was retired.
+- Governance: house rules are copied from `storytold/craft-contrib` at dde09ea31e2e (external repo) with a sha256, and `house-rules.yml` checks them (`AGENTS.md:1,22`). craftrules was retired.
 - Architecture: `crates/psd` was extracted to craft-psd in 74330157cb (#13414) with "The full test gate has not been run; CI should validate the switch" (WebFetch). Documentation drift was flagged by CodeRabbit.
 - Docs drift: `docs/development.md:67` says fail-fast, which is stale. AGENTS.md cites `crates/ui-egui/src/parity.rs`, but the file is `menus/parity.rs`.
 

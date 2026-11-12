@@ -163,7 +163,7 @@ AI-attributed: 3,337 / 4,130 (80.8 %) touch tests; no AI attribution: 3,122 / 4,
 
 ## Methods-relevant takeaways
 - Machine-readable AI attribution in commit trailers (co-author + session id + model/effort role line) makes AI involvement measurable at scale; here it covers ~50 % of commits (E03-003, E03-004, E03-005).
-- Adopting a richer, structured trailer (`Model-Effort:` with driver/briefer/writer roles) late shows the convention can evolve without tooling changes — but only 25 commits use it, so adoption needs enforcement to be useful (E03-005).
+- Adopting a richer, structured trailer (`Model-Effort:` with driver/briefer/writer roles) late shows the convention can evolve without tooling changes — but only 25 commits use it (non-merge; 27 total, all one contributor, errata #18), so adoption needs enforcement to be useful (E03-005).
 - Landing-style choice matters for metrics: squash merges keep main's first-parent history one-change-per-PR; merge commits import sync merges and inflate commit counts 3–4× — pick one and measure on PRs, not commits (E03-001, E03-002).
 - A high-throughput, many-contributor AI-assisted project kept typical changes small (median +52/−5, 2 files) and ~78 % of commits touching tests (E03-011).
 - Very frequent tagging (median 1.6 days) with a split to a `release` branch once main velocity rose (E03-015).
@@ -208,9 +208,9 @@ Key to the columns:
 | MCP server | NO for dev agents. It is documented for end-user agents and verified by `agent_tasks` tests | Tests drive MCP like an agent would (E04-026); no evidence that dev agents verify their own work over MCP | product feature; its own acceptance tests |
 | Enumerable command registry | YES: AGENTS.md rule 9 + `panic_hunt` (E04-012) | YES: `panic_hunt` fuzzes every command; part of the CI gate (E05 §0.2) | documented + observed |
 | `xtask layers` | YES: AGENTS.md §2, §5 | YES: in CI since day 1 (E04-031) | documented + observed |
-| `xtask panel-commands` | YES: AGENTS.md §5 | YES: CI gate; added by a Claude-co-authored commit (E04-032) | documented + observed |
+| `xtask panel-commands` | YES: AGENTS.md §5 | YES: CI gate; added by a Claude-co-authored commit (E04-012; previously cited as E04-032, which covers lints (corrected 2026-11-12, see errata #26)) | documented + observed |
 | Scorecard / parity checklist / FLOOR | YES: AGENTS.md §4 "Picking work" | YES: `scorecard --check` is in CI; FLOOR test (E04-050) | documented + observed |
-| Perf budgets | YES: AGENTS.md §5 | Partly: 0 of 88 budgets are enforced (E04-051) | documented; enforcement weak |
+| Perf budgets | YES: AGENTS.md §5 | Partly: 0 of 88 budgets are enforced (E04-051); = 0 of 102 rows incl. 14 benches, errata #11 | documented; enforcement weak |
 | `tests/interactions` JSON scenarios | NO (development-only runner; "Automated execution needs a separate shared workflow") | NOT in CI (E04-025) | exists, not used in CI |
 | `scripts/ci-gpu-lavapipe.py` | Development.md: yes, as a CI determinism measure | YES: CI gate command (E04-037) | domain CI mechanism; agent link only hypothesized |
 | Golden-image / `testkit::assert_image_eq` (in the plan) | Plan only (day-1 architecture §13) | NOT implemented: no `assert_image_eq`, no `xtask bless` (E04-035) | plan never realised |
@@ -309,8 +309,8 @@ Method: for each `git tag --sort=creatordate` tag, I took the tag commit, its au
 | v0.17.0 | 10-28 | b8c3f3aa8e | Brandon Thomas | 1179 | yes | yes | |
 | v0.18.0 | 10-30 | 8a87a457ab | Brandon Thomas | 914 | yes | yes | |
 | v0.19.0 | 11-01 | 2df9f80770 | Brandon Thomas | 231 | yes | yes | |
-| v0.20.1 | 11-02 | 327c4cc82e | Brandon Thomas | 267 | yes | yes | |
-| v0.20.2 | 11-04 | 7c12f64715 | Dylan M. Taylor | 5 | no | **no** | first tag off the `release` branch |
+| v0.20.1 | 11-02 (local; 11-03 UTC, errata #19) | 327c4cc82e | Brandon Thomas | 267 | yes | yes | |
+| v0.20.2 | 11-04 (local; 11-05 UTC, errata #19) | 7c12f64715 | Dylan M. Taylor | 5 | no | **no** | first tag off main; on no remote branch, not on `release` (previously "first tag off the `release` branch", ambiguous (corrected 2026-11-12, see errata #30)) |
 | v0.21.0 | 11-06 | efb7ebd0c0 | FredApps | 1156 | yes | no | |
 | v0.22.0 | 11-09 | 5000240c6e | Dylan M. Taylor | 1420 | no | no | |
 | v0.23.0 | 11-11 | 9963efcb2f | FredApps | 1291 | no | no | "Release: PhotoCraft v0.23.0 (main 78e478adda)" |
@@ -322,7 +322,7 @@ That is 27 tags in 42 days.
 
 ## Open questions / uncertainties
 - **Branch protection and required checks**: I could not read them, since the GitHub API is blocked. Check counts (6 → 19–24) and human-approval absence come from WebFetch summaries of 6 PRs only. Whether approvals are required and bypassed, or not required at all, is unknown.
-- **E05-003 row "0cc421d0d5"**: I did not verify that sha. The FreeBSD delegation commit observed in the log is `0cc0d0212c7a`? No. The log line is "0cc0…" and I did not re-check it. The verified commits for that change are cddb6fa21c (nix switch, 2026-10-15) and the log line "ci: delegate FreeBSD workflow to craft-common-actions and add nix check" (2026-10-15, Dylan M. Taylor). Treat that row's sha as unverified.
+- **E05-003 row "0cc421d0d5"** — resolved: the commit is `0cc161e2a8` (2026-10-15, Dylan M. Taylor); neither `0cc421d0d5` nor `0cc0d0212c7a` exists in the clone (corrected 2026-11-12, see errata #13). Original note: I did not verify that sha. The FreeBSD delegation commit observed in the log is `0cc0d0212c7a`? No. The log line is "0cc0…" and I did not re-check it. The verified commits for that change are cddb6fa21c (nix switch, 2026-10-15) and the log line "ci: delegate FreeBSD workflow to craft-common-actions and add nix check" (2026-10-15, Dylan M. Taylor). Treat that row's sha as unverified.
 - The contents of the shared `craft-common-actions` workflows (release.yml, house-rules.yml, nix.yml, freebsd.yml) were not read, except the summaries of sonarcloud.yml and gate.yml via WebFetch. Signing, notarization and Flatpak publishing details live there.
 - I could not determine whether the nightly perf, FreeBSD, ARM64 and release dry-run jobs are currently green, because I had no Actions access.
 - The purpose of the `ci/snapshot-*` branches is undocumented (E05-014, INFERRED).
@@ -389,7 +389,7 @@ Sample chosen to avoid E05's (#113, #7809, #11641, #12237, #13234, #13414).
 ### E06-040 — Bot review appears mid-October; early PRs had no review at all
 - Label: VERIFIED via WebFetch summary (sample of 10)
 - Data: 0/5 early PRs (#33, #1261, #1335, #1344, #2792) show any review, bot or human. 5/5 sampled PRs from 10-19 onward show CodeRabbit. SonarQube Cloud appears on #11059 (SonarCloud workflow added 8e518d8169, 2026-10-21, Dylan M. Taylor).
-- Notes: small sample. E05 holds the CI side.
+- Notes: small sample. E05 holds the CI side. Across E05, E06 and E09 the PR-page sample is about 22, with 4 explicit human approvals (cross-ref 2026-11-12, see errata #17).
 
 ### E06-041 — Human supervision is mostly labels, merge decisions and occasional change requests
 - Label: VERIFIED (sample) / INFERRED (generalisation)
@@ -540,7 +540,7 @@ Sample chosen to avoid E05's (#113, #7809, #11641, #12237, #13234, #13414).
 - External oracles + ratcheting floors define "correct" for format work without a human judging pixels (E09-D-001, D-002, D-003).
 - A campaign can be decomposed into one-commit, per-crate branches landed serially in minutes when each is mechanical (E09-C-004).
 - Agent-authored bug fixes carry a fixed message shape (symptom → root cause → behaviour) and a session-link trailer, giving traceability back to the agent session (E09-B-001).
-- Same-commit regression tests were the norm but not enforced: #1323 shipped without one, and 16 of 27 security fixes added no `#[test]` (E09-B table, G-003).
+- Same-commit regression tests were the norm but not enforced: 16 of 27 security fixes added no `#[test]` (E09-B table, G-003). (Previously also cited "#1323 shipped without one", which is wrong (corrected 2026-11-12, see errata #21).)
 - Perf claims are recorded in per-change docs with hardware, method, base-tree reproduction and "what this does not fix"; reviewers caught a harness bug that changed a published number (E09-F-002, F-003).
 - Budgets that are not yet met are kept visible as `enforce = false` with a measured note, never deleted (E09-F-004).
 - Large migrations used a committed plan with explicit open acceptance gates, and the PR stated what it did not claim (E09-E-001, E-002).

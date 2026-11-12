@@ -102,7 +102,7 @@ Claude Code" footer. "merges" = merge commits authored (incl. main→branch sync
 - Label: VERIFIED
 - Source: integration-batch merges a02f2ee410 (2026-10-23), cece50d513 (10-25), 52f338e2df (10-27), 799e129628 (10-31), fab871dadb (11-01), b957878f3f (11-02), all authored by aiongg
 - Data: 0 of 430 non-merge commits carry AI trailers. Authored 552 `Merge PR #N:` merge commits. Active 10-16..11-02 only.
-- Notes: per the brief's rule 4, no attribution means unknown, not human. PR #7848 shows aiongg labelling ("bugfix", Oct 27, via WebFetch).
+- Notes: true for trailers only: 13 commits authored by the `Codex` identity reached main through his PR #8577 (cross-ref 2026-11-12, see errata #16). Per the brief's rule 4, no attribution means unknown, not human. PR #7848 shows aiongg labelling ("bugfix", Oct 27, via WebFetch).
 
 ### E06-004 — Many contributors' commits are almost all Claude-attributed; some carry none
 - Label: VERIFIED
@@ -253,8 +253,8 @@ commits. Squash-merged branches show as "not ancestor". So "ancestor" counts onl
 ### E06-026 — Dylan M. Taylor's `fix/sec-*` and `sonar*/` series: human-only attribution, CodeRabbit + Sonar reviewed
 - Label: VERIFIED
 - Source: 20 `fix/sec-*` branches (11-02..11-11), 0 AI-trailer lines; 9 `sonar*/` branches (10-21..10-27). PR #11059 (fix/sec-command-work-bounds, via WebFetch): sections "What was wrong / What changed / Blast radius / Checks", "Not run: full workspace tests (shared build host)", CodeRabbit ~4 reviews ("Merge Risk: Moderate", docstring-coverage check failed), SonarQube "Quality Gate passed … 95.0% Coverage on New Code", tanish2k09 asked for changes ("Push when ready and we'll take another look"), label "waiting on author", still open on 11-12.
-- Data: 37 direct first-parent commits by Dylan, incl. a 2026-10-22 07:10–07:12 run of ~30 `security(...)` commits (c5a6afcf68 … c3c6c63074), author = committer = Dylan M. Taylor, no `(#N)`.
-- Notes: the brief estimated ≈25 `fix/sec-*` branches; this count is 20 (`grep -c '^fix/sec-' branches.tsv`). The direct pushes predate house rule 8 "main changes through a pull request … no exception" (added 11-06, 7d8648dfcb).
+- Data: 37 direct first-parent commits by Dylan, incl. a 2026-10-22 11:10–11:12 UTC (07:10–07:12 −0400) run of 32 `security…` commits (previously stated "07:10–07:12" without zone and "~30"; 25 carry `Finding:`) (c5a6afcf68 … c3c6c63074), author = committer = Dylan M. Taylor, no `(#N)`.
+- Notes: (corrected 2026-11-12, see errata #32). The brief estimated ≈25 `fix/sec-*` branches; this count is 20 (`grep -c '^fix/sec-' branches.tsv`). The direct pushes predate house rule 8 "main changes through a pull request … no exception" (added 11-06, 7d8648dfcb).
 
 ### E06-027 — Founder-era stacking and splitting: `pr/never-crash-*`, `jobs/*`, `land/*`, `batch-followups`
 - Label: VERIFIED
@@ -370,7 +370,7 @@ Sample chosen to avoid E05's (#113, #7809, #11641, #12237, #13234, #13414).
 ### E06-040 — Bot review appears mid-October; early PRs had no review at all
 - Label: VERIFIED via WebFetch summary (sample of 10)
 - Data: 0/5 early PRs (#33, #1261, #1335, #1344, #2792) show any review, bot or human. 5/5 sampled PRs from 10-19 onward show CodeRabbit. SonarQube Cloud appears on #11059 (SonarCloud workflow added 8e518d8169, 2026-10-21, Dylan M. Taylor).
-- Notes: small sample. E05 holds the CI side.
+- Notes: small sample. E05 holds the CI side. Across E05, E06 and E09 the PR-page sample is about 22, with 4 explicit human approvals (cross-ref 2026-11-12, see errata #17).
 
 ### E06-041 — Human supervision is mostly labels, merge decisions and occasional change requests
 - Label: VERIFIED (sample) / INFERRED (generalisation)

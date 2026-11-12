@@ -38,9 +38,11 @@ says "AI-attributed commit". It never says "the AI caused".
 
 ## A.1 Failure-mode taxonomy
 
-**Finding.** Sixteen failure modes have at least two cited incidents each. Seven ended up with a
-mechanical correction. Five got only advisory or process corrections. Four have no correction on
-record. The most frequent cause of red main is semantic merge skew between PRs that were each green
+**Finding.** Sixteen failure modes have at least two cited incidents each. Counted from the last
+column of the table below, nine ended up with at least one mechanical correction (F3–F8, F10, F15, F16;
+for F3, F4, F5, F6 and F15 it is partial). Four got only advisory or process corrections (F1, F2, F12, F14).
+Three have no correction on record for the class (F9, F11, F13). (Recounted 2026-11-12. An earlier
+"seven / five / four" could not be reproduced from the table; REVIEW-04-06-07 §(d).) The most frequent cause of red main is semantic merge skew between PRs that were each green
 (11 of the 21 red-main incidents traced in E07 §2; the classification is INFERRED, E07-003). It never got a mechanical fix: there is no
 `merge_group` trigger in any workflow (E07-003, E05-052).
 
@@ -530,7 +532,7 @@ Method notes:
   Integration-batch fix-ups inflate the denominator.
 
 **Release cadence.** 26 distinct tagged commits in 41.4 days, median gap 1.6 days. From v0.20.2
-(11-05), tags sit on a `release` branch and are not ancestors of main (E03-015). Releases kept their
+(11-05), tags are not ancestors of main (E03-015); v0.22.0–v0.23.1 sit on the `release` branch, v0.20.2 and v0.21.0 on no remote branch (errata #30). Releases kept their
 cadence while PR throughput fell. That is consistent with a project shifting from feature landing to
 stabilisation (INFERRED).
 
@@ -658,7 +660,7 @@ all refs) can be tied to a session (E03 §3, E06-011). That is 5.8 % of AI-attri
 | 11 | "I stopped writing code entirely in February" (HN 49977572) | The repository starts 09-30. Terse, untrailered founder commits exist (E01-010); their authorship is unknown | **UNCORROBORATED** |
 | 12 | "much of the current PR volume comes from coding agents" (RFC-0006, E08-028) | 59.2 % of first-parent changes AI-attributed; 49.6 % of non-merge commits | **CORROBORATED** in direction |
 | 13 | "100% AI software factory and no human review" (HN 50434834, 11-10; does not name PhotoCraft) | Sampled PRs: explicit human approval on 1/6 and 1/10 (E05-035, E06-041), 4 of about 22 pages overall (errata #17), *but* rule 1 requires an accountable person, and approvals exist (#11641, #7848, #9363) | **AMBIGUOUS**: partly consistent with samples; contradicted by the documented rule |
-| 14 | "Let the community token spend … diffuse into the products" (HN 49976861) | 582 author identities; 97 % of the 603 merge-commit PRs come from forks (E03-008; squash PRs' sources are not recorded) | **CORROBORATED** in direction; the spend itself is unmeasurable |
+| 14 | "Let the community token spend … diffuse into the products" (HN 49976861) | 582 author identities; ≈96 % (580) of the 603 merge-commit PRs come from forks (E03-008 as corrected by errata #40; squash PRs' sources are not recorded) | **CORROBORATED** in direction; the spend itself is unmeasurable |
 
 ## B.8 What public data cannot measure, and how a project could instrument it
 

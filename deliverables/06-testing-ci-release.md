@@ -235,7 +235,7 @@ check is built when the gap bites.
 | fail-fast on (10-15) then off (10-29) | e22c4ec7ab, 8c8c4b95f5 | "a red PR frees its runner early" | extra rebuild cycles per regression; reverted | VERIFIED |
 | GPU retries tried, then dropped | 110d58bea9 (branch only, `retries = 2`); 8f58ea4629 "retaining strict test gates"; no first-parent version ever had retries | flake noise | none: flakes root-caused with measured rates instead (E07-007) | VERIFIED |
 | Fuzz dispatch-only | `ci.yml:446-447` | 60 min × targets | matrix drifted to 12 deleted `psd` targets with nothing noticing (E05-023) | VERIFIED |
-| Sonar skipped on forks (token) | E05-029 | secret safety | ~97% of the 603 merge-commit PRs came from forks (E03 §5; 96 % by `data/E03_mergepr_by_source_owner.csv`; squash PRs' sources are not recorded), so most community PRs get no Sonar signal (INFERRED) | VERIFIED / INFERRED |
+| Sonar skipped on forks (token) | E05-029 | secret safety | ≈96 % (580) of the 603 merge-commit PRs came from forks (`data/E03_mergepr_by_source_owner.csv`; E03 §5's 97 % is superseded by errata #40; squash PRs' sources are not recorded), so most community PRs get no Sonar signal (INFERRED) | VERIFIED / INFERRED |
 
 **Finding (INFERRED).** The economies that removed a *platform* (Windows by path, macOS, FreeBSD) each
 caused at least one later red main or release-day failure. The economies that kept every case but ran
@@ -355,7 +355,7 @@ by a platform fix and a `.1` tag (new evidence below).
 |---|---|---|---|---|---|---|
 | Bootstrap | v0.1.0 (= v0.1.1-rc.4), v0.1.1-rc.5, v0.1.1 | 10-01 → 10-03 | Brandon Thomas | yes | 0.8–1.0 d | Linux packaging fix (4eb75d6370) |
 | Main-line | v0.2.0 … v0.20.1 (18 tags) | 10-05 → 11-03 | Brandon Thomas, except v0.3.0 (BFlat) and v0.8.2 (author identity "Claude", d43db3e153) | yes | 0.19–3.47 d | untagged bumps: 0.4.x, 0.8.0/0.8.1 (failed builds, INFERRED), 0.11.0, 0.15.0, 0.20.0 |
-| Release branch | v0.20.2, v0.21.0, v0.22.0, v0.23.0, v0.23.1 | 11-05 → 11-12 | Dylan M. Taylor (3), FredApps (2) | **no** (on `origin/release`) | 0.29–2.67 d | v0.23.1 = "Merge tested main for v0.23.1" after Flatpak fix eee667f1d9 |
+| Release branch | v0.20.2, v0.21.0, v0.22.0, v0.23.0, v0.23.1 | 11-05 → 11-12 | Dylan M. Taylor (3), FredApps (2) | **no** (v0.22.0–v0.23.1 on `origin/release`; v0.20.2 and v0.21.0 on no remote branch, errata #30) | 0.29–2.67 d | v0.23.1 = "Merge tested main for v0.23.1" after Flatpak fix eee667f1d9 |
 
 27 tags, 26 distinct tagged commits, 41.4 days, **median gap 1.6 days** (E03-015); the mean over the
 26 gaps is 1.59 days (`python3` over `days_since_prev_tag` in `data/E03_releases.csv`). E05 §0.4

@@ -266,7 +266,7 @@ had no merge queue; the semantic-skew class dominated red main (E07-003).
 | Main CI never cancelled | `[PC-VERIFIED E07-004, E05-004]` (07174271d5 / 01a63dee89) | PhotoCraft (`ci.yml:66-68`): group = `github.ref` for PR events, `github.run_id` otherwise, and `cancel-in-progress: ${{ github.event_name == 'pull_request' }}`; before the fix 80 of 83 main runs on 10-07 had been cancelled |
 | **Real merge queue** (`merge_group` trigger; gate runs on main+PR before landing) | `[PC-PARTIAL E07-003]` only a manual "(merge queue)" re-merge from 11-08 (fda05f7b02); no `merge_group` in CI | `[PROPOSED]` enable GitHub merge queue from day 0; gate job listens to `merge_group`. Answers E07-003, E07-005, E05-052 |
 | Integration branch for batches | `[PC-VERIFIED E06-021, E06-022]` | `integ/<date>-<n>`; integrator only; CI-only draft PR first; land with merge commit |
-| Release branch | `[PC-VERIFIED E05 §0.4]` first tag off `release` 11-04 | `release` receives merges of tested main; release environment and secrets bound to it |
+| Release branch | `[PC-VERIFIED E05 §0.4]` first tag off main 11-04 (v0.20.2; 11-05 UTC); tags on `release` from v0.22.0 (errata #30) | `release` receives merges of tested main; release environment and secrets bound to it |
 | Platform coverage on PR vs main | `[PC-PARTIAL E07-004, E07 F8]` PRs Linux-only unless path/label; Windows breaks surfaced on main | `[PROPOSED]` run the full platform matrix in the merge queue, not on every PR push |
 
 ---

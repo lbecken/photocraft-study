@@ -33,7 +33,13 @@ for f in files:
                 j += 1
             lab = 'VERIFIED' if 'VERIFIED' in label.upper() and 'INFERRED' not in label.upper() else ('INFERRED' if 'INFERRED' in label.upper() and 'VERIFIED' not in label.upper() else (label[:40] or '?'))
             counts[lab] = counts.get(lab, 0) + 1
-            cell = lambda s, n: s.replace('|', '\\|')[:n] + ('…' if len(s) > n else '')
+            def cell(s, n):
+                # Truncate at the last whitespace before the limit so a `sha:path[:line]`
+                # citation is never cut mid-token (a cut token fails verify_citations.py).
+                s = s.replace('|', '\\|')
+                if len(s) <= n: return s
+                cut = s.rfind(' ', 0, n + 1)
+                return (s[:cut] if cut > 0 else s[:n]).rstrip() + '…'
             rows.append(f'| {eid} | {cell(claim, 160)} | {cell(label, 60)} | {cell(src, 220)} | [{os.path.basename(f)}](../{f}) |')
             i = j
         else: i += 1

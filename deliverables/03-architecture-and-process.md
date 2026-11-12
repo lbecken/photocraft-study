@@ -549,7 +549,7 @@ E02-027/028). [observed, not rule]
 | Explicit AI attribution | 4,130 / 8,329 non-merge (49.6%); 84.7% in W40 → 22.9% in W46 | E03-003 |
 | `Claude-Session:` trailers | 238 non-merge commits / 274 incl. merges on main; 62 sessions on main, 129 across all refs, median 1 commit per session on main; up to 15 distinct sessions with commits on one day (10-13) | E03 §3, E06-011; recount in this deliverable |
 | Early checkpoint commits | "also contains compiling in-progress work from the parallel panels, type styles, File menu, photo, filters, UI-parity and fidelity agents" (aa87012aab, 10-02 UTC) | E01-013 |
-| Fan-out | 12 `pr/never-crash-*` branches, one commit each, squash-merged in ~15 min (10-04) | E06-027, E07-009 |
+| Fan-out | 12 `pr/never-crash-*` branches, one commit each, squash-merged on 10-04: #33 at 15:14 UTC, the other 11 in ~15 min (17:25–17:40 UTC; errata #25) | E06-027, E07-009 |
 | Bursts in one identity | David Mann: 377 consecutive pairs ≤ 5 min apart, 183 in disjoint areas — consistent with parallel sessions **or** batch rebasing | E03-014 |
 
 Discrepancy note: E08-015 reports 304 main commits with a `Claude-Session:` trailer; E06-011 reports

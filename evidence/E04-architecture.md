@@ -43,9 +43,9 @@ Key to the columns:
 | MCP server | NO for dev agents. It is documented for end-user agents and verified by `agent_tasks` tests | Tests drive MCP like an agent would (E04-026); no evidence that dev agents verify their own work over MCP | product feature; its own acceptance tests |
 | Enumerable command registry | YES: AGENTS.md rule 9 + `panic_hunt` (E04-012) | YES: `panic_hunt` fuzzes every command; part of the CI gate (E05 §0.2) | documented + observed |
 | `xtask layers` | YES: AGENTS.md §2, §5 | YES: in CI since day 1 (E04-031) | documented + observed |
-| `xtask panel-commands` | YES: AGENTS.md §5 | YES: CI gate; added by a Claude-co-authored commit (E04-032) | documented + observed |
+| `xtask panel-commands` | YES: AGENTS.md §5 | YES: CI gate; added by a Claude-co-authored commit (E04-012; previously cited as E04-032, which covers lints (corrected 2026-11-12, see errata #26)) | documented + observed |
 | Scorecard / parity checklist / FLOOR | YES: AGENTS.md §4 "Picking work" | YES: `scorecard --check` is in CI; FLOOR test (E04-050) | documented + observed |
-| Perf budgets | YES: AGENTS.md §5 | Partly: 0 of 88 budgets are enforced (E04-051) | documented; enforcement weak |
+| Perf budgets | YES: AGENTS.md §5 | Partly: 0 of 88 budgets are enforced (E04-051); = 0 of 102 rows incl. 14 benches, errata #11 | documented; enforcement weak |
 | `tests/interactions` JSON scenarios | NO (development-only runner; "Automated execution needs a separate shared workflow") | NOT in CI (E04-025) | exists, not used in CI |
 | `scripts/ci-gpu-lavapipe.py` | Development.md: yes, as a CI determinism measure | YES: CI gate command (E04-037) | domain CI mechanism; agent link only hypothesized |
 | Golden-image / `testkit::assert_image_eq` (in the plan) | Plan only (day-1 architecture §13) | NOT implemented: no `assert_image_eq`, no `xtask bless` (E04-035) | plan never realised |
@@ -132,7 +132,7 @@ Key to the columns:
 | 2026-10-17 | 235e7578f3 | A: ipp (#3017) |
 | 2026-10-25 | bb39b4a8dd | D: ml (revert of PR #1199) |
 | 2026-11-11 | 5d4b68f04c | D: heif → craft-heif (#13076) |
-| 2026-11-12 | 74330157cb | D: psd → craft-psd (#13414; 25 files, +893/−5,899) |
+| 2026-11-12 | 74330157cb | D: psd → craft-psd (#13414; 294 files, +755/−25,930 — previously stated 25 files, +893/−5,899 (corrected 2026-11-12, see errata #23)) |
 
 ### E04-006 — Extraction to shared `craft-libs` crates (a cross-repo modularity strategy)
 - Label: VERIFIED
@@ -349,7 +349,7 @@ Key to the columns:
 | stats | test/line counts | 16941f7198 | no |
 | parity | regenerate parity-checklist.md | (main.rs) | no (the FLOOR test runs) |
 | i18n-report | translation coverage; "never fails" | 9dd39df78d 2026-11-08 | yes, non-failing |
-| perf | benches vs budgets/baseline | 0f955e6c82 2026-10-05 | `--quick` in CI; full nightly |
+| perf | benches vs budgets/baseline | 0f955e6c82 2026-10-05 | manual dispatch / nightly only, never on PRs (previously stated "`--quick` in CI" (corrected 2026-11-12, see errata #12)) |
 | scorecard | regenerate / `--check` staleness | 0f955e6c82 | yes (`--check`) |
 | version | set workspace version | d98bee4c94 2026-10-01 | release only |
 | ico | pack .ico | d98bee4c94 | packaging |
@@ -382,7 +382,7 @@ Key to the columns:
 
 ### E04-035 — House-rules workflow (instruction-file integrity)
 - Label: VERIFIED
-- Source: `HEAD:.github/workflows/house-rules.yml`. It triggers on changes to `AGENTS.md` / `CLAUDE.md` and calls `storytold/craft-common-actions/.github/workflows/house-rules.yml@main` with `rust: true`. Added 7d8648dfcb (2026-11-06, FredApps). The marked blocks in `HEAD:AGENTS.md:1,22` carry `source=dde09ea31e… sha256=…`.
+- Source: `HEAD:.github/workflows/house-rules.yml`. It triggers on changes to `AGENTS.md` / `CLAUDE.md` and calls `storytold/craft-common-actions/.github/workflows/house-rules.yml@main` with `rust: true`. Added 7d8648dfcb (2026-11-06, FredApps). The marked blocks in `HEAD:AGENTS.md:1,22` carry `source=dde09ea31e… sha256=…` (dde09ea31e is a `storytold/craft-contrib` commit, external repo).
 - Notes: this is a domain-neutral check that keeps the agent instruction file in sync with the shared org rules. The shared workflow's logic is outside this repo and was not examined (INFERRED: it checks the hashed blocks). Cross-ref E02.
 
 ## 10. Scorecard and perf budgets

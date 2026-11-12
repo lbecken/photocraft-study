@@ -35,7 +35,7 @@ unknown, not that a human wrote it.
 - **Merge skew**: two PRs that each pass CI against their own base but break main once both land
   (E07-003).
 
-### Corrections to the evidence made while writing this deliverable (all VERIFIED; details in the final section)
+### Corrections to the evidence made while writing this deliverable (all VERIFIED; details in the final section; since applied to the evidence files as errata #21–#23, #36–#38)
 1. E09 says the #1323 sibling fix (988ad9558a) shipped **without** a regression test. That is wrong.
    The commit adds two inline `#[test]`s in `transform_tool.rs`: `a_distort_corner_stops_before_the_box_folds_over`
    and `keep_convex_leaves_a_degenerate_start_alone`. E09's grep looked only at test files. All four
@@ -353,7 +353,7 @@ that verification protects a large swap.
 | 968baf639e | a: 10-05 17:47 −0400 | Brandon Thomas (GitHub) | none recorded | #190 `feat/photoshop-oracle-corpus` | `ci.yml` +23 (corpus job), `xtask/src/corpus*.rs`, two sha256 manifests, AGENTS.md +6, development.md +74 | new `crates/engine/tests/photoshop_oracles.rs` (+133), `PASS_FLOOR = 1` "(of 84 with smart objects or type)"; io floors PSD_TOOLS 229, PHOTOSHOP 126 |
 | a62ef68ca2 | a: 10-14 14:12 −0400 | Timothy Daly (GitHub) | 17 `Co-Authored-By: Claude Opus 5.5` + 1 `Co-authored-by: Claude Opus 5.5` (squashed sub-commits) | #5000 | Brightness/Contrast curve "refit to the Photoshop ground truth we have" | `compose/src/tests.rs`, `engine/src/pixels_tests.rs` +22; `io/tests/corpus.rs` floors → 148/249/185 |
 | f54d605e2c | a: 11-05 21:41 +0530 | Khawar Zamman Wani | none recorded | #10307 | `xtask/src/psd_write_oracle.rs`, `starter.json` | `apps/photocraft-cli/tests/it/psd_write_oracle.rs` |
-| 9cebb79f31 … cd0728ee2a, c17e1c4b69 | a: 2026-11-12 00:37:34Z → 06:45:18Z | Dylan M. Taylor | none recorded | `switch-craft-psd` = `refs/pull/13414/head` (7 commits + merge of main) | "Use craft-psd from craft-libs; remove crates/psd", scorecard regen, lockfile, "Match brush import cap to shared decoder budget" (2 lines), `xtask/src/layers.rs` fixtures | import-path edits in ~40 test files; crate's own tests leave the repo |
+| 9cebb79f31 … cd0728ee2a, c17e1c4b69 | a: 2026-11-12 00:37:34Z → 06:45:18Z | Dylan M. Taylor | none recorded | `switch-photocraft-psd` = `refs/pull/13414/head`; the merge subject names a local `switch-craft-psd` (7 commits + merge of main) | "Use craft-psd from craft-libs; remove crates/psd", scorecard regen, lockfile, "Match brush import cap to shared decoder budget" (2 lines), `xtask/src/layers.rs` fixtures | import-path edits in ~40 test files; crate's own tests leave the repo |
 | 74330157cb | c: 2026-11-12 02:53:54 −0500 | Dylan M. Taylor (GitHub) | none recorded | squash #13414 | 294 files, +755/−25,930 | — |
 
 ### 4. Verification actually used
@@ -637,7 +637,7 @@ Per errata #7, these trailers belong to the October `security(...)` PRs, not to 
 | sha | a: / c: | PR | what changed | tests touched |
 |---|---|---|---|---|
 | 42d8aad56f | a=c: 2026-10-21 21:44 −0400 | #8417 (merge 9852baa4ba, 10-22 19:27) | `psd/src/slices.rs`: ID→index map replaces O(n·m) find (CWE-407) | inline `trailing_descriptor_applies_outsets_to_first_matching_slice` |
-| 7c78c951e4 … f65832931b (25) | a: 10-21 21:47 → 22:43; c: 10-22 07:10–07:12 | #8420–#8452 (rebase-merged) | CWE-407 ×11, CWE-400 ×9, CWE-770 ×3, CWE-409 ×1, CWE-789 ×1 | e.g. f65832931b (`compose/src/pattern.rs` +11, 256 MiB cap): **none** |
+| 7c78c951e4 … f65832931b (25) | a: 10-21 21:47 → 22:43; c: 10-22 07:10–07:12 −0400 (11:10–11:12 UTC) | #8420–#8452 (rebase-merged) | CWE-407 ×11, CWE-400 ×9, CWE-770 ×3, CWE-409 ×1, CWE-789 ×1 | e.g. f65832931b (`compose/src/pattern.rs` +11, 256 MiB cap): **none** |
 | ef4e13dc2d | a: 10-22 06:22; c: 19:44 | #8505 (merge ee0d23f77a) | `io/src/svg.rs`: bounded inflate, no double decompression (CWE-409) | `crates/io/tests/it/svg.rs` +46: `gzip_compressed_embedded_svg_decompresses_once_with_a_size_cap`, `resolve_data_rejects_nested_gzip_and_handles_text_plain_svgz` |
 
 ### 4. Verification actually used
@@ -656,7 +656,7 @@ Per errata #7, these trailers belong to the October `security(...)` PRs, not to 
   raised an aggregate-memory concern that stayed unaddressed. #8417 shows "No reviews" and "15 of 21
   checks passed" at merge (E09-G-003).
 - **VERIFIED.** Authoring took 59 min for 26 commits (21:44 → 22:43). The 25 were rebase-landed in
-  about 2 min (07:10–07:12 on 10-22). The first and last went through merge commits, about 22 h and 13 h after
+  about 2 min (07:10–07:12 −0400 on 10-22, i.e. 11:10–11:12 UTC, inside a 32-commit `security…` series; errata #32). The first and last went through merge commits, about 22 h and 13 h after
   authoring respectively (9852baa4ba 10-22 19:27, ee0d23f77a 10-22 19:44 −0400; E09-G-001).
 
 ### 6. Aftermath
@@ -721,8 +721,8 @@ passed while the semantics were wrong, and how the gaps were closed.
 ### 5. Review and integration path
 - **VERIFIED.** #10512 and #10538 were reviewed by maintainer FredApps, who also merged main into them
   and added docs (5829929e81, 01ca6a69a9, b15ac4b016). Both were squashed with a `FredApps` co-author.
-  Elapsed: 4 d 12 h and 4 d 10 h. The follow-up #11441 took 3 h 08 min (e7b8c5a72d 10:45Z → 3e27572e7a 13:53Z; E09-H-003 says
-  2 h 08 min, an arithmetic slip), written by the same maintainer with Claude trailers.
+  Elapsed: 4 d 12 h and 4 d 10 h. The follow-up #11441 took 3 h 08 min (e7b8c5a72d 10:45Z → 3e27572e7a 13:53Z; E09-H-003 originally said
+  2 h 08 min, an arithmetic slip, now corrected by errata #38), written by the same maintainer with Claude trailers.
 
 ### 6. Aftermath
 - **VERIFIED.** No further fixes to auto-nest or paste-between-boards after 11-05 14:00 (`git log

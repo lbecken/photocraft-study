@@ -371,7 +371,7 @@ already fixed on `main`, PRs left as drafts, or code that uses functions that do
 | Observation | Evidence | Label |
 |---|---|---|
 | Self-merges with no reviews | #113 (echelon, release PR), #13414 (dylanmtaylor, 24 checks), #1344/#1421 (bflatastic, agent-authored) | OBSERVED (WebFetch), E05 §0.3, E09-B-002 |
-| Merges with "No reviews" and failing checks | #33 "2 of 5 checks passed"; #1421 "4 of 7 checks passed" | OBSERVED (WebFetch), E06 §6, E09-B-002 |
+| Merges with "No reviews" and not all checks reported passed (skipped jobs may count as not passed, errata #14) | #33 "2 of 5 checks passed"; #1421 "4 of 7 checks passed" | OBSERVED (WebFetch), E06 §6, E09-B-002 |
 | Labels as approval | "ready to merge" = "Reviewed: correct, complete and tested; waiting for a maintainer to merge". Applied and then merged by the same maintainer (#11062) | OBSERVED, E06-030/041 |
 | Agent review replacing human approval on a batch | #9386: agent reviewer + attacker claimed; merged by aiongg; no human approval visible | OBSERVED (self-reported method), E06-022 |
 | Explicit approvals | FredApps on #7848, #11641, #8452. Dylan M. Taylor approved #9363 twice | OBSERVED, E06 §6, E05 §0.3, E09-E-002, E09-G-003 |
@@ -400,7 +400,7 @@ was chosen by hand, not at random, so this is not a rate estimate (INFERRED).
 | Product credits models from trailers | "**About ▸ Models** credits the AI models named in `Co-Authored-By` trailers." Snapshot counts: anthropic/claude-opus/5.5 736 commits, etc. | `docs/contributors.md:3-4`; `contributors/contributors.json` (head 9d3ba499ad); E06-006, E08-010 |
 | Credits are regenerated per release | "nothing regenerated contributors/contributors.json before a release" → fixed | daa9a01955 (11-05), E05-064 |
 | House rule 15 | "No agent attribution. A pull request does not say an agent wrote it." | `AGENTS.md:20`, 11-06 |
-| Practice after the rule | `Co-Authored-By: Claude` on 498 of 1,799 main commits since 11-06 (vs 4,145 of 10,418 before); "Generated with Claude Code" still in davidmann4's #13396 (11-12) | E02-016, E06-042 |
+| Practice after the rule | `Co-Authored-By: Claude` on 498 of 1,799 main commits since 11-06 (vs 4,145 of 10,418 before; date-only windows, see errata #28: with an exact cutoff at 7d8648dfcb, 499 of 1,805); "Generated with Claude Code" still in davidmann4's #13396 (11-12) | E02-016, E06-042 |
 
 INFERRED: the rule addresses PR *text*, not commit trailers (E02-011). So the two are compatible
 in the letter but opposed in effect. Everything that discourages disclosure erodes the data the
