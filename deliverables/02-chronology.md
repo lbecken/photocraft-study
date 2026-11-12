@@ -79,7 +79,7 @@ agent-hour estimate citing "8 parallel agents" (`0c2d4bfd1a`). Release pipeline 
 **P2 — Opening: PR flow, contributor influx, rules from incidents (10-04 → 10-07).** HN launch traffic
 (issue #1, 10-01: "found this project from your comment on HN", via WebFetch, E01-025) turns into 64
 authors and 391 squash PRs in four days. User crash reports produce rule 9 "Never panic on input" within a
-day and a 12-PR "never crash" sweep (E07-009). The parity metric is publicly demoted ("We are far from real
+day (link by timing only, INFERRED; §4 C1) and a 12-PR "never crash" sweep, #33 plus 11 per-crate PRs (E07-009). The parity metric is publicly demoted ("We are far from real
 Photoshop parity", `20783fdc70`). Scorecard and pinned corpora arrive (`0f955e6c82`, `968baf639e`). The
 phase ends with the first visible red-main cluster and the discovery that main CI runs were being cancelled
 (`07174271d5`). *Boundary to P3 fixed by:* 10-08 — first `claude/*` branches, first `Claude-Session:`
@@ -87,7 +87,7 @@ trailer, first `Claude` author identity, first CI-only integration trains (E01-0
 
 **P3 — Squash flood and maintainer agent sweeps (10-08 → 10-17).** Peak throughput: 1,838 PRs in 10 days,
 99 % squash-merged (`data/E03_pr_weekly.csv`). A second maintainer (BFlat/bflatastic) runs Claude sessions
-under the `Claude` identity over open issues (`claude/fix-<issue>-*`, 17 branches) and community PRs
+under the `Claude` identity (operator link INFERRED from the committer field and timezone, E06-010) over open issues (`claude/fix-<issue>-*`, 17 branches) and community PRs
 (`claude/integ-batch-1..11`, CI only), 10-08/09 (E06-021/024). Planning is rewritten in "Opus 5.5 agent
 wall-clock hours" with "10–20 concurrent agents" (`939c8f2c70`, 10-10). CI is re-engineered for cost and
 speed: macOS off PRs, nextest, Windows split, shared `craft-common-actions` (E05-003). Mechanical checks
@@ -111,12 +111,13 @@ PRs). Process becomes documentation and standardisation: an approval-receipt int
 10–16 continue, now "epic PRs". *Boundary to P6 fixed by:* v0.20.2 (`7c12f64715`, 11-05 00:49), the
 first tag that is not an ancestor of `main` (E03-015).
 
-**P6 — Governance and release-branch era (11-05 → 11-12).** Releases are cut on `origin/release` by Dylan
-M. Taylor and FredApps instead of the founder (E05-065). The 15 house rules arrive hash-checked from
+**P6 — Governance and release-branch era (11-05 → 11-12).** Releases are cut off `main` by Dylan
+M. Taylor and FredApps instead of the founder: v0.22.0–v0.23.1 sit on `origin/release`, v0.20.2 and v0.21.0 on no
+remote branch (`data/E03_tags_off_main.csv`; E05-065). The 15 house rules arrive hash-checked from
 `craft-contrib` (`7d8648dfcb`, 11-06), including "**No agent attribution.**" and "`main` changes through a
 pull request". The last integration batch lands the same day (`6b0f7762e1`, batch 20); thereafter PRs land
 individually as merge commits through a **manual** "(merge queue)" (`fda05f7b02`, 11-08; 7 on main per
-01c-errata #2). Structured `Model-Effort:` role trailers appear (`b29fdc5a29`, 11-08). The phase ends with
+01c-errata #2). Structured `Model-Effort:` role trailers appear (`b29fdc5a29`, 11-08), used by one contributor only (01c-errata #18). The phase ends with
 an 11-11 merge wave (180 PRs landed on 11-11, 146 of them as merge commits, `data/E03_pr_daily.csv`), an 11-commit "Fix main"
 cluster and a release-day failure answered by a nightly release dry run (`f1b5e7d727`).
 
@@ -125,14 +126,14 @@ cluster and a release-day failure answered by a nightly release dry run (`f1b5e7
 | Dimension | P1 | P2 | P3 | P4 | P5 | P6 |
 |---|---|---|---|---|---|---|
 | Landing | direct push | squash PRs | squash PRs (99 %) | merge-commit batches | batches + merge-commit PRs | merge-commit PRs + manual queue |
-| Who integrates | founder | founder | founder + BFlat (agent sweeps) | aiongg, David Mann | David Mann, aiongg, FredApps | David Mann (356 of 598 merge clicks overall, E03-008) |
+| Who integrates | founder | founder | founder + BFlat (agent sweeps) | aiongg, David Mann | David Mann, aiongg, FredApps | David Mann (356 of 603 web-flow merge-PR commits overall, E03-008) |
 | Planning artefact | private `plan/`, parity checklist | honest parity + scorecard | ROADMAP/gaps in agent-hours | gaps/scorecard + epics | integration protocols | epics + house rules |
 | Rule source | founder-written AGENTS.md | founder, incident-driven | maintainers, one rule per gate | Sonar-derived lints | org CI rule, craftrules retired | org house rules (hash-checked) |
 | Review | none visible | none visible ("No reviews", #33) | none visible (#1344) | CodeRabbit + agent review claimed (#9386) | FredApps approval receipts | CodeRabbit, rare human approval |
 | Release cutter | founder | founder, BFlat | founder, `Claude` identity (0.8.2) | founder | founder | Dylan M. Taylor, FredApps off `release` |
 
-All cells VERIFIED from rows in §2 except the "Review" row, which rests on ≤16 PR pages read via WebFetch
-summaries (E05 §0.3, E06-041) and is therefore low-confidence.
+All cells VERIFIED from rows in §2 except the "Review" row, which rests on ~22 PR pages read via WebFetch
+summaries (E05 §0.3, E06-041, E09; 01c-errata #17) and is therefore low-confidence.
 
 ---
 
@@ -168,7 +169,7 @@ table in E02 §1.
 | 15 | 10-02 20:33 | `0c2d4bfd1a` | `docs/parity-estimate.md`: "8 parallel agents", "wall-clock ≈ agent-hours ÷ 6"; trailer Claude Opus 4.8 | process-rule | Effort planned in agent-hours; only week-1 agent count (self-reported); first Opus 4.8 trailer (E01-014, E08-005) | VERIFIED (count self-reported) |
 | 16 | 10-03 06:56 | `58653e617b` | "625/625 menu items live (100%)" (Opus 4.8 trailer, 01c-errata #4) | product | Breadth metric saturates; later shown to over-claim (E07-013) | VERIFIED |
 | 17 | 10-03 | issue #7 | User report "Dies as soon as i open jpeg image" (wgpu panic) | incident | First user crash report; trigger of never-crash work (E07-009) | VERIFIED via WebFetch summary |
-| 18 | 10-03 11:34 (author, −0400) | `refs/pull/8/head` = `ed6ee8a5ec` | First PR head (Torstein) | people | External contributors arrive (E01-025) | VERIFIED |
+| 18 | 10-03 15:34 (author 11:34 −0400) | `refs/pull/8/head` = `ed6ee8a5ec` | First PR head (Torstein) | people | External contributors arrive (E01-025) | VERIFIED |
 | 19 | 10-03 13:55 | `7750529bbb` | Release 0.1.1 | release | — (E03-015) | VERIFIED |
 
 ### 2.2 P2 — Opening: PRs, contributors, first rules (10-04 → 10-07)
@@ -208,7 +209,7 @@ table in E02 §1.
 | 45 | 10-08 01:22 | `44303db546` (#898) | About ▸ Contributors/**Models** tabs; AGENTS rev 22 "Agents working for a contributor … ask them once" | agent-instruction | AI models credited inside the product from trailers (E08-010) | VERIFIED |
 | 46 | 10-08 13:52 | `bce7e54a63` (#1220) | Only signing/draft jobs use the `release` environment | release | Release permissions narrowed (E05-061) | VERIFIED |
 | 47 | 10-08 14:01 | `e5e3e39752` | v0.5.0 "from 0.4.1" — no 0.4.x tag exists | release | Tags not a complete version record (E01-024) | VERIFIED |
-| 48 | 10-08 16:08–17:10 | `e3932fa7a3`, `f94bb1dc9b` | **First `claude/` branch** (`claude/kind-darwin-btjse2`, fork of callmeBalloch, committer "Claude") and **first `Claude-Session:` trailer** | people | Session-linked agent attribution starts with a contributor, not the founder (E01-029) | VERIFIED |
+| 48 | 10-08 16:08–17:10 | `e3932fa7a3`, `f94bb1dc9b` | **First `claude/` branch** (`claude/kind-darwin-btjse2`, fork of callmeBalloch, committer "Claude") and **first `Claude-Session:` trailer on main** (one on a never-merged ref is earlier: `21318c065f`, DWAA1660, 10-08 14:37) | people | Session-linked agent attribution starts with a contributor, not the founder (E01-029) | VERIFIED |
 | 49 | 10-08 18:12 | PR #1335 (`claude/integ-batch-1`) | **First integration batch**: "CI only (do not merge): integration of community batch 1", opened/closed by bflatastic; 12 merges authored by `Claude` in 1 s; batches 1–11 through 10-09 | process-rule | Agent-assembled CI trains for N community PRs; members then squash-merged one by one (E06-021; operator INFERRED) | VERIFIED (structure; PR via WebFetch) |
 | 50 | 10-08 18:57 | `3bab0d4f52` | **First commit authored by `Claude`** (committer BFlat) | people | Agent as git author; 94 such commits in total (E03-006) | VERIFIED |
 | 51 | 10-08 19:04 | `f9b72468b4` (#779) | AGENTS rev 23 (bfenty): craftrules "is not public — outside contributors should ask a maintainer" (issue #493: "returns 404 to everyone outside the organization") | agent-instruction | First rule change triggered by an outside contributor; private rules collide with open contribution (E02 §1) | VERIFIED |
@@ -231,7 +232,7 @@ table in E02 §1.
 | 68 | 10-11 14:13 | `4165c57f92` (#3495) | `cargo xtask panel-commands`: UI handlers must dispatch command ids; shrink-only allowlist (AGENTS rev 27) | CI-gate | Golden rule 1 converted from prose into a lexical gate (E05-071/072) | VERIFIED |
 | 69 | 10-11 15:50 | `19f427aa00` (#3432) | Workflows refactored onto `storytold/craft-common-actions`, later deliberately `@main` | CI-gate | CI begins moving to org-shared reusable workflows (E05-003, E05-009) | VERIFIED |
 | 70 | 10-12 15:11–16:57 | `2db6b7d8f9`, `d43db3e153` | Release 0.8.1 rebuilt after shared-workflow failure; 0.8.2 (author `Claude`) after wasm "over … 24 MiB gate"; no v0.8.0/0.8.1 tags | release | Release-only breakage; an agent identity authors a release commit (E05-062) | VERIFIED |
-| 71 | 10-12 23:23 | `61c52c08db` (#4463) | First `GPT-6` co-author trailer | people | Non-Anthropic tools stay < 4 % of attributed commits (E03-004) | VERIFIED |
+| 71 | 10-12 23:23 | `61c52c08db` (#4463) | First plain `GPT-6` co-author string; a `GPT-6 (Codex)` co-author line is earlier (`7fd610741b`, 10-09 02:02, Streetblock) | people | Non-Anthropic tools stay < 4 % of attributed commits (E03-004) | VERIFIED |
 | 72 | 10-13 03:13 | `70e182b08f` (#4467) | panic_hunt "printed a blank page on the default printer" → `PHOTOCRAFT_NO_PRINT` | incident | Real-world side effect of an agent-safety fuzzer, guarded in CI (E05-074) | VERIFIED |
 | 73 | 10-13 | E06-011 | Peak of 15 distinct `Claude-Session` ids with commits on one day (all refs; 10 on main) | people | Upper visible bound on same-day sessions; 5.8 % of AI commits carry an id (07 §B.6) | VERIFIED |
 | 74 | 10-14 14:16 | `c699e3cda6` | v0.9.0 | release | — | VERIFIED |
@@ -256,7 +257,7 @@ table in E02 §1.
 | 88 | 10-21 | `data/E03_pr_daily.csv` | **Squash → merge-commit switch**: first day with more merge-commit (11) than squash (1) landings; weekly squash share 98.7 % (W42) → 80.1 % (W43) → 41.4 % (W44) → 19.9 % (W46) | process-rule | Batch PRs ask for "Create a merge commit" so member PRs auto-close (#9386); commit counts inflate 3–4× from here (E03-002, E06-012/022) | VERIFIED (switch date); reason INFERRED from #9386 text |
 | 89 | 10-21 19:47–21:08 | `8e518d8169`, `5933793982` | SonarCloud scan via shared workflow; same day fixes S7630 "prevent script injection in fuzz workflow"; Sonar main runs uncancelled from 10-23 (`5521968828`) | CI-gate | Static-analysis campaign starts; findings become rule-ID branches (E05-031, E07-011) | VERIFIED |
 | 90 | 10-22 00:12 | `f4bc90b93f` (#8368) | Pin actions to full SHA (S7637) | CI-gate | Later jobs re-introduce tag pins (E05-009) | VERIFIED |
-| 91 | 10-22 07:10–07:12 | `c5a6afcf68` … `c3c6c63074` | ~30 direct-pushed `security(...)` commits by Dylan M. Taylor; October security PRs carry `Finding: <uuid> (CWE-…)` trailers (01c-errata #7) | campaign | Security hardening as a one-maintainer campaign with opaque finding IDs; direct pushes predate house rule 8 (E06-026, E07-010) | VERIFIED |
+| 91 | 10-22 11:10–11:12 | `c5a6afcf68` … `c3c6c63074` | 32 direct-pushed first-parent `security(...)` commits by Dylan M. Taylor (07:10 is the −0400 author time); 25 of them carry `Finding: <uuid> (CWE-…)` trailers, as do the October security PRs (01c-errata #7) | campaign | Security hardening as a one-maintainer campaign with opaque finding IDs; direct pushes predate house rule 8 (E06-026, E07-010) | VERIFIED |
 | 92 | 10-22 17:54 | `6649b78526` (#8234) | AGENTS rev 32: golden rule 10 "Time goes through chrono" — "Follow-up to storytold/cadcraft#1785" | agent-instruction | Rule imported from an incident in a *sibling* repo (E02 §1) | VERIFIED |
 | 93 | 10-23 13:59 | `ed1b6f4314` | FreeBSD and Windows ARM64 checks run on pushes to `release` | CI-gate | Release branch becomes a gate surface (E05-060) | VERIFIED |
 | 94 | 10-23 18:32 | `9acf9a0cf9` | Linux gate runs through the shared `gate.yml`, executing `cargo xtask ci` | CI-gate | Local gate and CI gate become one program (E05-010) | VERIFIED |
@@ -276,7 +277,7 @@ table in E02 §1.
 | # | Date (UTC) | Ref | Event | Category | Why it matters for method | Label |
 |---|---|---|---|---|---|---|
 | 105 | 10-28 → 11-01 | `b8c3f3aa8e`, `8a87a457ab`, `2df9f80770` | v0.17.0 (10-28), v0.18.0 (10-31), v0.19.0 (11-01): 65 → 35 → 18 first-parent commits between tags | release | Releases keep cadence while landed PRs fall (E03-015, 07 §B.4) | VERIFIED |
-| 106 | 10-29 02:39 | `46c1347951` | FredApps: "108 open, non-draft, unmerged PRs, each with the latest FredApps review APPROVED at its exact current head"; "A zero-match run is BLOCKED, never PASSED" | process-rule | Only documented approval-receipt protocol; fork CI runs as evidence (E05-022) | VERIFIED |
+| 106 | 10-29 02:39–02:43 | `46c1347951`, `4a51aa83f6` | FredApps: "108 open, non-draft, unmerged PRs, each with the latest FredApps review APPROVED at its exact current head" (`46c1347951`); "A zero-match run is BLOCKED, never PASSED" (`4a51aa83f6:docs/integration-testing/per-pr-regressions.md`) | process-rule | Only documented approval-receipt protocol; fork CI runs as evidence (E05-022) | VERIFIED |
 | 107 | 10-29 18:57 | `8c8c4b95f5` | nextest `fail-fast = false` "so a single run exposes remaining regressions" | CI-gate | Reverses 10-15 choice; batch integration needs all failures per run (E05-054) | VERIFIED |
 | 108 | 10-30 02:22 | `0379569d00` (#10228) | AGENTS rev 34: "## CI workflows" — call craft-common-actions at `@main`; no CI changes in feature/fix PRs (E02 gives 10-29 = author date) | agent-instruction | CI ownership moves to the org; feature-driven CI growth stopped by rule, not by check (E05-012) | VERIFIED |
 | 109 | 10-30 12:06 | `b1cfff9d30` (#10204) | FredApps `integration/approved-bugfix-parity-2026-10-29` merged by Dylan M. Taylor | process-rule | Second batch style (approval receipts) alongside davidmann4's (E06-022) | VERIFIED |
@@ -292,18 +293,18 @@ table in E02 §1.
 |---|---|---|---|---|---|---|
 | 115 | 11-05 00:49 | `7c12f64715` | **Release-branch switch**: v0.20.2 (Dylan M. Taylor) is the first tag not reachable from `main`; v0.22.0–v0.23.1 on `origin/release` | release | Release line decoupled from a fast-moving main; founder no longer cuts releases (E03-015, E05-065) | VERIFIED |
 | 116 | 11-05 16:23 | `daa9a01955` (#11426) | Contributor credits regenerated for every release ("still showed a snapshot from 2026-10-10") | release | Model/people credits become a release step (E05-064) | VERIFIED |
-| 117 | 11-06 06:07 | `653a177e6f` | Translation row: "@tronicum with Claude Code, AI-assisted (machine-translated); not yet reviewed by a native speaker" | external-statement | Only prose "built with Claude Code" disclosure in the repo (E08-011) | VERIFIED |
+| 117 | 11-06 06:07 | `653a177e6f` | Translation row: "@tronicum with Claude Code, AI-assisted (machine-translated); not yet reviewed by a native speaker" | external-statement | One of two prose "with Claude Code" disclosures found (the other: Bosnian row, `a331258dff`, 11-05); both moved out with the catalogs on 11-08 (E08-011 says "only"; corrected here) | VERIFIED |
 | 118 | 11-06 10:50 | `7d8648dfcb` (#11632) | AGENTS rev 36: **house rules** (15) + Rust block copied from `craft-contrib@dde09ea31e` (external repo), sha256-headed, checked by `house-rules.yml`; includes rules 1 "A person is accountable", 2 "Check, then claim", 7 "Report only what ran", 8 "`main` changes through a pull request", 15 "**No agent attribution.** A pull request does not say an agent wrote it." | governance | Rules become org-wide, versioned and integrity-checked; agent failure modes from RFC-0006 encoded as prose (E02-012, E08-028) | VERIFIED |
 | 119 | 11-06 17:44 | `2ff8f419cb` (#7975) | GPU tests on lavapipe; fail if any test prints a skip — "57 GPU checks … returned early and passed without comparing anything" | CI-gate | Tests must prove they ran (E05-024, E07-018) | VERIFIED |
 | 120 | 11-06 19:32 | `efb7ebd0c0` | v0.21.0 by FredApps (off main) | release | Second non-founder release cutter (E05-065) | VERIFIED |
 | 121 | 11-06 21:49 | `6b0f7762e1` (#11671) | Batch-20 "7 i18n PRs" — **last integration batch** | process-rule | Batch era ends the day the house rules arrive (connection INFERRED from timing only) | VERIFIED (date) |
 | 122 | 11-07 → 11-12 | `data/E03_pr_daily.csv` | 87, 80, 36, 56, 146, 15 merge-commit PR landings per day (11-07 … 11-12) | process-rule | PRs land individually as merge commits at batch-era volume, without a merge queue | VERIFIED |
-| 123 | 11-08 01:05 | `b29fdc5a29` (#11678) | **First `Model-Effort:` trailer** (e.g. "Opus 5.5 drove; Opus 5.5 briefed; Sonnet 5.5 wrote at medium"); 25 commits to 11-11 | people | Driver/briefer/writer agent roles recorded in metadata, never documented (E03-005) | VERIFIED |
+| 123 | 11-08 01:05 | `b29fdc5a29` (#11678) | **First `Model-Effort:` trailer** (e.g. "Opus 5.5 drove; Opus 5.5 briefed; Sonnet 5.5 wrote at medium"); 27 commits (25 non-merge) to 11-11, all by Trevor Brown | people | Driver/briefer/writer agent roles recorded in metadata by one contributor, never documented (E03-005, 01c-errata #18) | VERIFIED |
 | 124 | 11-08 02:45 | `fda05f7b02` | First "(merge queue)" commit (David Mann): merge main into the PR, regenerate, re-run gate; 7 on main (01c-errata #2) | process-rule | Manual substitute for a merge queue (E07-003) | VERIFIED |
 | 125 | 11-08 16:16 | `acc88b3203` | i18n catalogs deleted from the repo (−145,893) in favour of craft-i18n | product | Hot-spot catalogs (16 of the top-40 files) leave the repo (E03 §12) | VERIFIED |
 | 126 | 11-09 11:33 | `5000240c6e` | v0.22.0 on `origin/release`, GPG-signed by dylanmtaylor | release | — (E08-030, WebFetch) | VERIFIED |
 | 127 | 11-10 ~ | HN 50434834 | echelon: "We're leaning in with 100% AI software factory and no human review." (does not name PhotoCraft) | external-statement | Conflicts with house rule 1; scope ambiguous (E08-016) | VERIFIED (statement) |
-| 128 | 11-11 00:36–08:40 | `47d3dcde33`, `06650357d8`, `a3c2f2e299` | **11-11 "Fix main" cluster** (11 commits): complexity 31 > 30; "#9781 and #10983 each defined … merged minutes apart, so main stopped compiling (E0428)"; "clippy after the 11-11 merges" | incident | Merge skew × newly denied lint after the merge wave (E07-005, F9 in 07) | VERIFIED |
+| 128 | 11-11 00:36–08:40 | `47d3dcde33`, `06650357d8`, `a3c2f2e299` | **11-11 "Fix main" cluster** (11 commits incl. cherry-picked duplicates and one "WIP"): complexity 31 > 30; "#9781 and #10983 each defined … merged minutes apart, so main stopped compiling (E0428)"; "clippy after the 11-11 merges" | incident | Merge skew × newly denied lint after the merge wave (E07-005, F9 in 07) | VERIFIED |
 | 129 | 11-11 15:28–15:41 | `0cc411241b`, `0d9a9a5a70` (#13206) | AGENTS revs 37–38: before/after screenshots go in the PR description, never the repo; exception added after "CodeRabbit on #13206" | agent-instruction | Last AGENTS.md change; a bot review comment edits an agent rule (E02 §1) | VERIFIED |
 | 130 | 11-11 17:12–22:04 | `e119384a83` (#13255), `23c2b85a4f`, `f1b5e7d727` (#13374) | Harden-Runner egress audit on every job; StepSecurity actions; **nightly release dry run** "instead of on release day, as it did on 11 Nov 2026" | CI-gate | Release-only breakage moved forward by a scheduled gate (E05-063) | VERIFIED |
 | 131 | 11-11 19:53 → 11-12 02:55 | `9963efcb2f`, `8a909b2673`, `eee667f1d9`, `45066c4829` | v0.23.0 on `release` then synced to main (#13345); Flatpak fix; v0.23.1 "Merge tested main for v0.23.1" | release | Bump-on-release-then-sync reverses the documented main-first flow (INFERRED, E05-065) | VERIFIED |
@@ -344,8 +345,8 @@ on 26 commits), `E03_growth.csv` (LOC and `#[test]` at the last first-parent com
 row shows day-1 → pin). E05-019 counts 18,111 `#[test]` at the pin with a different grep; 18,014 is used here
 for consistency (07 §B.4).
 
-**The squash/merge caveat (stated once, applies to every count above).** Until W42, 98.7–99.4 % of PRs were
-squash-merged, so one PR = one first-parent commit and its internal commits vanish. From W43, merge-commit
+**The squash/merge caveat (stated once, applies to every count above).** Until W42, 95.7–99.4 % of PRs were
+squash-merged (W40 95.7 %, W41 99.4 %, W42 98.7 %), so one PR = one first-parent commit and its internal commits vanish. From W43, merge-commit
 PRs import whole branches including "merge main into branch" syncs (3,463 of 4,067 merges on main are such
 side merges), and one integration batch lands 9–48 member PRs under one PR number. Hence: commits
 **overcount** work from W43, "PRs landed" **undercounts** it in W43–W45 (908 PR heads reached main only via
@@ -394,7 +395,7 @@ functions; no process response followed by the pin (E07-005; 07 F9). INFERRED.
 | Discord and private chat | Intake reaches GitHub only via the ticket-craft relay; decisions taken in chat leave no trace | E07-021/022, E08 S08 press-kit note |
 | Unattributed commits (4,199 non-merge, 50.4 %) | AI share per phase is a lower bound; the drop after 11-06 cannot be separated from contributor mix or landing style (07 §B.6) | E03 C7, E03-003 |
 | Squash merges | Who pressed merge on 2,690 squash PRs, and PR internal history, are lost | E03 §4 |
-| PR/issue pages | Review, approval and open/close times rest on ≤16 WebFetch summaries | E00-004, E05 §0.3, E06-041 |
+| PR/issue pages | Review, approval and open/close times rest on ~22 WebFetch summaries (01c-errata #17) | E00-004, E05 §0.3, E06-041 |
 | Agent counts and orchestration | "8 parallel agents" (10-02) and "10–20 concurrent agents" (10-10) are self-reported; session ids cover 5.8 % of AI commits | E08-003/005, 07 §B.6 |
 | Lightweight tags | Tag dates are commit dates, not tagging/publish dates; who published each draft release is unknown | E03-015, E05-065 |
 | Author vs committer dates | E02/E05 sometimes date rows by author date; this file uses committer UTC, so a few events differ by ≤3 days (rows 87, 108) | method note |
@@ -407,7 +408,7 @@ functions; no process response followed by the pin (E07-005; 07 F9). INFERRED.
   metrics (script-generated CSVs), the squash → merge-commit switch date (10-21, daily CSV), the
   release-branch switch (v0.20.2, 11-05) and the AGENTS.md revision sequence.
 - **Weakest:** phase boundaries (my interpretation; P4/P5 at 10-29 is the softest — W44 is a low-activity
-  week and could as well be the end of P4); the "Review" row of §1.3 (≤16 PR pages, WebFetch summaries);
+  week and could as well be the end of P4); the "Review" row of §1.3 (~22 PR pages, WebFetch summaries);
   all causal links labelled INFERRED in §4; HN dates marked "~" (from E08's Algolia reads, day precision).
 - **Not checkable:** private `plan/`, `log/`, craftrules, Discord; branch-protection settings; whether
   `claude/integ-batch-*` and `integration-batch-7..20` are one pipeline (E06-022).
@@ -421,6 +422,8 @@ functions; no process response followed by the pin (E07-005; 07 F9). INFERRED.
   - E03 dates the first `Model-Effort:` commit `b29fdc5a29` 11-07; committer UTC is 11-08 01:05.
   - PR total 3,288 in §1.1 vs 3,285 distinct numbers in E03 §5: the daily CSV counts landings, and 3
     squash numbers land twice.
+  - Independent review (REVIEW-02-03-05.md) corrected rows 18, 48, 71, 91, 106, 117, 123 (UTC times, "first"
+    claims, counts) and applied errata #17 and #18; see that file for the checks.
   - Applied 01c-errata items 1, 2, 4, 6, 7 and 9 (session counts, merge-queue count, Opus 4.8 trailers,
     fix branches vs integ batches, `Finding:` trailers, unverified `0cc4…` sha).
 

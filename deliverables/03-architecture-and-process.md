@@ -51,8 +51,8 @@ Dates are 2026 unless stated. "Day 1" = 2026-09-30, the date of `16941f7198` ("o
    scanner (4165c57f92). Rules with no check (licence allowlist, "no agent attribution", claim-before-coding)
    are the ones practice visibly diverges from (E02 §4, E05-071). VERIFIED.
 4. **The process is a high-throughput, weak-review pipeline held together by gates and integrators.**
-   ~3,285 PRs landed in 44 days (E03 §5); on 10 sampled PR pages, human approval appears once (#7848)
-   and "No reviews" is common (E06-040/041, E05-035). From late October most community PRs reached main
+   ~3,285 PRs landed in 44 days (E03 §5); on ~22 hand-picked PR pages, explicit human approval appears on 4
+   (#7848, #11641, #8452, #9363; 01c-errata #17) and "No reviews" is common (E06-040/041, E05-035, E09). From late October most community PRs reached main
    through maintainer-run integration batches; one batch PR states review was done by "two independent
    agents per PR (a reviewer and an attacker)" (#9386, via WebFetch summary). VERIFIED (sample) / INFERRED
    (generalisation).
@@ -304,7 +304,7 @@ without a GUI: from tests, the CLI and MCP. The GUI is one client of the engine.
 | `panic_hunt` | no command panics on hostile params | test bf111b524e (10-04); in CI only from 45afd2e9d7 (10-17) | yes, gate | yes, rule 9 (`HEAD:AGENTS.md:125`) | E04-012, E05-071 |
 | Workspace lints + `clippy.toml` | `unsafe_code = "forbid"`, unwrap/expect/panic only in tests, `cognitive-complexity-threshold = 30`, ban `egui::ComboBox` | clippy.toml 50a27e6c74 (10-04, #33); deny lints 604da9d06b (10-27) | yes (`-D warnings`) | yes, "Never crash" section | E04-032, E05-032 |
 | Compile-time completeness | `.pcraft` writer destructures structs so a new field fails to compile | 536a7346fb / ae92ac20bf | yes (compile) | yes, AGENTS.md §8 | `HEAD:crates/format/src/convert.rs:236`; E04-033 |
-| Git-source policy | git deps only from `github.com/storytold/`; no `.cargo` source replacement | 6401cfdbe1 (10-17, aiongg) | yes, `platforms` job | indirectly (craft-libs rule `HEAD:AGENTS.md:56`) | `HEAD:.github/workflows/ci.yml:93-127`; E04-034 |
+| Git-source policy | git deps only from `github.com/storytold/`; no `.cargo` source replacement | 6401cfdbe1 (10-20 UTC; author date 10-17, aiongg) | yes, `platforms` job | indirectly (craft-libs rule `HEAD:AGENTS.md:56`) | `HEAD:.github/workflows/ci.yml:93-127`; E04-034 |
 | House-rules hash check | AGENTS.md house-rules blocks equal the craft-contrib source (sha256 in header) | 7d8648dfcb (11-06, FredApps) | on AGENTS.md/CLAUDE.md change | the blocks themselves | `HEAD:.github/workflows/house-rules.yml`; E02-012 (hashes recomputed and match). Shared workflow logic not inspected |
 | Scorecard freshness | generated `docs/scorecard.md` matches its TOML sources | 0f955e6c82 (10-05) | yes, gate (`--check`) | yes, AGENTS.md §4.1 | E04-050 |
 | wasm check | L0–L6 compile to wasm32 | day 1 | yes, gate | yes, rule 7 | E05 §0.2 |
@@ -325,7 +325,7 @@ Verdict for the check family:
 | Artefact | Shape | Since | Gate? | Agent-facing text | Source |
 |---|---|---|---|---|---|
 | `scorecard/*.toml` → `docs/scorecard.md` | 8 TOML files, 166 items (113 done / 46 partial / 7 missing), each with `id`, `target`, `status`, `issue`, `note`; header "Statuses must be true on main" | 0f955e6c82 (10-05, #239/#221) | `scorecard --check` in gate | "Check `docs/scorecard.md` before picking work … Its numbers are measured; prefer them to estimates." (`HEAD:AGENTS.md:136-138`) | E04-050 |
-| `perf/budgets.toml` | 88 scenarios, **0** with `enforce = true`, 5 `not_measurable`; "never invent a number for them" | 0f955e6c82 | `perf --quick` only; nightly cannot fail (baseline from another machine class) | "Before you finish": `perf --quick` for hot paths | E04-051, E05-028 |
+| `perf/budgets.toml` | 102 rows (88 scenarios + 14 benches), **0** with `enforce = true` (01c-errata #11), 5 `not_measurable`; "never invent a number for them" | 0f955e6c82 | no PR gate: `perf --quick` runs only on manual dispatch / nightly (01c-errata #12); nightly cannot fail (baseline from another machine class) | "Before you finish": `perf --quick` for hot paths | E04-051, E05-028 |
 | `docs/parity-checklist.md` + `FLOOR` | generated from `menu_catalog.rs` (reference-app menu tree) vs live registry; "664 of 664 menu items live" | `536a7346fb` as `docs/parity.md` (10-01); renamed 939c8f2c70 (10-10) | FLOOR test | "When parity rises, raise `FLOOR` … (never lower it)" (`HEAD:AGENTS.md:143`, stale path) | E01-015, E04-042 |
 | `docs/gaps.md` | ranked shortfalls vs the target app with agent-hour estimates | 939c8f2c70 (10-10) | no | "This is the work list agents pick from: take the highest-ranked entry that nobody is working on" (`HEAD:docs/gaps.md:6-7`); "Hours are Opus 5.5 agent-hours, one agent working sequentially … **Human** marks what an agent can't finish alone." (`HEAD:docs/gaps.md:15-16`) | E02-007, E02-008 |
 
@@ -333,7 +333,7 @@ Verdict for the check family:
 |---|---|---|
 | **Yes, most explicitly of all mechanisms** (quotes above: "the work list agents pick from"; "prefer them to estimates"). | Yes: `docs/scorecard.md` is the 3rd most-touched file on main (443 non-merge commits, E03-016); a stale row "costs someone a session: they sit down to write a test that is already there" (984bc5c715; E07-016). But fewer than 14% of code commits in any period update a tracker in the same commit, falling to 4.6% in November (E06-031/032). | — |
 
-Perf budgets are the weak member: documented as a goal list, never enforced (0 of 88), so "documented
+Perf budgets are the weak member: documented as a goal list, never enforced (0 of 102 rows), so "documented
 intent ≠ active gate". VERIFIED counts / INFERRED effect (E05-028).
 
 ## A.4 Planned on day 1 but never built, or abandoned
@@ -488,8 +488,8 @@ hash-checked rules; no tool-specific configs, no permission lists, no orchestrat
   (lines 1–52); then mission, orientation table (14 docs), workspace map + layering, "Never crash
   (outranks feature work)", golden rules 1–9, §4 Picking work, §5 Before you finish (10 gate commands,
   mostly conditional), §6 Parallel agents, §7 Tracking, §8 Native format, credits, CI workflows.
-- **Evolution:** 38 revisions 09-30 → 11-11; 23 by Brandon Thomas (revs 1–22 except one); 21 carry a
-  Claude co-author trailer, 1 Copilot, 15 none (unknown). Most edits ride along with the PR that builds
+- **Evolution:** 38 revisions 09-30 → 11-11; 22 by Brandon Thomas (revs 1–19, 21, 22, 26); 19 carry a
+  Claude co-author trailer, 1 Copilot, 18 none (unknown) — recounted in the clone; E02 §1/E02-026 give 23 and 21. Most edits ride along with the PR that builds
   the gate or crate they describe; the finish list grew from 4 to 10 commands, each added with its
   tool (E02-002, E02-005, E02-026). Identifiable triggers: issue #493, storytold/cadcraft#1785, a
   CodeRabbit comment (0d9a9a5a70), and org standards (E02 §1).
@@ -512,7 +512,7 @@ hash-checked rules; no tool-specific configs, no permission lists, no orchestrat
   grind work to Codex … and agy/Gemini … Claude keeps architecture, implementation and acceptance."
   (`5aed6c2a25:CLAUDE.md:63-68`; E02-022). Founder statement: "We're using vanilla Claude Code"
   (HN 50029182, E08-015). [self-reported]
-- **Role trailers:** 25 non-merge commits (11-07 → 11-11) carry `Model-Effort:` lines such as "Opus 5.5
+- **Role trailers:** 25 non-merge commits (11-08 → 11-11 UTC), all by one contributor, Trevor Brown (01c-errata #18), carry `Model-Effort:` lines such as "Opus 5.5
   drove; Opus 5.5 briefed; Sonnet 5.5 wrote at medium" — a driver/briefer/writer split recorded in
   metadata, not documented anywhere (E03-005, E02 §5 grep: 0 doc hits). [observed]
 
@@ -548,7 +548,7 @@ E02-027/028). [observed, not rule]
 | Commits touching tests (heuristic) | 77.5% overall; 80.8% of AI-attributed vs 74.4% of unattributed | E03 §7 |
 | Explicit AI attribution | 4,130 / 8,329 non-merge (49.6%); 84.7% in W40 → 22.9% in W46 | E03-003 |
 | `Claude-Session:` trailers | 238 non-merge commits / 274 incl. merges on main; 62 sessions on main, 129 across all refs, median 1 commit per session on main; up to 15 distinct sessions with commits on one day (10-13) | E03 §3, E06-011; recount in this deliverable |
-| Early checkpoint commits | "also contains compiling in-progress work from the parallel panels, type styles, File menu, photo, filters, UI-parity and fidelity agents" (aa87012aab, 10-01) | E01-013 |
+| Early checkpoint commits | "also contains compiling in-progress work from the parallel panels, type styles, File menu, photo, filters, UI-parity and fidelity agents" (aa87012aab, 10-02 UTC) | E01-013 |
 | Fan-out | 12 `pr/never-crash-*` branches, one commit each, squash-merged in ~15 min (10-04) | E06-027, E07-009 |
 | Bursts in one identity | David Mann: 377 consecutive pairs ≤ 5 min apart, 183 in disjoint areas — consistent with parallel sessions **or** batch rebasing | E03-014 |
 
@@ -567,21 +567,22 @@ frequency is **unknown**.
 | Documented accountability | "**A person is accountable.** Whoever runs an agent answers for what it opens and for its review comments." (`HEAD:AGENTS.md:6`); "Review the diff before opening a pull request." (`:10`); "Report only what ran." (`:12`) — all since 11-06 | rule |
 | Who may merge / approvals required | **not documented**; no CODEOWNERS on any ref; branch protection not visible | unknown (E02 §6) |
 | Bot review | CodeRabbit on 5/5 sampled PRs from 10-19 on, 0/5 early; config only skips Dependabot (`HEAD:.coderabbit.yaml:2-6`); comments include "Prompt for AI Agents" blocks; findings did not block merge (#12237 merged with a failed pre-merge check). SonarCloud from 10-21; skipped on fork PRs | observed (WebFetch) — E05-030, E06-040, E05-029 |
-| Bot → code | 311 commits say "CodeRabbit review"; CodeRabbit comment changed an AGENTS.md rule (0d9a9a5a70) | observed — E07 §10, E02-015 |
-| Human approval | 1 of 10 PRs in E06 sample (#7848, FredApps) and 1 of 6 in E05 sample (#11641, FredApps); one change request (#11059, tanish2k09); "ready to merge" then merge by same maintainer (#11062) | observed (small sample) |
+| Bot → code | 255 commits on main contain "CodeRabbit review" (`git log 74330157cb -i --grep='CodeRabbit review'`; E07 §10's 311 does not reproduce); CodeRabbit comment changed an AGENTS.md rule (0d9a9a5a70) | observed — E07 §10, E02-015 |
+| Human approval | 1 of 10 PRs in E06 sample (#7848, FredApps), 1 of 6 in E05 sample (#11641, FredApps) and 2 in E09's pages (#8452 FredApps, #9363 dylanmtaylor): 4 of ~22 (01c-errata #17); one change request (#11059, tanish2k09); "ready to merge" then merge by same maintainer (#11062) | observed (small sample) |
 | "No reviews" merges | #33, #1261, #1344, #2792 (early); self-merges #113 (echelon, release) and #13414 (dylanmtaylor, 24 checks, Sonar 95.8% new-code coverage) | observed |
 | Agent review in a batch | PR #9386 (integration-batch-8): review by "two independent agents per PR (a reviewer and an attacker)", "every claim checked against code, spec or a run", "each PR's code reverted on the branch, its named tests fail"; no human approval visible; merged by aiongg | self-reported in PR text, via WebFetch summary (E06-022) |
 | Fork-integration approval protocol | FredApps' 108-PR integration: "each with the latest FredApps review APPROVED at its exact current head"; "A zero-match run is BLOCKED, never PASSED." | documented in `docs/integration-testing/` (E05-022) |
 | Automated review from a human account | eliets2 "first-pass review", described as automated, on #12237 | observed (WebFetch) — E05-035 |
 | Founder rhetoric | "We're leaning in with 100% AI software factory and no human review." — does not name PhotoCraft | self-reported, scope ambiguous (E08-016) |
 
-INFERRED: required status checks gate merges (check counts 19–24 on sampled PRs), but required human
-approvals are either not configured or bypassed (E05-035). The sample (≤16 PR pages) cannot settle the
-rate.
+Unresolved: whether status checks are required for merge — sampled merges show 2 of 5 and 4 of 7 checks
+passed (#33, #1421), so do not assume they are (01c-errata #14). Required human approvals are either not
+configured or bypassed (E05-035, INFERRED). The sample (~22 PR pages) cannot settle the rate.
 
 ## B.6 Integration
 
-Landing kinds on first-parent main (E06-012, VERIFIED, `fp.py`):
+Landing kinds on first-parent main (E06-012, VERIFIED, `fp.py`; E06's date basis — a reviewer recount by
+author or committer date reproduces the first two and last two rows but splits 10-05..10-15 slightly differently):
 
 | Period (commit date) | direct push | squash `(#N)` | merge-PR commit |
 |---|---|---|---|
@@ -594,8 +595,8 @@ Landing kinds on first-parent main (E06-012, VERIFIED, `fp.py`):
 
 Three phases, all **observed**:
 1. **Direct pushes** (founder, 09-30 → 10-03), then a switch to PRs on 10-04 (first squash `b7cac05f69`,
-   first merge commit `9905db34ff`; E01-025/026). Direct pushes continued for releases and a ~30-commit
-   `security(...)` series on 10-22 by Dylan M. Taylor, before house rule 8 "`main` changes through a pull
+   first merge commit `9905db34ff`; E01-025/026). Direct pushes continued for releases and a 32-commit
+   `security(...)` series on 10-22 (11:10–11:12 UTC) by Dylan M. Taylor, before house rule 8 "`main` changes through a pull
    request. … There is no exception." (11-06; E06-026).
 2. **Squash era** (10-04 → ~10-20): PR lifetimes median 2.8 h for PRs landed 09-30..10-09; peak 49
    landings in 10 minutes (E06-013). The project's own figure: "1,004 merged PRs in 10.5 days. Median PR
@@ -604,14 +605,14 @@ Three phases, all **observed**:
    uncancellable (E05-004).
 3. **Merge-commit era** (late Oct → Nov): 576 of 598 merge-PR commits come from forks; median lifetime
    52 h for merge-commit PRs, 68 h for PRs landed in November (E06-013/014). Merge clicks concentrate:
-   David Mann 356 of 598 (E03-008).
+   David Mann 356 of 603 web-flow merge-PR commits (598 first-parent + 5 side; E03-008).
 
 **Two kinds of integration batch** (VERIFIED structure, E06-021/022, E07-002):
 
 | | `claude/integ-batch-1..11` | maintainer fork batches (`davidmann4/integration-batch-7..20`, aiongg `integration-*`, FredApps `integration/*`) |
 |---|---|---|
 | When | 10-08 → 10-09 | 10-18 → 11-06 |
-| Author | `Claude` identity; PRs opened by bflatastic; "🤖 Generated with Claude Code" + session link (#1335) | David Mann (98% Claude-trailered), aiongg (0 trailers), FredApps |
+| Author | `Claude` identity; PRs opened by bflatastic; "🤖 Generated with Claude Code" + session link (#1335) | David Mann (98% Claude-trailered), aiongg (0 trailers, yet 13 `Codex`-identity commits landed via his #8577; 01c-errata #16), FredApps |
 | Purpose | "CI only (do not merge)": one CI run for N community PRs | stage N PRs, resolve conflicts, fix up, test, land as one merge commit ("Please merge with 'Create a merge commit'" — #9386) |
 | How members landed | each member squash-merged separately | via the batch merge commit; 37–48 PRs per batch at peak |
 | Reverts | none observed | pre-merge reverts inside the batch: five on 10-25 in batch-8 (e.g. 0134d2dc70, bb39b4a8dd) with no stated reason; **0** reverts on main's first-parent line overall (E07-001) |
@@ -636,7 +637,7 @@ when batches carried most merges. The dominant cause is semantic merge skew betw
 | Pipeline | `release.yml` on day 2 (`d98bee4c94`, 10-01): every push to `release` builds signed installers; delegates to `craft-common-actions/release.yml@main`; 15 signing secrets | observed | E01-024, E05-060 |
 | Cadence | 27 lightweight tags, v0.1.0 (10-01) → v0.23.1 (11-12); median inter-tag gap 1.6 days | observed | E03-015 |
 | Who | v0.1.0..v0.20.1 Brandon Thomas (one by BFlat, one by the `Claude` identity: d43db3e153 "Release 0.8.2"); later Dylan M. Taylor and FredApps | observed | E06-005 |
-| Release branch | from v0.20.2 (11-05) tags are off main, on `origin/release`; Nov shows bump-on-release then sync to main (8a909b2673) | observed / INFERRED | E05-065 |
+| Release branch | from v0.20.2 (11-05) tags are off main; v0.22.0–v0.23.1 are on `origin/release`, v0.20.2 and v0.21.0 on no remote branch (`data/E03_tags_off_main.csv`); Nov shows bump-on-release then sync to main (8a909b2673) | observed / INFERRED | E05-065 |
 | Human gate | "creates or updates a **draft** GitHub Release … Nobody sees a draft until a maintainer publishes it." (`HEAD:docs/releasing.md:3-6`); house rule 9 lists releases under "Stop and ask" | rule | E05-060, E02-009 |
 | Agent involvement | 26 of 29 first-parent version-bump commits carry a Claude trailer | observed | E05-065 |
 | Nightly dry run | added f1b5e7d727 (11-11) after release-day breakage "as it did on 11 Nov 2026"; builds all but macOS, signs nothing | observed | E05-063 |
@@ -646,7 +647,7 @@ when batches carried most merges. The dominant cause is semantic merge skew betw
 
 | Incident (date) | Response | Kind | Source |
 |---|---|---|---|
-| Crash reports (#7) and panicking MCP commands (#16/#17), 10-03 | AGENTS.md rule 9 "Never panic on input" (ed0b99964d, 00:10 10-04) → `panic_hunt` (bf111b524e) → "Never crash" section + forbid unsafe (50a27e6c74) → 12-PR sweep | rule + check + campaign (trigger chain INFERRED from timing) | E07-009 |
+| Crash reports (#7) and panicking MCP commands (#16/#17), 10-03 | AGENTS.md rule 9 "Never panic on input" (ed0b99964d, 10-04 04:10 UTC) → `panic_hunt` (bf111b524e) → "Never crash" section + forbid unsafe (50a27e6c74) → 12-PR sweep | rule + check + campaign (trigger chain INFERRED from timing) | E07-009 |
 | CI fmt red "on every run" for 4 days | workspace rustfmt + `.git-blame-ignore-revs` (f7eb6ea9e7) | campaign | E07-012 |
 | 625/625 "live" vs users hitting broken basics, 10-05 | honest-parity doc + AGENTS.md rule 0 | doc + rule | E07-013 |
 | 80/83 main runs cancelled, 10-07 | main runs never cancelled; PRs Linux-only unless platform paths or `full-ci` | CI | E05-004 |
@@ -672,7 +673,7 @@ ratcheting metric**, not prose; prose-only rules followed when no check was poss
 | Specifications | none; params are free-text doc strings; planned schema validation not built | epics with "Main files" tables (#13458) | prompts/task specs given to agents (none published) |
 | Architecture decisions | `docs/architecture.md` plan + "Current state" preface; `docs/decisions.md` has **only 2 entries**, not referenced in AGENTS.md | plan principles held; schema, undo, golden images changed | decisions taken in `plan/` or chat |
 | Task decomposition | §6: one area = one module; edit only files you own | per-crate fan-out (never-crash, 12 PRs); epics split into child issues | how parallel agents' areas were assigned |
-| Agent roles | none on main; `Model-Effort:` "drove / briefed / wrote" in 25 commits only | integration-batch review "reviewer and attacker" agents (#9386, self-reported) | whether role splits were standard practice |
+| Agent roles | none on main; `Model-Effort:` "drove / briefed / wrote" in 25 non-merge commits, one contributor only | integration-batch review "reviewer and attacker" agents (#9386, self-reported) | whether role splits were standard practice |
 | Tools and permissions | none (no settings, allow-lists, `.mcp.json`); stop-and-ask list (11-06) | Claude Code (session trailers), Copilot sessions, Codex/Cursor/GPT trailers (minority) | permission modes, sandboxing, tool configs used locally |
 | Orchestration | none on main | "8 parallel agents" (10-02) and "10–20 concurrent agents" (10-10) self-reported; "vanilla Claude Code" (HN) | launch method, scheduler, how outputs were merged in week 1 |
 | Parallelism | §6 Parallel agents since day 1 (target dirs, atomic manifests, wait-and-retry) | up to 15 distinct sessions on one day; up to 504 landed PRs in flight per day; duplicate-work failures | actual agent counts over time |
@@ -681,7 +682,7 @@ ratcheting metric**, not prose; prose-only rules followed when no check was poss
 | Edit-build-test-debug loop | "Before you finish" gate list; `cargo xtask ci` = CI; visual self-check rule | 77.5% of commits touch tests; median change +52/−5; flake fixes with measured rates | per-session loop length, retries, failed attempts |
 | Reviews | "A person is accountable"; "Review the diff"; no approval policy | bot review ubiquitous after mid-Oct; human approval rare in samples; agent review claimed in #9386 | branch-protection settings; true human-review rate |
 | Integration | "main changes through a pull request" (11-06); "Don't add or change CI in a feature or fix PR" (10-29) | direct → squash → merge commits; two batch types; manual "(merge queue)"; no GitHub merge queue | who pressed merge on 2,690 squash PRs |
-| Quality gates | 10-command finish list; never-crash lints; floors never lowered | `cargo xtask ci` gate; corpus; lavapipe; 0 of 88 perf budgets enforced; licence allowlist unchecked | shared `gate.yml` / `house-rules.yml` internals (partly) |
+| Quality gates | 10-command finish list; never-crash lints; floors never lowered | `cargo xtask ci` gate; corpus; lavapipe; 0 of 102 perf-budget rows enforced; licence allowlist unchecked | shared `gate.yml` / `house-rules.yml` internals (partly) |
 | Release automation | release branch → draft → maintainer publishes; stop-and-ask | 27 tags in 42 days; nightly dry run; AI-trailered bumps | who published each draft |
 | Failures and corrections | "Every crash fix comes with a test that panicked before the fix"; "Guards say why" | 0 first-parent reverts; 59 fix-main commits; incidents → checks (B.8) | reasons for batch-8 reverts |
 | Human supervision | stop-and-ask list; accountability rule; "**Human** marks what an agent can't finish alone"; "Needs a human" list (Photoshop checks, signing, native speakers) | labels, merge clicks, occasional change requests; maintainer manual test before merge (#13396) | how much humans read diffs |
@@ -695,7 +696,7 @@ ratcheting metric**, not prose; prose-only rules followed when no check was poss
 | U1 | How the day-1 "one-shot" (`16941f7198`, 241 files, +42,241 lines, 596 tests, ~2h50m after init) was produced | It set the architecture, AGENTS.md and CI that everything else follows | No trailer, no session link, no prompt; "one-shot" never defined in the repo; founder's "I just one-shotted Photoshop" (HN 49928088) gives no method (E01-004, E08-013) |
 | U2 | Contents of `plan/` and `log/devlog.md` | The planning method and the hand-off protocol are the core of the agent workflow | Both gitignored since day 1 |
 | U3 | Orchestration: how many agents ran, how they were launched, assigned areas and merged in week 1 | Determines whether the AGENTS.md §6 rules are sufficient or rely on an unseen harness | Only self-reported counts ("8", "10–20") without method; no harness config on any ref; "vanilla Claude Code" is a claim |
-| U4 | Real human-review depth and branch-protection settings | Decides whether the gates alone carried quality | Settings not in git; GitHub API blocked; ≤16 PR pages sampled via summaries; founder's "no human review" remark has unclear scope |
+| U4 | Real human-review depth and branch-protection settings | Decides whether the gates alone carried quality | Settings not in git; GitHub API blocked; ~22 PR pages sampled via summaries; founder's "no human review" remark has unclear scope |
 | U5 | AI share of the ~50% of commits with no attribution | Affects every "AI did X%" statement | Absence of a trailer is unknown, not human; high-volume authors (aiongg, yoriswind, rmsff) carry 0 trailers; house rule 15 (11-06) discourages PR attribution |
 | U6 | Reliability of the integration-batch agent review (#9386) | It is the only stated review method for most late-October/November community PRs | Stated in PR text only; the review outputs are not committed; batch reverts carry no reasons |
 | U7 | Frequency of the visual self-check (snapshot/screenshot) | It is the one documented agent self-verification loop for UI | Screenshots go to PR bodies by rule; only 3 commit messages and 1 PR page show it |
@@ -708,7 +709,7 @@ ratcheting metric**, not prose; prose-only rules followed when no check was poss
 
 - **Strongest:** Part A existence/date facts and diagrams (git-verified, citations resolve); the
   landing-kind table, AGENTS.md history, gate composition.
-- **Weakest:** everything about review and supervision (WebFetch summaries of ≤16 PR pages; no access to
+- **Weakest:** everything about review and supervision (WebFetch summaries of ~22 PR pages; no access to
   branch protection), agent counts and orchestration (self-reported only), and the self-check frequency.
 - **Not checkable:** gitignored `plan/` and `log/`, local agent configs, shared workflow internals, who
   squash-merged PRs.
@@ -721,7 +722,8 @@ ratcheting metric**, not prose; prose-only rules followed when no check was poss
   says nine "(merge queue)" commits; recount gives 7 on main, 9 across all refs. (3) E05-003 has an
   unverified FreeBSD-delegation sha that its own author flags; this deliverable does not use it. (4) E07-013 documents a mismatch
   between the 10-05 honest-parity percentages in the commit (55–70% / 20–35%) and the later revision table
-  (60–70% / 25–35%).
+  (60–70% / 25–35%). (5) AGENTS.md revision authorship/trailer counts in E02 §1 (23 / 21) recount to 22 / 19
+  (independent review, REVIEW-02-03-05.md).
 
 ## New evidence gathered during synthesis
 
