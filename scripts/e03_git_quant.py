@@ -236,7 +236,7 @@ wcsv("E03_model_effort_values.csv", ["model_effort_value", "lines"], me.most_com
 sess_distinct = {k: len({v for c in C for v in c["sess"][k]}) for k in SESS_RE}
 
 # ---- per human author share (top 25 by commits, non-merge, canonical names)
-ac = collections.Counter(c["auth"] for c in NONMERGE)
+ac = collections.Counter(c["auth"] for c in NONMERGE if not c["ai_auth"])  # human identities only
 arows = []
 for a, n in ac.most_common(25):
     cs = [c for c in NONMERGE if c["auth"] == a]
@@ -728,6 +728,25 @@ for l, _ in SPEC:
 sr.append(["TOTAL"] + [sum(r[i] for r in sr) for i in range(1, len(hdr))])
 wcsv("E03_churn_special_weekly.csv", hdr, sr)
 
+# ---------------------------------------------------------------- duplicates (double-counting check)
+dup = collections.Counter((c["auth"], c["subj"].strip().lstrip("\ufeff")) for c in NONMERGE)
+dup_commits = sum(n for n in dup.values() if n > 1)
+dup_extra = sum(n - 1 for n in dup.values() if n > 1)
+pdup = collections.Counter(tuple(sorted((f[2], f[0], f[1]) for f in c["files"])) + (c["subj"].strip(),)
+                           for c in NONMERGE if c["files"])
+pdup_extra = sum(n - 1 for n in pdup.values() if n > 1)
+wcsv("E03_duplicates.csv", ["metric", "value"],
+     [["nonmerge commits whose (author, subject) occurs more than once", dup_commits],
+      ["extra copies beyond the first (author, subject)", dup_extra],
+      ["extra copies with identical subject AND identical numstat (likely cherry-pick/rebase copies)", pdup_extra]])
+# tags: which remote branches contain tags that are not reachable from main
+tag_br = []
+for r in rel:
+    if not r[3]:
+        brs = git("branch", "-r", "--contains", r[1]).split()
+        tag_br.append([r[0], r[1], " ".join(b for b in brs if b != "->")[:300]])
+wcsv("E03_tags_off_main.csv", ["tag", "commit", "remote_branches_containing"], tag_br)
+
 # ---------------------------------------------------------------- report
 print("commits", len(C), "nonmerge", len(NONMERGE), "merges", len(C) - len(NONMERGE), "first_parent", len(first_parent))
 print("fp merges by kind", dict(fp_merge_kind))
@@ -739,4 +758,5 @@ print("branches", BR_STATS)
 print("authors canonical", len(set(CANON.values())), "raw names", len(name_cnt))
 print("cc first-parent", fpc.most_common())
 print("plain 'Fix...' subjects (nonmerge)", sum(1 for c in NONMERGE if FIXW.match(c["subj"])))
+print("dups", dup_commits, dup_extra, pdup_extra)
 print("days", daylist[0], daylist[-1], "weeks", weeks)

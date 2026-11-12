@@ -1,0 +1,4 @@
+metric,value
+"nonmerge commits whose (author, subject) occurs more than once",241
+"extra copies beyond the first (author, subject)",168
+extra copies with identical subject AND identical numstat (likely cherry-pick/rebase copies),69

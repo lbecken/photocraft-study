@@ -1,0 +1,6 @@
+tag,commit,remote_branches_containing
+v0.20.2,7c12f64715,
+v0.21.0,efb7ebd0c0,
+v0.22.0,5000240c6e,origin/patch/flatpak-update-0.22.1 origin/release
+v0.23.0,9963efcb2f,origin/release
+v0.23.1,45066c4829,origin/release
