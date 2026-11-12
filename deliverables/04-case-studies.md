@@ -60,7 +60,7 @@ through three sources: an in-repo doc, a sibling project's issue, and user bug r
 ### 2. Trigger and specification
 - **VERIFIED.** The specification was a doc inside the one-shot root commit:
   > "Each request is one JSON line" … "An MCP server will wrap this same protocol (milestone M11)."
-  (16941f7198:docs/control-protocol.md:3,15; E09-A-001). It is a list of 14 methods and an
+  (16941f7198:docs/control-protocol.md:3,16; E09-A-001). It is a list of 14 methods and an
   engine-command table (E04-013). There is no separate requirements document.
 - **VERIFIED.** The day-1 architecture plan already set the shape: "Stdio for agent CLIs, and
   optionally loopback TCP with a token so it can attach to a running GUI" (16941f7198:docs/architecture.md:426;
@@ -76,7 +76,7 @@ through three sources: an in-repo doc, a sibling project's issue, and user bug r
 | ae92ac20bf | 2026-09-30 09:37 −0400 | Brandon Thomas | none recorded | direct ("continued wip", 181 files) | new `crates/automation/` (`server.rs`, `bridge.rs`, `headless.rs`) | `crates/automation/tests/mcp.rs` (+411): `lists_expected_tools`, `headless_edit_render_save_roundtrip`, `command_list_filters`, `errors_are_tool_errors_not_crashes`, `open_png_and_inspect`, `bridge_forwards_to_control_protocol`, `bridge_rejects_non_loopback`, `bridge_reports_unreachable_app` |
 | cfecebbcfb | 2026-10-01 21:40 −0400 | Brandon Thomas | `Co-Authored-By: Claude Opus 5.5` | direct | `rpc.rs` (+349) headless JSON-lines server; MCP `command_batch`; docs +30 | `tests/mcp.rs` (+25) |
 | 8a2f31c2c4 | 2026-10-03 22:01 −0700 | storybored379 | `Co-authored-by: Claude Opus 5.5 (1M context)` | PR #16 | poisoned `Mutex<Headless>` recovered with `PoisonError::into_inner` | `a_panicking_command_does_not_wedge_the_session` |
-| 55054b5fcc / 7eb3b2e072 / 8f0f95959d | 2026-10-07 | BFlat (GitHub) | 1 / 6 / 5 `Co-Authored-By: Claude Opus 5.5` lines (squashed sub-commits) | PRs #439, #546, #548 | user reports #415, #503–#506, #529: batch `wait`, non-object params rejected, stdio survives a bad line | e.g. `params_that_are_not_an_object_are_rejected_before_running`, `stdio_skips_a_rejected_line_and_keeps_the_session`, `bridge_command_batch_forwards_each_steps_wait`, `jobs_tests.rs`, `apps/photocraft-cli/tests/cli.rs` |
+| 55054b5fcc / 7eb3b2e072 / 8f0f95959d | 2026-10-07 | BFlat (GitHub) | 1 / 6 / 5 `Co-Authored-By: Claude Opus 5.5` lines (squashed sub-commits) | PRs #439, #546, #548 | user reports #415 (#439), #503–#506 and #529 (#546), #510–#512 and #514 (#548): batch `wait`, non-object params rejected, stdio survives a bad line, control-channel requests wait for their job | e.g. `params_that_are_not_an_object_are_rejected_before_running`, `stdio_skips_a_rejected_line_and_keeps_the_session`, `bridge_command_batch_forwards_each_steps_wait`, `jobs_tests.rs`, `apps/photocraft-cli/tests/cli.rs` |
 | 0e0311d245 | a: 2026-10-08 21:41 −0400; c: 10-09 11:12:46 +0700 | harrisonoconnorhover (BFlat) | none recorded | PR #1533, rebase-merge | `server.rs` +16, `docs/control-protocol.md` +2 | `bridge_previews_reject_document_indices`, `headless_previews_preserve_document_indices` |
 | cff8daf185 | a: 2026-10-09 03:32Z; c: 11:12:46 +0700 | Claude (BFlat) | `Co-Authored-By: Claude Opus 5.5`, `Claude-Session: …01UHgFEH…`, "(cherry picked from commit 7406c26bd4…)" | rides with #1533; source on `claude/integ-batch-7` | one-line clippy 1.99 `as_chunks` fix | `tests/mcp.rs` |
 | 15e35cf605 | 2026-10-09 06:54 −0700 | storybored379 (GitHub) | `Co-Authored-By: Claude Opus 5.5` | squash #1668 | `server/conventions.rs`, `progress.rs`, `transport.rs`, `workspace.rs`; creates `docs/mcp.md` | new `tests/mcp_wire.rs` (+147): `malformed_line_recovers_and_modern_lists_are_complete`; `tests/mcp.rs`: `convention_tools_have_titles_hints_and_strict_schemas`, `convention_unknown_arguments_name_the_key_without_side_effects`, `export_directory_symlinks_cannot_escape_the_granted_root`, `export_cleanup_owns_only_created_files_even_during_unwind`; `video_cmds/tests.rs` |
@@ -117,8 +117,11 @@ through three sources: an in-repo doc, a sibling project's issue, and user bug r
   135 (E09-A-003). `docs/control-protocol.md` grew from 50 to 840 lines, adding HMAC auth, jobs, the
   bridge and the headless server (E04-013). It is also among the files with the most fix commits:
   32 (E07-025).
-- **VERIFIED.** Flakiness: the MCP test "failed 9/30" under load before 18c5420039 (2026-10-11) fixed
-  shared font generation and fixed frame windows (E07 §3 table).
+- **VERIFIED.** Flakiness: the MCP `photocraft://commands` test "failed 9/30" beside the rest of
+  mcp.rs, because parallel tests filled and cleared the process-wide render caches; 18c5420039
+  (2026-10-11, `Co-Authored-By: Claude Opus 5.5`) moved it to its own test binary,
+  `tests/mcp_resources.rs`. The same commit's font-generation and frame-window fixes were for other
+  tests (E07 §3 table).
 
 ### 7. What this case demonstrates about method
 - (a) **VERIFIED.** The tests drive the feature through its public interface: a real MCP client, a
@@ -210,7 +213,8 @@ Sibling fixes from the same session id (VERIFIED, `git show`; the #1323 row corr
   issue to session to commit to test.
 - (a) **VERIFIED.** The test pins both sides: the bug must not recur, and real composition must still
   work. This guards against "fix by disabling the feature".
-- (b) **VERIFIED (WF).** No human review, and checks were not all green at merge (4 of 7). Correctness
+- (b) **VERIFIED (WF).** No human review, and only 4 of 7 checks were reported passed at merge (skipped
+  path-selected jobs may be counted as not passed; errata #14). Correctness
   rested on the agent's test and the maintainer's judgement.
 - (b) **INFERRED.** The diagnosis came from the same agent that wrote the fix. No independent repro
   on Wayland is recorded, so the test encodes the agent's own model of the bug.
@@ -244,17 +248,17 @@ sequence rule, fuzzer, lint, sweep, runtime net.
      `craftrules` was later declared retired (`AGENTS.md:18`; E05 lead).
 
 ### 3. Trace
-All commits are by Brandon Thomas. All main commits are squashes (committer GitHub, one parent).
+All commits are by Brandon Thomas. ed0b99964d and bf111b524e are direct commits (committer Brandon Thomas); the PR commits #33–#59 are squashes (committer GitHub, one parent).
 | sha (main) | c: (−0400) | AI attribution as written | branch / PR | what changed | tests touched |
 |---|---|---|---|---|---|
-| ed0b99964d | 10-04 00:10 | (see E07-009: `Claude Opus 4.8`) | direct | AGENTS.md rule 9 | — |
+| ed0b99964d | 10-04 00:10 | `Co-Authored-By: Claude Opus 4.8` | direct | AGENTS.md rule 9 | — |
 | bf111b524e | 10-04 00:24 | `Co-Authored-By: Claude Opus 4.8` | direct | `edit.paste` short `center`, `edit.transform.again` short quad row | new `crates/engine/tests/panic_hunt.rs` (+48): `no_command_panics_on_adversarial_params` (`#[ignore]`); `paste_with_malformed_center_does_not_panic` |
 | 50a27e6c74 | 11:14 | `Co-authored-by: Claude Opus 5.5` | `pr/never-crash-steering`, #33 | AGENTS.md +15, `clippy.toml` (tests may unwrap), `unsafe_code = "forbid"` | none |
 | 69f0e25d5f | 13:25:17 | same | `-formats`, #34 | tiff 0.10→0.11; `Image::new` → `Result`; worker-panic relays; deny attrs on 4 crates | `crates/codecs/tests/malformed.rs` (+50): `tiff_empty_sample_format_is_an_error`; `fidelity.rs`, `roundtrip.rs` adjusted |
 | 48d1a4f9e5, 296ced38d6, 1d832d3e84, 91ef877f2f | 13:25–13:26 | same | `-cms`, `-core`, `-automation`, `-algo-ui-misc` (#36, #39, #38, #40) | per-area unwrap removal + deny attrs | see E09 table |
 | 4218d07f40 | 13:26:26 | same | `-engine`, #54 | 21 files +128/−98: `active_layer_of()`, `pixels_mut()?`, `split_last().ok_or(..)?`, bounded name searches | **none** |
 | f8f48db78a, 6dffa0894c, 86cc989e72 | 13:39–13:40 | same | `-gpu`, `-algo`, `-ui` (#55–#57) | per-area | see E09 table |
-| ab3ab92b4a | 13:40:30 | same | `-guard`, #58 | `catch_unwind` in `Session::execute`; `crash_guard` panic hook in the app | **none** |
+| ab3ab92b4a | 13:40:30 | same | `-guard`, #58 | `catch_unwind` in `Session::execute`; `crash_guard` panic hook in the app | 1 inline test for the app helper only: `guard_turns_a_panic_into_an_error` (`apps/photocraft/src/crash_guard.rs`); none for `Session::execute` |
 | 2e80c781ee | 13:40:43 | same | `-ops`, #59 | "ops had no panic sites; the attribute keeps it that way." | none |
 
 ### 4. Verification actually used
@@ -276,8 +280,9 @@ All commits are by Brandon Thomas. All main commits are squashes (committer GitH
   1. The fuzzer was opt-in and **no workflow ran it for 13 days**. 45afd2e9d7 (2026-10-17, Ivan)
      says: "The full-registry fuzz (AGENTS.md Rule 9) is #[ignore]d and no workflow ran it, so nothing
      enforced 'must stay green'." (E05-071).
-  2. The largest sweeps (#54 engine, 21 files) and the runtime guard (#58) add **no tests**, so the
-     guard's "document is unchanged" claim (ab3ab92b4a) is unasserted in that change.
+  2. The largest sweep (#54 engine, 21 files) adds **no tests**. The runtime guard (#58) adds one unit
+     test for the app-side `crash_guard` helper, but none for `Session::execute`, so the guard's
+     "document is unchanged" claim (ab3ab92b4a) is unasserted in that change.
   3. Rule "Prove it" was written at 11:14, but the sweep removed unwrap sites rather than fixing
      observed crashes. Most changes therefore have no "panicked before" test, and the rule was not
      applied to them.
@@ -306,8 +311,9 @@ All commits are by Brandon Thomas. All main commits are squashes (committer GitH
   attribute only).
 - (b) **VERIFIED.** An `#[ignore]`d check is advisory. The "must stay green" fuzz ran in no workflow
   until 10-17 (E05-071).
-- (b) **VERIFIED.** The runtime net (#58) and the largest sweep (#54) landed with no tests. The
-  campaign's own "prove it" rule was applied to bug fixes, not to the mechanical sweep.
+- (b) **VERIFIED.** The largest sweep (#54) landed with no tests, and the runtime net (#58) with one
+  test of the app helper but none of the engine guard. The campaign's own "prove it" rule was applied
+  to bug fixes, not to the mechanical sweep.
 - (c) **INFERRED.** Transferable pattern: write rule, fuzzer, deny-lint and scorecard count at once,
   and make the fuzzer a CI step on day one. Precondition: an enumerable command registry with JSON
   params, so a fuzzer can call everything (E04-010–012).
@@ -344,7 +350,7 @@ that verification protects a large swap.
 | 574d0d3d53 | a: 2026-10-05 08:01 −0400 | Brandon Thomas (GitHub) | none recorded | #195 `feat/psd-tools-corpus` | psd-tools pins (`xtask/psd-tools-corpus.sha256`, 309 lines), io/psd fixes "it found" | `crates/io/tests/corpus.rs` (465 lines changed); new `corpus_regressions.rs` (+167, synthetic repros); `compose/src/tests.rs` +35; MIXED floor 133 |
 | 1d9d92341f | a: 10-05 10:52 −0400 | Brandon Thomas (GitHub) | none recorded | #224 `fix/psd-effects` | effects spread, emboss, gradient geometry, text gamma | `compose/src/tests.rs` +47, `gpu/tests/parity.rs` +18, floor 145 |
 | 968baf639e | a: 10-05 17:47 −0400 | Brandon Thomas (GitHub) | none recorded | #190 `feat/photoshop-oracle-corpus` | `ci.yml` +23 (corpus job), `xtask/src/corpus*.rs`, two sha256 manifests, AGENTS.md +6, development.md +74 | new `crates/engine/tests/photoshop_oracles.rs` (+133), `PASS_FLOOR = 1` "(of 84 with smart objects or type)"; io floors PSD_TOOLS 229, PHOTOSHOP 126 |
-| a62ef68ca2 | a: 10-14 14:12 −0400 | Timothy Daly (GitHub) | none recorded | #5000 | Brightness/Contrast curve "refit to the Photoshop ground truth we have" | `compose/src/tests.rs`, `engine/src/pixels_tests.rs` +22; `io/tests/corpus.rs` floors → 148/249/185 |
+| a62ef68ca2 | a: 10-14 14:12 −0400 | Timothy Daly (GitHub) | 17 `Co-Authored-By: Claude Opus 5.5` + 1 `Co-authored-by: Claude Opus 5.5` (squashed sub-commits) | #5000 | Brightness/Contrast curve "refit to the Photoshop ground truth we have" | `compose/src/tests.rs`, `engine/src/pixels_tests.rs` +22; `io/tests/corpus.rs` floors → 148/249/185 |
 | f54d605e2c | a: 11-05 21:41 +0530 | Khawar Zamman Wani | none recorded | #10307 | `xtask/src/psd_write_oracle.rs`, `starter.json` | `apps/photocraft-cli/tests/it/psd_write_oracle.rs` |
 | 9cebb79f31 … cd0728ee2a, c17e1c4b69 | a: 2026-11-12 00:37:34Z → 06:45:18Z | Dylan M. Taylor | none recorded | `switch-craft-psd` = `refs/pull/13414/head` (7 commits + merge of main) | "Use craft-psd from craft-libs; remove crates/psd", scorecard regen, lockfile, "Match brush import cap to shared decoder budget" (2 lines), `xtask/src/layers.rs` fixtures | import-path edits in ~40 test files; crate's own tests leave the repo |
 | 74330157cb | c: 2026-11-12 02:53:54 −0500 | Dylan M. Taylor (GitHub) | none recorded | squash #13414 | 294 files, +755/−25,930 | — |
@@ -399,9 +405,11 @@ that verification protects a large swap.
 - **VERIFIED.** The extraction is the pinned HEAD, so no aftermath is observable. The 2-line "brush
   import cap" change (92f35aa25a) shows that the shared decoder's budgets differed from the local
   ones. That behavioural difference was found and absorbed on the branch.
-- **VERIFIED.** Floors kept rising after October: PHOTOSHOP 126 (10-05) → 190 (b526378de4, 10-22).
+- **VERIFIED.** Floors kept rising after 10-05: PHOTOSHOP 126 (10-05) → 190 (b526378de4, 10-22, David
+  Mann, `Co-Authored-By: Claude Opus 5.5`). No floor changed after 10-22 up to the pin (`git log
+  origin/main -G'pass_floor: [0-9]+' -- crates/io/tests/corpus.rs crates/io/tests/it/corpus.rs`).
   Contributors wrote fixes against the oracle: "(seven Lab oracles pass)" (4c450b3879), "(14 oracles
-  pass)" (1e6f565a7b) (E09-D-003).
+  pass)" (1e6f565a7b), both Timothy Daly squashes with Claude Opus 5.5 trailers (E09-D-003).
 
 ### 7. What this case demonstrates about method
 - (a) **VERIFIED.** The reference application's own embedded output is a free, independent oracle.
@@ -448,10 +456,10 @@ branch name and a Codebuff trailer.
 |---|---|---|---|---|---|---|
 | 14c059c971 | a: 2026-10-25 02:14 +0100 | skylartaylor | none recorded (branch `codex/…`) | `codex/egui-037-photocraft-20261023`, PR #9363 | port + plan doc; 331 files, +15,728/−3,374 | body reports a 9-stage CI run (see §4) |
 | c6d87dc1ea, 47d552dced | 10-25 03:41, 06:55 +0100 | skylartaylor | none recorded | same | merges reconciling main | — |
-| b1f73ab821 | 10-25 14:33 −0400 | Dylan M. Taylor | none recorded | same | merge origin/main | — |
+| b1f73ab821 | 10-25 14:33 −0400 | Dylan M. Taylor | "Generated with Codebuff" / `Co-Authored-By: Codebuff` | same | merge origin/main | — |
 | 6e4f85e161 | 10-25 14:37 −0400 | Dylan M. Taylor | "Generated with Codebuff" / `Co-Authored-By: Codebuff` | same | "CodeRabbit review follow-ups": wrong or shared accessible names on 6 control groups; eager font order (Japanese UI face first) | — |
 | 54a0bc46fa | 10-25 14:48 −0400 | Dylan M. Taylor | none recorded | = `refs/pull/9363/head` | rustfmt | — |
-| 5c9192bbe2 | c: 2026-10-25 13:04:35 −0600 | skylar taylor-barrick (GitHub) | squash body: `Co-authored-by: Dylan M. Taylor`, `Co-authored-by: Codebuff` | squash #9363 | 246 files, +8,720/−1,589 | 46 test/fixture files changed; 83 new test fns, e.g. `a_0_37_resize_after_the_migration_is_kept`, `a_0_36_rollback_resize_after_0_37_is_picked_up`, `a_document_switch_away_and_back_fails_the_capture`; fixtures `apps/photocraft/tests/fixtures/ui-0.14/0.15/0.37.ron` |
+| 5c9192bbe2 | c: 2026-10-25 13:04:35 −0600 | skylar taylor-barrick (GitHub) | squash body: "Generated with Codebuff", `Co-Authored-By: Codebuff`, `Co-authored-by: Dylan M. Taylor`, `Co-authored-by: Codebuff` | squash #9363 | 246 files, +8,720/−1,589 | 46 test/fixture files changed; 83 new test fns, e.g. `a_0_37_resize_after_the_migration_is_kept`, `a_0_36_rollback_resize_after_0_37_is_picked_up`, `a_document_switch_away_and_back_fails_the_capture`; fixtures `apps/photocraft/tests/fixtures/ui-0.14/0.15/0.37.ron` |
 | 6f6e0d1793 … 3f2229b9ad (12) | 10-25 20:07 → 10-26 06:42 +0100 | skylartaylor / skylar taylor-barrick | none recorded | `codex/egui-037-photo-followup-20261025`, PR #9518 | "Reconcile the published squash merge while preserving qualified follow-up fixes", font validation, coverage pins | "cover CJK fallback and font cache edge cases" |
 | d641b96a52 | 10-26 13:16 −0600 | skylar taylor-barrick | none recorded | merge commit #9518 | 14 commits | — |
 | 73ac7d9a25 | 10-28 21:22 +0100 | David Mann | `Co-Authored-By: Claude Opus 5.5` | (main) | RTL regression fix; `bidi_text.rs` −171 net | `bidi_text.rs` tests replaced by `arabic_names_are_laid_out_right_to_left`; `i18n/live_tests.rs` +20 |
@@ -488,8 +496,9 @@ branch name and a Codebuff trailer.
   merged 42 h after the first commit.
 
 ### 6. Aftermath
-- **VERIFIED.** 18 main commits match `egui ?0?\.37|egui037|M0\.37` from 10-25 to 11-05 (E07-026). They
-  include rustfmt of the merge (178d6c2235), test adaptations (ef20eca473 "Tests: egui 0.37's
+- **VERIFIED.** 18 non-merge main commits match `egui ?0?\.37|egui037|M0\.37`, author-dated 10-25 to
+  11-05 (E07-026). The count includes the migration's own branch commits and squash (e.g. 6e4f85e161,
+  54a0bc46fa, 5c9192bbe2), so it is not 18 follow-ups. It also includes rustfmt of the merge (178d6c2235), test adaptations (ef20eca473 "Tests: egui 0.37's
   Id::unique"), "Adapt to egui 0.37 renames" on three other branches (5295017732, ea0a447df1,
   c484971fdf), review follow-ups (b078e0e8a6, #9575) and the RTL regression (73ac7d9a25, about 3.8 days
   after the first commit) (E09-E-004).
@@ -606,7 +615,7 @@ AI attribution is unknown. The handle contains "-ai", but a name is not an attri
 ## Case G — The `Finding:` security sweep (October 2026)
 
 ### 1. What it is and why it was chosen
-In about one hour on 10-21, one maintainer authored 25 single-finding hardening commits. Each ends in
+In about one hour on 10-21, one maintainer authored 26 of the 27 single-finding hardening commits. Each ends in
 a `Finding: <uuid> (CWE-NNN)` trailer, and each landed as its own PR. The case was chosen because it
 is a high-throughput "finding → fix" pipeline where the source of the findings is invisible.
 Per errata #7, these trailers belong to the October `security(...)` PRs, not to the November
@@ -646,8 +655,8 @@ Per errata #7, these trailers belong to the October `security(...)` PRs, not to 
   raised an aggregate-memory concern that stayed unaddressed. #8417 shows "No reviews" and "15 of 21
   checks passed" at merge (E09-G-003).
 - **VERIFIED.** Authoring took 59 min for 26 commits (21:44 → 22:43). The 25 were rebase-landed in
-  about 2 min (07:10–07:12 on 10-22). The first and last went through merge commits about 22 h after
-  authoring (E09-G-001).
+  about 2 min (07:10–07:12 on 10-22). The first and last went through merge commits, about 22 h and 13 h after
+  authoring respectively (9852baa4ba 10-22 19:27, ee0d23f77a 10-22 19:44 −0400; E09-G-001).
 
 ### 6. Aftermath
 - **VERIFIED.** A different, later series used multi-finding bundles per area. It has no `Finding:`
@@ -711,8 +720,8 @@ passed while the semantics were wrong, and how the gaps were closed.
 ### 5. Review and integration path
 - **VERIFIED.** #10512 and #10538 were reviewed by maintainer FredApps, who also merged main into them
   and added docs (5829929e81, 01ca6a69a9, b15ac4b016). Both were squashed with a `FredApps` co-author.
-  Elapsed: 4 d 12 h and 4 d 10 h. The follow-up #11441 took 2 h 08 min, written by the same maintainer
-  with Claude trailers (E09-H-003).
+  Elapsed: 4 d 12 h and 4 d 10 h. The follow-up #11441 took 3 h 08 min (e7b8c5a72d 10:45Z → 3e27572e7a 13:53Z; E09-H-003 says
+  2 h 08 min, an arithmetic slip), written by the same maintainer with Claude trailers.
 
 ### 6. Aftermath
 - **VERIFIED.** No further fixes to auto-nest or paste-between-boards after 11-05 14:00 (`git log
@@ -735,7 +744,7 @@ passed while the semantics were wrong, and how the gaps were closed.
 ## Case I (ninth) — Red main from two individually-green PRs (#5344 × #5616)
 
 ### 1. What it is and why it was chosen
-Merge skew is the most frequent red-main cause: 11 of 21 incidents (E07-003; deliverable 07 §F1). This
+Merge skew is the most frequent red-main cause: 11 of 21 incidents (classification INFERRED, E07-003; deliverable 07 §F1). This
 instance broke compilation, the strongest failure, and it has a precise fix message. It shows what
 "green PR" means without a merge queue.
 
@@ -749,7 +758,7 @@ instance broke compilation, the strongest failure, and it has a precise fix mess
 ### 3. Trace
 | sha | c: | author | AI attribution as written | PR | what changed | tests |
 |---|---|---|---|---|---|---|
-| 3ebc42a200 | 2026-10-14 15:17 −0400 | Zer0C00L01 | none recorded | #5344 | Export As presets; new `Persisted` field | (not examined) |
+| 3ebc42a200 | 2026-10-14 15:17 −0400 | Zer0C00L01 | `Co-authored-by: Cursor Agent` (plus Zer0C00L01, Brandon Thomas) | #5344 | Export As presets; new `Persisted` field | (not examined) |
 | c61cf9f0bd | 2026-10-16 19:20 −0600 | nrq6993-a11y | `Co-authored-by: Cursor` | #5616 | per-set preset loading via `take()` | `presets/tests.rs` +26: `a_damaged_preset_set_keeps_the_other_sets` |
 | 351149f0df | 2026-10-17 08:32 −0600 | Joseph (00xJ0 co-author) | none recorded | #6906 | +1 line `export_presets` | relies on "the existing load step and round-trip test" |
 
@@ -787,19 +796,19 @@ instance broke compilation, the strongest failure, and it has a precise fix mess
 |---|---|---|---|---|---|---|---|---|
 | A MCP | in-repo protocol doc → FilmCraft #28 → user issues | bulk commits, then one PR per report batch | Brandon Thomas (none recorded at genesis; Claude Opus 5.5 from 10-01); storybored379 + Claude; BFlat squashes with Claude trailers; harrisonoconnorhover (none) | yes, from day 0 | partial: in-process client, wire test; bridge only vs fake server | squash/rebase by maintainer; #1533 + agent lint fix | #1533 2 h 31 min | ≥3 user-report PRs in week 2; flake fix |
 | B #1381 | community issue + Claude-generated diagnosis | 1 issue = 1 agent branch | author `Claude` (Opus 5.5, session link) | yes (all 4 siblings, correcting E09) | no: synthetic events only, no Wayland repro | none ("No reviews", WF); 4/7 checks | 4 h 18 min (siblings 42 min–5 h 11 min) | 0 found |
-| C never crash | AGENTS rule 9 + external `craftrules` standard | 12 one-commit per-crate branches, stacked | Brandon Thomas, `Claude Opus 5.5` on all 12 (trigger: Opus 4.8) | partly (#34 yes; #54, #58, #59 none) | yes in design (registry fuzzer), but not in CI until 10-17 | unknown; 11 squashes in 15 min | 2 h 50 min | panic_hunt hardening; "hostile numbers" series |
-| D PSD oracle | Photoshop's embedded composites; own corpus | by feature group, reported as oracle deltas | Brandon Thomas, Timothy Daly et al. (none recorded); extraction Dylan M. Taylor (none) | yes (floors and synthetic repros in same commit) | **yes**: external oracle, pinned sha256 corpora, CI job | squash; #13414 self-merged, bot only | #13414 7 h 16 min | floors raised 20×; write side still manual |
-| E egui 0.37 | 1,632-line committed plan (Codex paths) | plan sections; 2 PRs | skylartaylor (`codex/` branch, none recorded); Codebuff on 1 commit | yes (83 new test fns, fixtures) | partial: full gate locally; native/IME/perf declared open | CodeRabbit ×2 + human approval ×2 (WF) | 17 h 50 min (#9363) | 18 related commits incl. RTL regression |
+| C never crash | AGENTS rule 9 + external `craftrules` standard | 12 one-commit per-crate branches, stacked | Brandon Thomas, `Claude Opus 5.5` on all 12 (trigger: Opus 4.8) | partly (#34, #36, #38, #39 yes; #58 app helper only; #54, #59 none) | yes in design (registry fuzzer), but not in CI until 10-17 | unknown; 11 squashes in 15 min | 2 h 50 min | panic_hunt hardening; "hostile numbers" series |
+| D PSD oracle | Photoshop's embedded composites; own corpus | by feature group, reported as oracle deltas | Brandon Thomas 10-05 PRs (none recorded); Timothy Daly #4945/#5000/#5171 (Claude Opus 5.5 trailers); extraction Dylan M. Taylor (none) | yes (floors and synthetic repros in same commit) | **yes**: external oracle, pinned sha256 corpora, CI job | squash; #13414 self-merged, bot only | #13414 7 h 16 min | floors raised 20×; write side still manual |
+| E egui 0.37 | 1,632-line committed plan (Codex paths) | plan sections; 2 PRs | skylartaylor (`codex/` branch, none recorded); Codebuff on 2 branch commits + the squash | yes (83 new test fns, fixtures) | partial: full gate locally; native/IME/perf declared open | CodeRabbit ×2 + human approval ×2 (WF) | 17 h 50 min (#9363) | 18 matching non-merge commits (incl. the migration's own) incl. RTL regression |
 | F box blur | #211 budgets + cost model in commit | row PR + column PR | ebosido444-ai (none recorded → unknown) | yes (bit-exact differential + hash) | **yes**: base-tree worktree hashes | CodeRabbit + 2 humans, changes requested | ~11 d | measurement correction 1.89×→1.45×; radius sweep |
 | G Finding: | unnamed external finding store (UUID + CWE) | 1 finding = 1 PR (27) | Dylan M. Taylor (none recorded) | 11 of 27 | no (module tests only) | CodeRabbit; 1 approval seen; #8417 none | ~0.5–22 h | Nov `fix/sec-*` bundles, mostly unmerged |
-| H artboards | issues #1531, #10218, #8788; then a tester on main | 1 agent fix + 2 PRs + 1 follow-up PR | Claude; Mohamed Mahjoub + Claude; FredApps + Claude Opus 5.5 | yes (34 named tests) | human tester on main; CodeRabbit | maintainer review + squash | 4 d 10–12 h; follow-up 2 h 08 min | 4 in-PR corrections + 6-commit follow-up |
-| I merge skew | n/a (incident) | — | #5616 `Co-authored-by: Cursor`; fix Joseph | fix relied on existing test | no: CI not run on the merge result | squash, no up-to-date requirement | fix 13 h 12 min after break | process: batches, manual queue |
+| H artboards | issues #1531, #10218, #8788; then a tester on main | 1 agent fix + 2 PRs + 1 follow-up PR | Claude; Mohamed Mahjoub + Claude; FredApps + Claude Opus 5.5 | yes (34 named tests) | human tester on main; CodeRabbit | maintainer review + squash | 4 d 10–12 h; follow-up 3 h 08 min | 4 in-PR corrections + 6-commit follow-up |
+| I merge skew | n/a (incident) | — | #5344 `Co-authored-by: Cursor Agent`; #5616 `Co-authored-by: Cursor`; fix Joseph (none recorded) | fix relied on existing test | no: CI not run on the merge result | squash, no up-to-date requirement | fix 13 h 12 min after break | process: batches, manual queue |
 
 ## Patterns across cases (each recurs in ≥3 cases)
 
 1. **The test lands in the same change as the code, and is named for the behaviour.** A
    (8a2f31c2c4, 7eb3b2e072), B (all four), C (bf111b524e, 69f0e25d5f), D (corpus_regressions.rs), E,
-   F, H. VERIFIED. **But it is not universal**: C #54/#58, G 16 of 27, and the backfill campaign
+   F, H. VERIFIED. **But it is not universal**: C #54 (and #58's engine guard), G 16 of 27, and the backfill campaign
    "eight fixes merged without one" (E07-015). The norm is a convention enforced by no gate.
 2. **External or differential oracles, where they exist, are the strongest verification in the
    record.** D (Photoshop composites, 2/255), F (bit-exact against a base worktree), C (registry
@@ -819,8 +828,10 @@ instance broke compilation, the strongest failure, and it has a precise fix mess
    named test or a named incident, which is the project's main learning loop.
 6. **Agent attribution is visible at the commit level, but uneven.** Explicit trailers and session
    links: A, B, C, H. Only a branch prefix or third-party tool: E (`codex/`, Codebuff), I (Cursor).
-   None recorded: D, F, G. VERIFIED. Per errata #8 and E05 §0, attribution fell after house rule 15
-   (11-06), so the cases after November are the least attributable.
+   None recorded: F, G and D's 10-05 and 11-12 commits (D's Timothy Daly squashes carry Claude
+   trailers). VERIFIED. The Claude co-author rate on non-merge main commits fell from 48.7 % (10-01 →
+   11-06) to 40.6 % (11-07 → 11-13) after house rule 15, causation not established (E05-073). The
+   unattributed cases here are mostly from October, before that rule, so it does not explain them.
 7. **Decomposition into one-issue or one-area PRs is the default shape.** B (1 issue = 1 branch), C (1
    crate area = 1 branch), G (1 finding = 1 PR), A (report batches). VERIFIED. It made changes
    individually small, but it also produced the parallel landings that cause merge skew (I; E07-003).
@@ -856,3 +867,4 @@ instance broke compilation, the strongest failure, and it has a precise fix mess
 | panic_hunt at birth: 4 param sets × every `command_specs()` entry, `#[ignore]` | bf111b524e:crates/engine/tests/panic_hunt.rs:1-48 | VERIFIED |
 | #1531 agent fix shipped 5 tests | 7488ab413d | VERIFIED |
 | 11 of 27 `Finding:` commits add a test (recount agrees with E09) | loop over `git log origin/main --grep='^Finding:'` | VERIFIED |
+| Review corrections (REVIEW-04-06-07): #58 adds `guard_turns_a_panic_into_an_error`; #5000 (a62ef68ca2) carries 18 Claude trailers; b1f73ab821 carries a Codebuff trailer; #5344 (3ebc42a200) carries `Co-authored-by: Cursor Agent`; #11441 took 3 h 08 min | `git show ab3ab92b4a \| grep -A1 '#\[test'`; `git show -s --format=%B <sha>`; committer times of e7b8c5a72d, 3e27572e7a | VERIFIED |

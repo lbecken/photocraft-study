@@ -41,7 +41,7 @@ says "AI-attributed commit". It never says "the AI caused".
 **Finding.** Sixteen failure modes have at least two cited incidents each. Seven ended up with a
 mechanical correction. Five got only advisory or process corrections. Four have no correction on
 record. The most frequent cause of red main is semantic merge skew between PRs that were each green
-(11 of the 21 red-main incidents traced in E07 §2). It never got a mechanical fix: there is no
+(11 of the 21 red-main incidents traced in E07 §2; the classification is INFERRED, E07-003). It never got a mechanical fix: there is no
 `merge_group` trigger in any workflow (E07-003, E05-052).
 
 ### Summary table
@@ -51,7 +51,7 @@ record. The most frequent cause of red main is semantic merge skew between PRs t
 | F1 | Individually-green PRs collide on main | 6103da5278, 351149f0df, 06650357d8, df055f3dcb | CI on main | TTF median 68 min, range 3 min–13 h 12 m (n=17) | integration batches; manual "(merge queue)"; main runs uncancelled | **process only** |
 | F2 | Duplicate or conflicting work from parallel contributors/agents | 25f211500b, 29e4039c72, 06650357d8, 252a47ef76, closed duplicate PRs #11854/#11846/#11713 | compiler, catalog-consistency tests, ticket-craft bot, maintainers | TTF 37 min (ko rows) | house rules 2 and 6 (11-06); `duplicate` label | mechanical detection, **advisory prevention** |
 | F3 | CI blind spots created by cost-cutting | 80/83 main runs cancelled (07174271d5); Windows-only reds ee3ebfa748, 79a33dae9c; macOS release-only (bb3108cfd2) | a maintainer noticed (#800); later CI on main | cancellation lasted ≥10.6 h and was fixed the same day; Windows reds TTF 1 h 08 m–5 h 43 m | `cancel-in-progress` only for PRs; `full-ci` label; nightly jobs | mechanical (partial) |
-| F4 | Tests that do not prove the fix: vacuous, skip-passing or missing | 2ff8f419cb (57 GPU checks), 1a86826ab7, 602344bae0, 72e11802d4 ("eight fixes merged without one"), #1323 | CI-environment audit, mutation checks, CodeRabbit, backfill sweep | latent; unknown how long | fail-on-skip lavapipe step; backfill campaign; house rule 4 | mechanical (GPU skips only), advisory otherwise |
+| F4 | Tests that do not prove the fix: vacuous, skip-passing or missing | 2ff8f419cb (57 GPU checks), 1a86826ab7, 602344bae0, 72e11802d4 ("eight fixes merged without one"), 16 of 27 `Finding:` fixes | CI-environment audit, mutation checks, CodeRabbit, backfill sweep | latent; unknown how long | fail-on-skip lavapipe step; backfill campaign; house rule 4 | mechanical (GPU skips only), advisory otherwise |
 | F5 | Over-claimed completion or parity metrics | 58653e617b "625/625 … (100%)"; 82% estimate; "one-shotted … The whole thing"; 1.89×→1.45× (7082689b38) | first user feedback, review | 2 days (10-03 → 10-05) | "Honest parity assessment" + AGENTS step 0 (433b84fae7); corpus floors | advisory + mechanical behaviour floors |
 | F6 | Settings and features wired but inert | "it was decorative" c89c33c704, 9dc394dfc8; 66 of 129 settings do nothing (10-05) | scorecard audit | metric from 10-05; 66→8 over 38 days | scorecard count; `xtask panel-commands` (4165c57f92) | metric (not a gate) + one mechanical gate |
 | F7 | Regressions introduced by fixes | #8034 → SMB save loop #9440 (1253e79d68); 0b779b4fec self-follow-up; egui 0.37 → RTL regression 73ac7d9a25 | user reports via ticket-craft bot, human tester on main | #9440: 17 days report→fix | fault injection, named per-rule tests | mechanical once a test exists |
@@ -60,7 +60,7 @@ record. The most frequent cause of red main is semantic merge skew between PRs t
 | F10 | Release-only breakage | 0.8.1 build failed (2db6b7d8f9); 0.8.2 wasm over gate (d43db3e153); 11-11 release-day breakage | release workflow | release-day → nightly dry run the same day (11-11) | nightly release dry run (f1b5e7d727); `--locked` in PR CI | mechanical (macOS excluded) |
 | F11 | Unenforced budgets and gates that cannot fail | 0 of 102 perf budgets enforced, baseline from another machine class; stale fuzz matrix; i18n report never fails; Nix on absent files | this study / E05 audit, one CodeRabbit note | n/a | none, except panic_hunt (unenforced 13 days, then CI 45afd2e9d7) | **none** (one exception) |
 | F12 | Review theatre: bots present, approval absent | #12237 merged with a failed CodeRabbit check and no approval; #1421 "No reviews", 4/7 checks; #33 "2 of 5 checks passed" | WebFetch samples | n/a | house rule 1 "A person is accountable" (11-06) | **advisory** |
-| F13 | Loss of attribution and provenance | rule 15 (7d8648dfcb); branch names lost on squash; PR# gone from merge subjects; `Claude-Session` on 238 of 4,130 AI commits; Opus 4.8 trailer on "Opus 5.5" estimate | this study | n/a | none; `Model-Effort:` trailer adopted voluntarily on 25 commits | **none** |
+| F13 | Loss of attribution and provenance | rule 15 (7d8648dfcb); branch names lost on squash; PR# gone from merge subjects; `Claude-Session` on 238 of 4,130 AI commits; Opus 4.8 trailer on "Opus 5.5" estimate | this study | n/a | none; `Model-Effort:` trailer adopted voluntarily on 25 non-merge commits by one contributor | **none** |
 | F14 | Private planning state invisible to contributors | `plan/` and `log/` gitignored since 16941f7198; `craftrules` 404 (issue #493, f9b72468b4) | contributor issue #493 | 10-08 note → 10-31 removal → 11-06 public replacement (29 days) | craft-contrib public rules; anti-stall rule "do not ask for it" | advisory; `plan/`/devlog **never fixed** |
 | F15 | Generated or tracker docs go stale; merge-conflict casualties | scorecard 192 vs 193 (3c44319455); conflict markers committed (8601a7b170); stale "missing" rows (984bc5c715) | `scorecard --check` in CI; contributors | 2 h 04 m (scorecard) | scorecard freshness gate; central regeneration in batches | mechanical (scorecard only) |
 | F16 | Crash on hostile input or driver variance | issue #7 (wgpu Rgba32Float), #16/#17 (8a2f31c2c4, b6a95b6c8d), fuzz finds (bf111b524e) | user reports, fuzz | issue #7 fixed in about 1 day; rule within about 1 day | rule 9 / never-crash; clippy deny; `forbid(unsafe)`; panic_hunt; `catch_unwind` | mechanical |
@@ -86,8 +86,7 @@ to the merge of the fix PR, so time-to-detect is folded in.
     W46 11 (E07-005). The W43–W45 zeros coincide with the batches. That is a correlation, not a
     demonstrated cause (INFERRED).
   - The manual "(merge queue)" practice from 11-08 (fda05f7b02). The grep `--grep='(merge queue)'` on
-    main finds 7 commits on 11-08 to 11-11. E07-003 reports 9 with a different match, an unresolved
-    small difference.
+    main finds 7 commits on 11-08 to 11-11; E07-003's 9 counts all refs (errata #2).
   - No GitHub merge queue (`merge_group` absent, E07-003). **Process, not mechanical.**
 - **Agent link.** AGENTS.md §6, present since 10-01, already anticipates in-tree collisions between
   parallel agents: "If someone else's in-progress edit breaks the build, wait and retry; don't fix
@@ -145,7 +144,8 @@ to the merge of the fix PR, so time-to-detect is folded in.
   - 602344bae0 (#5549): "The mid-drag test asserted nothing … Verified by mutation".
   - a79db76e30: "the Alt+H/Alt+P cases checked nothing".
   - 72e11802d4 (#8690, 10-25): "Regression tests for eight fixes merged without one".
-  - Sibling fix #1323 (437b25bea9) shipped with no test (E09-B).
+  - (E09-B's claim that sibling fix #1323 shipped with no test is wrong: 988ad9558a adds two inline
+    tests, errata #21.)
   - 16 of 27 `Finding:` security fixes add no `#[test]` (E09-G-003).
 - **Detection.** CI-environment audit, mutation spot checks ("mutation" in 24 commits), CodeRabbit
   (c441fd350c "CodeRabbit on #11369") and a backfill sweep.
@@ -303,11 +303,15 @@ to the merge of the fix PR, so time-to-detect is folded in.
 - **Incidents (VERIFIED via WebFetch summaries).**
   - #12237 merged by davidmann4 with a failed CodeRabbit "Out of Scope Changes" check and no approval
     (E05-035).
-  - #1421 (author `Claude`): "No reviews", "4 of 7 checks passed" (E09-B-002).
-  - #33: "No reviews", merged with "2 of 5 checks passed" (E06 §6).
+  - #1421 (commit author `Claude`; PR opened by bflatastic): "No reviews", "4 of 7 checks passed"
+    (E09-B-002).
+  - #33: "No reviews", merged with "2 of 5 checks passed" (E06 §6). For #1421 and #33 the unpassed
+    checks may be skipped path-selected jobs, so they do not prove failing checks were overridden
+    (errata #14).
   - #9386 integration batch: "two independent agents per PR (a reviewer and an attacker)", with no
     visible human approval before merge (E06-041).
-  - Explicit human approval appears on 1 of 6 E05-sampled PRs and on 1 of 10 E06-sampled PRs.
+  - Explicit human approval appears on 1 of 6 E05-sampled PRs and on 1 of 10 E06-sampled PRs; with
+    E09's pages, about 22 pages show 4 approvals (errata #17).
 - **Detection.** Only by this study. The project records no incident.
 - **Correction.**
   - Advisory: house rule 1 "A person is accountable. Whoever runs an agent answers for what it opens"
@@ -328,12 +332,12 @@ to the merge of the fix PR, so time-to-detect is folded in.
     to 43/2,074 (E06-031).
   - Only 238 of 4,130 AI-attributed non-merge commits carry `Claude-Session:` (E03 §3).
   - Trailer model strings are unreliable. 0c2d4bfd1a estimates "Opus 5.5 effort" under a `Claude Opus
-    4.8` trailer (E01-012). A `codex/` branch carries Claude trailers (#7809) or none (#9363,
-    Codebuff on one commit, E09-E-003).
+    4.8` trailer (E01-012). A `codex/` branch carries Claude trailers (#7809) or none (#9363, where
+    Codebuff trailers are on two branch commits and the squash: b1f73ab821, 6e4f85e161, 5c9192bbe2).
   - The handoff devlog is private (F14).
 - **Correction.** None by the project. `Model-Effort:` trailers ("Opus 5.5 drove; … Sonnet 5.5 wrote
-  at medium") appear on 25 commits, 11-07 → 11-11, voluntarily and without a documented rule
-  (E03-005). They move in the opposite direction to rule 15.
+  at medium") appear on 25 non-merge commits (27 in all), 11-08 → 11-11 committer UTC, all by one
+  contributor (Trevor Brown), voluntarily and without a documented rule (E03-005; errata #18, #19). They move in the opposite direction to rule 15.
 
 ### F14 — Private planning state invisible to contributors
 - **Definition.** Agents and maintainers rely on state that outside contributors (and their agents)
@@ -386,8 +390,9 @@ to the merge of the fix PR, so time-to-detect is folded in.
 
 ## A.2 Which modes are specific to or amplified by agent-driven, high-parallelism development
 
-**Finding (INFERRED).** None of the 16 modes is unique to AI agents. Six are **amplified** by the
-volume and parallelism the method produces: F1, F2, F9, F12, F13 and F15. Three are **agent-shaped**,
+**Finding (INFERRED).** None of the 16 modes is unique to AI agents. Five are **amplified** by the
+volume and parallelism the method produces: F1, F2, F9, F12 and F15. F13 is agent-specific in subject
+matter (the data lost is agent provenance), not in cause. Three are **agent-shaped**,
 meaning they match failure patterns the developers themselves attribute to agents: F4, F5/F6 and F14.
 The rest are ordinary engineering failures whose rate the evidence cannot tie to agents: F3, F7, F8,
 F10, F11 and F16.
@@ -424,7 +429,9 @@ Caveats:
 **Finding.** Failures that a user or CI reported loudly turned into rules or gates within 0–2 days.
 Failures in combinational and organisational space (merge skew, review, attribution, budgets) either
 took weeks and got only process fixes, or got nothing. Every prose rule that later mattered was
-converted into a check only after it had been shown not to hold (E05-071).
+converted into a check only after it had been shown not to hold (E05-071). Where the correcting
+commit does not name the failure, the link in the table below is INFERRED from timing: the
+integ-batch, fork-batch, "(merge queue)" and house-rules rows.
 
 | Failure surfaced | Date | First correction | Date | Latency | Route | Type |
 |---|---|---|---|---|---|---|
@@ -474,7 +481,7 @@ counted per file. It has not been applied to the cross-PR and human-process fail
 **Finding.** Within 44 days the project went from 68,332 to 955,603 non-blank Rust lines, from 915 to
 18,014 `#[test]` attributes, to 3,285 landed PR numbers, 26 tagged release commits and 582 author
 identities (all VERIFIED, E03-012, E03 §5, E03-015, E03-007). Throughput peaked in W41–W42 and then fell
-by roughly 4–10× in landed PRs per day. Raw commit counts show the opposite shape, so they must not be
+to 10–79 landed PRs per day in W43–W46 (2.4–19× below W41's 192). Raw commit counts show the opposite shape, so they must not be
 used as an output measure.
 
 ### Weekly table (ISO weeks; UTC committer dates; sources in brackets)
@@ -538,7 +545,7 @@ stabilisation (INFERRED).
 **Finding.** Visible rework is moderate and mostly forward-fixing:
 - 15.7 % of non-merge commits are fix-typed by subject (lower bound);
 - 0 reverts on main's first-parent line;
-- 21 traced red-main incidents with median repair of about 1 h;
+- 21 traced red-main incidents, median repair about 1 h over the 17 with a measured TTF;
 - at least 5 features needed 5 or more follow-up fixes.
 
 The largest potential waste is the 2,238 PR heads (35 %) with no merge evidence. That figure mixes
@@ -594,7 +601,8 @@ effects.
   skylar taylor-barrick 1.3 %, Korg1ch, MarekSpodBiedry, dotCooCoo, Marco Arnulfo.
 - 9 are in between, e.g. Brandon Thomas 76.0 %, Hector Villarreal 83.5 %, Khawar Zamman Wani 32.8 %.
 - Attribution is a per-person habit, not a per-change decision.
-- 0 % means "unknown". yoriswind's 19 fork branches are named `codex/*` (E06 roster) with no
+- 0 % means "unknown": 13 commits authored by the `Codex` identity reached main through aiongg's PR
+  #8577 (errata #16). yoriswind's 19 fork branches are named `codex/*` (E06 roster) with no
   trailers, so branch names and trailers disagree (E06-025).
 
 **Why the share declines: what the evidence can and cannot say.** New computation for this
@@ -649,8 +657,8 @@ all refs) can be tied to a session (E03 §3, E06-011). That is 5.8 % of AI-attri
 | 10 | "using Opus 5.5" (HN 49934844); "vanilla Claude Code … ever so occasionally Codex" (HN 50029182, 49977572) | Opus 5.5 is the dominant trailer; 238 `Claude-Session:` non-merge commits; 15 Codex trailers | **CORROBORATED** ("vanilla" unverifiable) |
 | 11 | "I stopped writing code entirely in February" (HN 49977572) | The repository starts 09-30. Terse, untrailered founder commits exist (E01-010); their authorship is unknown | **UNCORROBORATED** |
 | 12 | "much of the current PR volume comes from coding agents" (RFC-0006, E08-028) | 59.2 % of first-parent changes AI-attributed; 49.6 % of non-merge commits | **CORROBORATED** in direction |
-| 13 | "100% AI software factory and no human review" (HN 50434834, 11-10; does not name PhotoCraft) | Sampled PRs: explicit human approval on 1/6 and 1/10 (E05-035, E06-041), *but* rule 1 requires an accountable person, and approvals exist (#11641, #7848, #9363) | **AMBIGUOUS**: partly consistent with samples; contradicted by the documented rule |
-| 14 | "Let the community token spend … diffuse into the products" (HN 49976861) | 582 author identities; 97 % of merge-PR sources are forks (E03-008) | **CORROBORATED** in direction; the spend itself is unmeasurable |
+| 13 | "100% AI software factory and no human review" (HN 50434834, 11-10; does not name PhotoCraft) | Sampled PRs: explicit human approval on 1/6 and 1/10 (E05-035, E06-041), 4 of about 22 pages overall (errata #17), *but* rule 1 requires an accountable person, and approvals exist (#11641, #7848, #9363) | **AMBIGUOUS**: partly consistent with samples; contradicted by the documented rule |
+| 14 | "Let the community token spend … diffuse into the products" (HN 49976861) | 582 author identities; 97 % of the 603 merge-commit PRs come from forks (E03-008; squash PRs' sources are not recorded) | **CORROBORATED** in direction; the spend itself is unmeasurable |
 
 ## B.8 What public data cannot measure, and how a project could instrument it
 
@@ -660,7 +668,7 @@ all refs) can be tied to a session (E03 §3, E06-011). That is 5.8 % of AI-attri
 2. **Human supervision hours.** Who reviewed, for how long, and who pressed merge on 2,690 squash
    merges are not in git (E03 §4).
 3. **Prompts, specs and briefs.** `plan/` and `log/devlog.md` are gitignored. `Model-Effort:` names a
-   "briefed" role on 25 commits, but no brief is published.
+   "briefed" role on 25 non-merge commits by one contributor, but no brief is published.
 4. **Abandoned agent sessions.** Session ids exist only on landed or pushed commits. Sessions that
    produced nothing leave no trace. The 2,238 unmerged heads cannot be attributed.
 5. **Concurrency over time.** No per-agent identity or session coverage exists. Bursts by one identity
@@ -702,8 +710,8 @@ without guessing.
    - 77.5 % of commits touch tests, and crash, format, layering and corpus gates were enforced early;
    - yet over-claimed parity, inert settings (66/129) and vacuous tests (57 GPU checks) persisted until
      audits or users exposed them (F4–F6).
-4. **VERIFIED.** The dominant red-main cause was semantic merge skew between individually-green PRs
-   (11 of 21). Repair was fast (median 68 min). Prevention stayed procedural: batches and a manual
+4. **VERIFIED (incidents) / INFERRED (classification).** The dominant red-main cause was semantic merge
+   skew between individually-green PRs (11 of 21, E07-003). Repair was fast (median 68 min). Prevention stayed procedural: batches and a manual
    merge queue, never a mechanical merge queue (F1).
 5. **INFERRED.** Parallelism amplified the failures that are combinational across PRs: merge skew,
    duplicates, gate-on-union failures and tracker conflicts. The project's corrective tooling is
@@ -733,7 +741,7 @@ without guessing.
 
 ## Confidence and gaps
 - **Weakest points.**
-  - Review evidence rests on 16 WebFetch-summarised PR pages (F12).
+  - Review evidence rests on about 22 WebFetch-summarised PR pages (E05 + E06 + E09; errata #17) (F12).
   - Red-main TTF uses merge-to-merge times from E07's 21-incident table, not CI run times, so
     time-to-detect is folded in.
   - Fix-type shares depend on subject conventions that changed with landing style.
@@ -753,7 +761,7 @@ without guessing.
 - **Evidence disagreements found.**
   - E07-013's "parity discrepancy" is two same-day commits (#182 and #186), not drift. Resolved in F5.
   - "(merge queue)" commit count: E07-003 says 9; `git log main --grep='(merge queue)'` gives 7 here.
-    Unresolved and minor.
+    Resolved by errata #2: 7 on main, 9 across all refs.
   - The AI-share figures across E02/E03/E05/E07/E08 differ by denominator. Reconciled in B.6.
   - E03 reports `#[test]` 18,014 at the pin and E05-019 reports 18,111 (different counting). Noted in
     B.4.

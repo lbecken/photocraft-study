@@ -50,8 +50,8 @@ trailer is "attribution unknown". Web observations are WebFetch summaries (lower
 2. **External definitions of "correct"** that agents cannot argue with: pinned, hashed corpora judged
    against Photoshop's own composites at 2/255, CPU-vs-GPU parity, and floors that only ratchet up
    (E04-036, E04-037, E09-D-002).
-3. **Fast forward-repair of main** instead of prevention: 21 traced red-main incidents with a median
-   time-to-fix of 68 minutes (07 §A.1 F1), zero reverts on main's first-parent line (E07-001), and
+3. **Fast forward-repair of main** instead of prevention: 21 traced red-main incidents, with a median
+   time-to-fix of 68 minutes over the 17 that have a measured TTF (07 §A.1 F1), zero reverts on main's first-parent line (E07-001), and
    repair and backout done inside integration batches.
 
 It is **hollow** in four places: merge-time integrity (no merge queue; individually-green PRs collide,
@@ -65,8 +65,9 @@ Several gates that look real cannot fail at all (§7).
 ## 1. The verification stack
 
 **Finding.** The stack has eleven layers. The fast layers are mechanical and blocking on every PR. The
-slow, platform and performance layers are path-selected, nightly, dispatch-only or report-only. Nearly
-every layer after day 1 was added in response to a named failure (column "Introduced to stop").
+slow, platform and performance layers are path-selected, nightly, dispatch-only or report-only. About
+half of the layers added after day 1 name the failure they were added to stop (column "Introduced to
+stop"); the rest (source policy, corpus, CodeRabbit, Sonar, Dependabot, perf, fuzz) name none.
 
 ### 1.1 Diagram (fastest/local → slowest/nightly)
 
@@ -95,8 +96,8 @@ Sources: `74330157cb:.github/workflows/ci.yml:6-12,76-470`, E05 §0.1–0.2, cro
 | L2a | fmt | `cargo fmt --all -- --check` | gate | yes | day 1, but "failed on every run because the repo … was never formatted" until f7eb6ea9e7 (10-04) | — | most frequent red-main class in W41 (07 F1) | VERIFIED |
 | L2b | clippy as policy | `-D warnings`; `unsafe_code = "forbid"`; deny `cognitive_complexity` (30), `too_many_arguments`, `wildcard_imports`; unwrap/expect/panic test-only; `egui::ComboBox` disallowed (`Cargo.toml:97-105`, `clippy.toml:1-8`) | gate | yes | clippy.toml 50a27e6c74 (10-04, never-crash); complexity deny 604da9d06b (10-27, Sonar campaign) | panics on hostile input (issue #7, #16/#17; E07-009); Sonar S3776 (E05-032) | the 10-27 deny later produced post-merge reds (47d3dcde33, 06650357d8; 07 F9) | VERIFIED |
 | L3a | layers | crate dependency table, UI crates only at L6+, unregistered crate = error (`xtask/src/layers.rs`) | gate + Windows integration leg | yes | 16941f7198 (in CI day 1) | architecture drift (design plan, E04-031) | seconds (parses `cargo metadata`) | VERIFIED |
-| L3b | panel-commands | lexical scan: click handlers dispatch command ids; shrink-only allowlist, 1 entry at HEAD (`xtask/src/panel_commands.rs:1-28`) | gate | yes | 4165c57f92 (10-11, Claude Opus 5.5 trailer) | AGENTS rule 1 "Everything is a command" being advisory (E05-071) | lexical; "incomplete by its own admission" (`panel_commands.rs:20-24`) | VERIFIED |
-| L3c | source policy | `.cargo/config*` has no source replacement/patches; `cargo metadata --locked`; every `git+` dep from `github.com/storytold/` (`ci.yml:93-127`) | `platforms` job, every PR | yes | 6401cfdbe1/8f9ebc3136 (10-17) | supply-chain substitution (no incident named) | <10 min | VERIFIED |
+| L3b | panel-commands | lexical scan: click handlers dispatch command ids; shrink-only allowlist, 1 entry at HEAD (`xtask/src/panel_commands.rs:1-28`) | gate | yes | 4165c57f92 (10-11, `Claude Opus 5.5 (1M context)` trailer) | AGENTS rule 1 "Everything is a command" being advisory (E05-071) | lexical; its header lists the handler shapes it does not scan (`panel_commands.rs:20-24`) | VERIFIED |
+| L3c | source policy | `.cargo/config*` has no source replacement/patches; `cargo metadata --locked`; every `git+` dep from `github.com/storytold/` (`ci.yml:93-127`) | `platforms` job, every PR | yes | 6401cfdbe1/8f9ebc3136 (committer UTC 10-20, author 10-17; errata #19) | supply-chain substitution (no incident named) | <10 min | VERIFIED |
 | L3d | house rules | copied rule blocks match `craft-contrib@dde09ea31e` (external repo) by sha256 | on AGENTS.md/CLAUDE.md change | yes (shared workflow, logic not inspected) | 7d8648dfcb (11-06) | drift of agent instructions across repos (E02-012) | trivial | VERIFIED (trigger) / INFERRED (logic) |
 | L4 | unit / integration / doc tests | ~18,000 `#[test]`s, one `tests/it/` binary per crate, nextest `ci` profile: `fail-fast = false`, 60 s slow warning, terminate after 10 periods (`.config/nextest.toml:26-29`) | gate | yes | day 1; nextest in CI e22c4ec7ab/1a4167936e (10-15); version pinned 0.9.150 for GHSA-vc25-qg58-w57c (ddf9ca1e2d, 10-26) | Windows tests "took 14 of 37 min" (b9aa935d19); hangs | GPU group capped at 4 threads; no retries, no quarantine (E05-050) | VERIFIED |
 | L5 | command fuzzing (`panic_hunt`) | every command in `command_specs()` with adversarial params must not panic | gate (`--run-ignored only`) | yes | harness bf111b524e (10-04); **in CI only from 45afd2e9d7 (10-17)** | "The full-registry fuzz (AGENTS.md Rule 9) is #[ignore]d and no workflow ran it" (45afd2e9d7) | side effect: "printed a blank page on the default printer" → `PHOTOCRAFT_NO_PRINT` (70e182b08f, 10-12) | VERIFIED |
@@ -145,7 +146,7 @@ than deleting the first.
 
 | Target | What "pass" means | Where | Ratchet | Label |
 |---|---|---|---|---|
-| Reference-app composite | PSD's embedded Photoshop composite vs our compositor, `PASS_TOL = 2.0/255.0` | `968baf639e:crates/engine/tests/photoshop_oracles.rs:24`; `crates/io/tests/it/corpus.rs:435` `assert!(pass >= src.pass_floor …)` | floors: MIXED 133→148, PSD_TOOLS 229→249, PHOTOSHOP 126→190 over 20 floor-changing commits, never decreasing (E09-D-002) | VERIFIED |
+| Reference-app composite | PSD's embedded Photoshop composite vs our compositor, `PASS_TOL = 2.0/255.0` | `968baf639e:crates/engine/tests/photoshop_oracles.rs:22`; `crates/io/tests/it/corpus.rs:435` `assert!(pass >= src.pass_floor …)` | floors: MIXED 133→148, PSD_TOOLS 229→249, PHOTOSHOP 126→190 over 20 floor-changing commits, never decreasing (E09-D-002) | VERIFIED |
 | Pinned corpora | 1,044 files in 10 sha256 manifests; missing corpus = failure, "never a silent skip" (`968baf639e:docs/development.md:318-322`) | `xtask/src/corpus_pins.rs` | "adjust floors only upwards" (`:9-10`) | VERIFIED |
 | CPU oracle vs GPU | 78 parity tests within 2/255; AGENTS calls `compose` "the oracle" (`AGENTS.md:86`) | `crates/gpu/tests/it/parity.rs` | n/a | VERIFIED |
 | Menu parity checklist | generated "664 of 664 menu items live"; `FLOOR = 663` (`crates/ui-egui/src/menus/parity.rs:10`, "never lower it") | `docs/parity-checklist.md:5` | FLOOR | VERIFIED |
@@ -168,7 +169,7 @@ the diff.
 | Inert settings | "it was decorative" (c89c33c704, 9dc394dfc8); 66 of 129 settings did nothing on 10-05 | scorecard prefs audit | counted as a metric (66 → 8); not a gate | VERIFIED (07 F6) |
 | Skip-passing GPU tests | 57 GPU checks on llvmpipe "returned early and passed without comparing anything"; how long is unknown (parity tests exist from 09-30, fix 11-06) | CI-environment audit (2ff8f419cb) | lavapipe re-run that fails on skip (Linux only) | VERIFIED (07 F4) |
 | Tests asserting nothing | "The mid-drag test asserted nothing … Verified by mutation" (602344bae0); Windows pipeline test "never reached FXC, the compiler this test exists for" (1a86826ab7); "passed even if nothing was painted (CodeRabbit on #11369)" (c441fd350c); "the Alt+H/Alt+P cases checked nothing" (a79db76e30) | mutation by hand, CodeRabbit, audits | case-by-case fixes; no mechanical rule | VERIFIED (E07-018) |
-| Fixes without regression tests | "eight fixes merged without one" (72e11802d4, #8690); #1323 merged with no test (E09-B); 16 of 27 `Finding:` security fixes added no `#[test]` (E09-G-003) | backfill campaign | one-off backfill | VERIFIED |
+| Fixes without regression tests | "eight fixes merged without one" (72e11802d4, #8690); (E09-B's "#1323 merged with no test" is wrong: 988ad9558a adds two inline tests, errata #21); 16 of 27 `Finding:` security fixes added no `#[test]` (E09-G-003) | backfill campaign | one-off backfill | VERIFIED |
 | Unenforced perf budgets | 0 of 102 rows enforced (14 `[[bench]]` + 88 `[[scenario]]`); box blur "3.7 s / 2.8 s measured" vs 1 s budget kept `enforce = false` (`perf/budgets.toml:647-663`) | this study | none; the convention is honest but static | VERIFIED (07 F11) |
 | Self-reported counts | integration PRs report "10,793 tests passed" (#9386), "12,514 of 12,521 passing, with the 7 failures explained" (#13396); egui PR body 11,580 vs PR page 11,592 executions (E09-E-002) | — | none; house rule 7 "Report only what ran" | VERIFIED (WebFetch) |
 
@@ -186,7 +187,7 @@ layers, fuzz harness, corpora, scorecard). Days 7–17 (10-07 → 10-17) were ab
 run and finish*: uncancelled main, cheap-first ordering, nextest, timeouts, and putting already
 documented rules into CI. From 10-18 the additions are review bots, static analysis and supply chain,
 and the last week adds anti-hollowness checks (fail-on-skip, release dry run). The trigger is almost
-always a named incident in the commit body, often an AI-attributed one. E05-073 found no commit that
+always a named incident in the commit body. E05-073 found no commit that
 blames an agent: causes are written as "concurrent landings" or PR pairs.
 
 ### 3.1 Cause → gate pairs (VERIFIED unless marked)
@@ -198,22 +199,22 @@ blames an agent: causes are written as "concurrent landings" or PR pairs.
 | 10-05 | "a stale Cargo.lock fails CI instead of the release build" | `--locked` in CI | ad86321738 | — |
 | 10-07 | "80 of 83 push runs on main were cancelled, and a formatting break from two PRs that were each green alone (#663 + #700) went unnoticed" | main runs never cancelled; PR CI Linux-only by path | 07174271d5 (#800) | same day |
 | 10-09/10 | "Concurrent wgpu instances segfault in libvulkan" | `GPU_LOCK`; nextest `gpu` test group | d8d2df4fba, 3092d3b6f9 | — |
-| 10-11 | AGENTS rule 1 "Everything is a command" unchecked | `xtask panel-commands`, shrink-only allowlist | 4165c57f92 | 12 days after rule |
+| 10-11 | AGENTS rule 1 "Everything is a command" unchecked | `xtask panel-commands`, shrink-only allowlist | 4165c57f92 | 11 days after rule (day 12) |
 | 10-12 | panic_hunt "printed a blank page on the default printer" | `PHOTOCRAFT_NO_PRINT`, `LPDEST` | 70e182b08f | — |
 | 10-12 → 10-15 | 0.8.1 web job: wasm "25,587,059 bytes, over … 24 MiB gate"; gate then "failed unrelated PRs" | wasm split into gzip parts behind a boot crate | d43db3e153, df055f3dcb | 3 days |
 | 10-15 | "a clippy failure (15 s) showed red only 41-48 min into the job" | cheap checks before tests | 9660dca263 / 5f9190f8cc | — |
 | 10-15 | hangs, one failure per rebuild | nextest `ci` profile, runtime limits on unbounded jobs | e22c4ec7ab, 1a4167936e, b2fafcf68c | — |
 | 10-17 | "The full-registry fuzz (AGENTS.md Rule 9) is #[ignore]d and no workflow ran it" | panic_hunt in the CI gate | 45afd2e9d7 | 13 days after rule |
-| 10-17 | (no incident named) | git deps only from `storytold` | 6401cfdbe1 | — |
+| 10-20 (a: 10-17) | (no incident named) | git deps only from `storytold` | 6401cfdbe1 | — |
 | 10-21 | Sonar S7630 BLOCKER: script injection in the fuzz workflow input | fixed; actions pinned to SHA (S7637) | 5933793982, f4bc90b93f | same day |
 | 10-26 | nextest advisory GHSA-vc25-qg58-w57c | `nextest-version = "0.9.150"` | ddf9ca1e2d | — |
 | 10-27 | Sonar S3776 cognitive complexity | clippy `cognitive_complexity = "deny"`, threshold 30 | 604da9d06b | — |
-| 10-29 | feature PRs growing ci.yml (INFERRED, E05-012) | AGENTS "Don't add or change CI in a feature or fix PR" | 0379569d00 | prose only |
+| 10-30 (a: 10-29) | feature PRs growing ci.yml (INFERRED, E05-012) | AGENTS "Don't add or change CI in a feature or fix PR" | 0379569d00 | prose only |
 | 10-29 | fail-fast hid later regressions: "a single run exposes remaining regressions" | `fail-fast = false` | 8c8c4b95f5 | reverses e22c4ec7ab |
 | 11-06 | "57 GPU checks … passed without comparing anything" | lavapipe re-run, fail on skip | 2ff8f419cb | unknown latency |
 | 11-11 | release-day breakage "as it did on 11 Nov 2026" | nightly release dry run | f1b5e7d727 | same day |
 | 11-11 | egress visibility (no incident) | Harden-Runner on every job, `egress-policy: audit` | e119384a83 | audit, not block |
-| 11-12 | automation GPU tests outside the `gpu` group "segfaulted" on lavapipe | added to the group | 2383ea0a4a | ~6.9 days latent (07 F8) |
+| 11-11/12 | automation GPU tests outside the `gpu` group "segfaulted" on lavapipe | added to the group | 2383ea0a4a (11-11; merged via d99b6a832c 11-12 UTC) | ~6.9 days latent (07 F8) |
 
 Two cases show the **documented-rule → mechanical-gate** lag directly: panic_hunt (13 days) and
 panel-commands (rule since day 1, check on day 12). The others show **incident → gate within a day**.
@@ -234,7 +235,7 @@ check is built when the gap bites.
 | fail-fast on (10-15) then off (10-29) | e22c4ec7ab, 8c8c4b95f5 | "a red PR frees its runner early" | extra rebuild cycles per regression; reverted | VERIFIED |
 | GPU retries tried, then dropped | 110d58bea9 (branch only, `retries = 2`); 8f58ea4629 "retaining strict test gates"; no first-parent version ever had retries | flake noise | none: flakes root-caused with measured rates instead (E07-007) | VERIFIED |
 | Fuzz dispatch-only | `ci.yml:446-447` | 60 min × targets | matrix drifted to 12 deleted `psd` targets with nothing noticing (E05-023) | VERIFIED |
-| Sonar skipped on forks (token) | E05-029 | secret safety | ~97% of merge-PR sources are forks (E06/E03 leads), so most community PRs get no Sonar signal (INFERRED) | VERIFIED / INFERRED |
+| Sonar skipped on forks (token) | E05-029 | secret safety | ~97% of the 603 merge-commit PRs came from forks (E03 §5; 96 % by `data/E03_mergepr_by_source_owner.csv`; squash PRs' sources are not recorded), so most community PRs get no Sonar signal (INFERRED) | VERIFIED / INFERRED |
 
 **Finding (INFERRED).** The economies that removed a *platform* (Windows by path, macOS, FreeBSD) each
 caused at least one later red main or release-day failure. The economies that kept every case but ran
@@ -268,8 +269,8 @@ threads on long pages (E06 confidence notes).
 ### 4.2 What review demonstrably did
 - **Caught measurement and logic bugs.** CodeRabbit asked for independent input copies, and the box
   blur speed-up was corrected from 1.89× to 1.45× (7082689b38, E09-F-003). CodeRabbit flagged a test
-  that "passed even if nothing was painted" (c441fd350c). 311 commits are titled "CodeRabbit review"
-  (E07 §10).
+  that "passed even if nothing was painted" (c441fd350c). 255 main commits contain "CodeRabbit review"
+  (`git log origin/main -i --grep='CodeRabbit review' | wc -l`; E07 §10's 311 does not reproduce).
 - **Was formatted for agents.** CodeRabbit comments carry "Prompt for AI Agents" blocks (E05-030); the
   loop "integrator agent fixes → bot review → agent addresses bot findings" is explicit on #13396
   (E06-043).
@@ -302,7 +303,7 @@ copies none of this; copying the *protocol* requires writing it down as a gate.
 **Finding.** The weakest point of the system is between "PR green" and "main green". There is no
 merge queue (`ci.yml:6-12` has no `merge_group`; `grep -rln merge_group .github/` is empty, E07-003).
 GitHub tests each PR against its own base, so two green PRs can produce a red main. This was the
-dominant red-main cause (11 of 21 traced incidents, 07 F1). The project answered with process
+dominant red-main cause (11 of 21 traced incidents; classification INFERRED, E07-003, 07 F1). The project answered with process
 (integration batches, a manual "(merge queue)", uncancelled main runs), not with a mechanism.
 
 ### 5.1 Collisions that passed every per-PR gate (VERIFIED, E07 §2)
@@ -333,8 +334,8 @@ commits that day) on top of the 10-27 complexity deny.
 **INFERRED interpretation.** The batch period is a hand-built merge queue with a backout step. It
 worked while one integrator ran it and stopped when merges returned to per-PR merges on 11-07 →
 11-11, which is where red main came back. A batch also makes reverts invisible to main's history: the
-revert rate at PR granularity is 0/3,475 first-parent commits, but 23 reverts happened in batch
-branches (E07-001). Read "zero reverts on main" as "backouts moved upstream of main", not "nothing
+revert rate at PR granularity is 0/3,475 first-parent commits, but 23 reverts reachable from main
+happened on branches before merge, six of them in batch-8 alone (E07-001). Read "zero reverts on main" as "backouts moved upstream of main", not "nothing
 needed backing out".
 
 ---
@@ -345,7 +346,7 @@ needed backing out".
 version bump on an already-green main, built and signed by a shared workflow into a **draft** GitHub
 Release that a maintainer publishes by hand (`docs/releasing.md:3-6`). The weak spots are the parts
 that only the release build exercises (signing, packaging, riscv64, Flatpak, macOS). Until 11-11
-these failed on release day; three `.0` version bumps were never tagged and were followed within hours
+these failed on release day (VERIFIED for 0.8.1 and 11-11; INFERRED for the three below, errata #15); three `.0` version bumps were never tagged and were followed within hours
 by a platform fix and a `.1` tag (new evidence below).
 
 ### 6.1 Tag cadence (condensed; UTC dates from `data/E03_releases.csv`)
@@ -353,7 +354,7 @@ by a platform fix and a `.1` tag (new evidence below).
 | Phase | Tags | Dates (UTC) | Cut by (tag-commit author) | On main? | Gap between tags | Notes |
 |---|---|---|---|---|---|---|
 | Bootstrap | v0.1.0 (= v0.1.1-rc.4), v0.1.1-rc.5, v0.1.1 | 10-01 → 10-03 | Brandon Thomas | yes | 0.8–1.0 d | Linux packaging fix (4eb75d6370) |
-| Main-line | v0.2.0 … v0.20.1 (19 tags) | 10-05 → 11-03 | Brandon Thomas, except v0.3.0 (BFlat) and v0.8.2 (author identity "Claude", d43db3e153) | yes | 0.19–3.47 d | untagged bumps: 0.4.x, 0.8.0/0.8.1 (failed builds, INFERRED), 0.11.0, 0.15.0, 0.20.0 |
+| Main-line | v0.2.0 … v0.20.1 (18 tags) | 10-05 → 11-03 | Brandon Thomas, except v0.3.0 (BFlat) and v0.8.2 (author identity "Claude", d43db3e153) | yes | 0.19–3.47 d | untagged bumps: 0.4.x, 0.8.0/0.8.1 (failed builds, INFERRED), 0.11.0, 0.15.0, 0.20.0 |
 | Release branch | v0.20.2, v0.21.0, v0.22.0, v0.23.0, v0.23.1 | 11-05 → 11-12 | Dylan M. Taylor (3), FredApps (2) | **no** (on `origin/release`) | 0.29–2.67 d | v0.23.1 = "Merge tested main for v0.23.1" after Flatpak fix eee667f1d9 |
 
 27 tags, 26 distinct tagged commits, 41.4 days, **median gap 1.6 days** (E03-015); the mean over the
@@ -410,7 +411,7 @@ covers less than it claims); **ADV** = advisory; **ABS** = absent.
 | Gate | Rating | Evidence |
 |---|---|---|
 | Local gate = CI gate (`xtask ci`) | ME | same program (E05-010); stop-at-first-failure summary; caught every class in 07 F1 on main |
-| fmt | ME | red main 5 times in W41 (07 F1 rows 1–4, 13), each fixed in 3–65 min |
+| fmt | ME | red main 5 times (07 F1 rows 1–4 on 10-07 in W41, row 13 on 10-14 in W42), each fixed in 3–65 min |
 | clippy `-D warnings` + deny lints | ME, with a side effect | never-crash lints on 28/28 crates (`docs/scorecard.md`); complexity deny created post-merge reds (07 F9) |
 | layers | ME | in CI since day 1; every internal edge points down at HEAD (E04-002) — evidence of prevention is absence of violations, not a caught incident |
 | panel-commands | ME (partial) | allowlist shrank 2 → 1; lexical and admittedly incomplete (`panel_commands.rs:20-24`) |
@@ -445,8 +446,9 @@ covers less than it claims); **ADV** = advisory; **ABS** = absent.
 | secret scanning / private security channel | ABS | `SECURITY.md:9` (E05-034) |
 
 Count (INFERRED, by each row's first rating): of 34 rows, 15 are ME (several partial), 6 MH, 7 ADV,
-6 ABS. The ME rows are all
-fast, Linux, deterministic and owned in this repo; the MH rows are concentrated in checks that run
+6 ABS. Most ME rows are
+fast, Linux, deterministic and owned in this repo (the exceptions are Windows, FreeBSD/ARM64 nightly
+and the release dry run); the MH rows are concentrated in checks that run
 rarely (nightly, dispatch, path triggers) or measure presence instead of behaviour.
 
 ---
@@ -458,7 +460,7 @@ rarely (nightly, dispatch, path triggers) or measure presence instead of behavio
 1. **Make the local gate and CI gate one command, cheapest step first.** Agents then reproduce CI
    before pushing, and red appears in seconds for lint-class failures. (E05-010; 9660dca263)
 2. **Turn every rule an agent must obey into a failing check, and expect a lag if you don't.** The
-   two documented rules that became checks late (panic_hunt 13 days, panel-commands 12 days) were
+   two documented rules that became checks late (panic_hunt 13 days, panel-commands 11 days) were
    violated in the meantime; rules that never became checks (licence, "test fails without fix", CI
    edits) are still violated or unverifiable. (E05-071, E07-015, E05-012)
 3. **Define correctness by an outside judge, then ratchet.** Reference outputs embedded in real files,
@@ -551,7 +553,7 @@ rarely (nightly, dispatch, path triggers) or measure presence instead of behavio
     calls there)" → v0.11.1 46e538b3a2 (10-20).
   - e6d6fb45a4 "Release 0.15.0" (10-23) → 4991f6377e "packaging(macos): retry stapling when Apple's
     ticket lookup drops (#8995)" → v0.15.1 60c87b9884 (10-23).
-  - 24d4f4db9f "Release 0.20.0" (11-02) → eed8bd27d2 "Packaging: run the cross-built CLI's --version
-    check without the malloc re-exec" → v0.20.1 327c4cc82e (11-02).
+  - 24d4f4db9f "Release 0.20.0" (11-03 UTC; 11-02 local) → eed8bd27d2 "Packaging: run the cross-built
+    CLI's --version check without the malloc re-exec" → v0.20.1 327c4cc82e (11-03 UTC, errata #19).
   - v0.11.1, v0.15.1 and v0.20.1 tag commits are by Brandon Thomas with `Co-Authored-By: Claude Opus 5.5`.
 - Mean gap between tags: 1.59 days over 26 gaps (`data/E03_releases.csv`, `days_since_prev_tag`).
