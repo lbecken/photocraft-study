@@ -51,11 +51,11 @@ was missing, the metrics stayed green while the product was not.
 
 | Weakness | Evidence | Label | Lesson for the IDE (PROPOSED) |
 |---|---|---|---|
-| Parity metric measured wiring | "625/625 menu items are live … only means each item dispatches *a* command"; 214 shortcut failures in an audit; project re-estimated 55–70 % surface, 20–35 % switchable (E07-013, E01-019) | VERIFIED | Never let "feature exists" be the headline metric; measure behaviour against an oracle. |
-| Perf budgets unenforced | 88 scenarios, 0 `enforce = true`; baseline recorded at load ~225 on another machine class (E04-051, E05-028) | VERIFIED | Latency is a core IDE requirement; budgets must gate on a fixed runner. |
-| Tests that passed without testing | 57 GPU checks returned early and passed on GPU-less CI; several tests asserted nothing (E07-018, E05-024) | VERIFIED | Fail on skip; require zero-match runs to be BLOCKED; mutation spot-checks. |
-| Individually green PRs colliding | Recurring "main red since #X + #Y" fixes; 59 fix-main commits (E05-052, E07 §0) | VERIFIED | Real merge queue from day 1. |
-| Save-path regressions | Durability fix correct on local NTFS broke SMB saves; ~17 days to fix (E07-021) | VERIFIED | IDE file I/O (VFS, save, external change) needs environment-diverse fault injection. |
+| Parity metric measured wiring | "625/625 menu items are live … only means each item dispatches *a* command"; 214 shortcut failures in an audit; project re-estimated 55–70 % surface, 20–35 % switchable (E07-013: 20783fdc70; E01-019: 433b84fae7) | VERIFIED | Never let "feature exists" be the headline metric; measure behaviour against an oracle. |
+| Perf budgets unenforced | 88 scenarios, 0 `enforce = true` (`74330157cb:perf/budgets.toml`); baseline recorded at load ~225 on another machine class (E04-051, E05-028) | VERIFIED | Latency is a core IDE requirement; budgets must gate on a fixed runner. |
+| Tests that passed without testing | 57 GPU checks returned early and passed on CI's software rasterizer (2ff8f419cb); several tests asserted nothing (602344bae0, c441fd350c) (E07-018, E05-024) | VERIFIED | Fail on skip; require zero-match runs to be BLOCKED; mutation spot-checks. |
+| Individually green PRs colliding | Recurring "main red since #X + #Y" fixes (e.g. 351149f0df, 06650357d8); 59 fix-main commits (E05-052, E07 §0) | VERIFIED | Real merge queue from day 1. |
+| Save-path regressions | Durability fix correct on local NTFS broke SMB saves; ~17 days from report (#9440) to fix (1253e79d68) (E07-021) | VERIFIED | IDE file I/O (VFS, save, external change) needs environment-diverse fault injection. |
 | Planned mechanisms never built | Validated param schema → free-text "JSON-ish" doc string; golden images/`xtask bless` never implemented; op-based history → snapshots (E04-003, E04-027) | VERIFIED | Build the contract-level mechanisms before fan-out; do not let them slide. |
 | Doc drift | README/AGENTS.md crate map and counts stale; generated docs stayed accurate (E04-004, E04-006) | VERIFIED | Generate every number-bearing doc. |
 | Shared-line conflict hotspots | Conflict markers committed into status lines; scorecard.md 3rd most-touched file (E07-020) | VERIFIED | No "every PR edits this line" conventions. |
@@ -102,8 +102,8 @@ IDE columns PROPOSED.
 | 11 | Scorecard TOML → generated doc, `--check` in CI (E04-050) | Per-language feature matrix + quality metrics generated from tests, `--check` in CI | direct | Rows must cite a test that measures behaviour, not presence | Scorecard drift into a wiring metric (E07-013) |
 | 12 | Perf budgets with `enforce` flag, "never invent a number" (E04-051, E09-F-004) | Latency budgets (keystroke-to-paint, completion p95, find-usages) | adapt | **Enforced on a fixed, dedicated runner** with a measured baseline; PhotoCraft had 0 of 88 enforced and a contended baseline (E05-028) | Noisy runners → flaky gates → gates turned off; use counters (allocations, query recomputations) as low-noise proxies |
 | 13 | Parity checklist / `gaps.md` ranked work queue; estimates in agent-hours (E01-015, E01-020, E02-008, E08-002) | Ranked backlog per language/feature; agent-hour estimates calibrated against your own merged history | adapt | No reference menu tree; derive the queue from IntelliJ/rust-analyzer *feature lists* as inspiration, but acceptance must be oracle-based | PhotoCraft's own estimate was revised ~10× upward in 8 days (E08-005); treat early estimates as guesses |
-| 14 | AGENTS.md day 0, hash-checked house rules, stop-and-ask list (E01-003, E02-009, E02-012) | Same | direct | Add IDE-specific invariants (threading, cancellation, VFS ownership) to the guide and back each with a check | Rules without checks diverge (E02-016) |
-| 15 | Integration batches (E07-002, E06-021, E06-022) | Real merge queue (serialised CI on the merge result) | adapt | Replace manual batches with automation; keep batches only for large cross-cutting landings | Queue throughput limits; needs fast gate |
+| 14 | AGENTS.md day 0, hash-checked house rules, stop-and-ask list (E01-003, E02-009, E02-012) | Same | direct | Add IDE-specific invariants (threading, cancellation, VFS ownership) to the guide and back each with a check | Rules without checks diverge (E02 §4) |
+| 15 | Integration batches (E07-002, E06-021, E06-022) | Real merge queue (serialised CI on the merge result) | adapt | Replace manual batches with automation; batch only many approved Medium PRs in one area (08 §4.6); High-tier changes land alone (08 §9.1) | Queue throughput limits; needs fast gate |
 | 16 | Nightly release dry run (E05-063, E05-062) | Same, plus nightly "open the big corpus, index, run all inspections" smoke | direct | — | Nightly-only failures are noticed late |
 | 17 | Compile-time completeness via destructuring (E04-033) | Same for settings serialisation, protocol types, plugin API structs | direct | — | Low |
 | 18 | Golden-image testing (planned, never built) (E04-027) | Snapshot tests of trees/highlights/completions | adapt | Do it | Covered in row 8 |
@@ -122,13 +122,13 @@ Every row below is PROPOSED.
 
 | IDE difficulty | Why it lacks PhotoCraft's oracle | Objective check that gives agents a target | Strength / caveat |
 |---|---|---|---|
-| **Parsing** (incl. error recovery) | No reference parse tree; recovery behaviour is a design choice | (a) Round-trip: `parse → print → parse` gives identical tree; lossless tree reproduces source byte-for-byte. (b) Differential: accept/reject agrees with `rustc` (or the language's reference parser) on corpora and conformance suites. (c) Snapshot of trees on pinned corpora with ratcheting floor. (d) Fuzz random edits: tree never panics, spans stay in bounds | (a)(b) are strong; (c) needs reviewed blessing; recovery quality has no oracle → snapshot + human review |
-| **Name resolution, type inference** | Semantics defined by the compiler, not a file | Differential vs the compiler: for every expression in a corpus, compare inferred types/resolved paths against compiler output (e.g. rustc's save-analysis-like dumps or `cargo check` diagnostics) and against an existing server (rust-analyzer) as a second opinion. Floors on agreement rate per corpus | Two oracles that disagree flag tasks for humans; never auto-accept "matches rust-analyzer" where rust-analyzer is known to be wrong |
+| **Parsing** (incl. error recovery) | No reference parse tree; recovery behaviour is a design choice | (a) Round-trip: `parse → print → parse` gives identical tree; lossless tree reproduces source byte-for-byte. (b) Differential: accept/reject agrees with the reference parser (for Rust, `syn` or a nightly parse-only rustc mode; full `rustc` also rejects code in later phases, so compare only syntax errors) on corpora and conformance suites. (c) Snapshot of trees on pinned corpora with ratcheting floor. (d) Fuzz random edits: tree never panics, spans stay in bounds | (a)(b) are strong; (c) needs reviewed blessing; recovery quality has no oracle → snapshot + human review |
+| **Name resolution, type inference** | Semantics defined by the compiler, not a file | Differential vs the compiler: for every expression in a corpus, compare inferred types/resolved paths against compiler-derived facts. rustc exposes no stable resolution/type dump (save-analysis was removed), so derive them by compilation: inject `let _: <inferred type> = <expr>;` or a path-use probe at sampled sites and require `cargo check` to accept it (and reject a deliberately wrong type). Use an existing server (rust-analyzer) as a second opinion. Floors on agreement rate per corpus | Two oracles that disagree flag tasks for humans; never auto-accept "matches rust-analyzer" where rust-analyzer is known to be wrong |
 | **Diagnostics** | Same | `cargo check --message-format=json` as oracle: IDE diagnostics on a pinned corpus vs compiler diagnostics (precision/recall per code), ratcheting | Strong for compiler-equivalent diagnostics; IDE-only lints need their own snapshot tests |
-| **Refactoring safety** | No reference refactorer output | **Refactor → still compiles → tests still pass**: apply each refactoring at sampled sites in corpus projects, run `cargo check` and the project's tests. Plus inverse properties (rename A→B→A = identity; extract/inline round-trip) and "no semantic change" via comparing compiler-resolved references before/after | The best oracle available; cost is high (compile per sample) → sample and rotate by day like PhotoCraft's `Sweep` (E04-027) |
+| **Refactoring safety** | No reference refactorer output | **Refactor → still compiles → tests still pass**: apply each refactoring at sampled sites in corpus projects, run `cargo check` and the project's tests. Plus inverse properties (rename A→B→A = identity when B is fresh; extract/inline round-trip) and "no semantic change" via the IDE's own resolver before/after, cross-checked by the compile-and-test result (no stable compiler API exposes resolved references) | The best oracle available; cost is high (compile per sample) → sample and rotate by day like PhotoCraft's `Sweep` (E04-027) |
 | **Formatting** | Style is a spec | Idempotence `fmt(fmt(x)) == fmt(x)`; differential vs `rustfmt` where you aim for compatibility; parse-equivalence before/after | Strong, cheap |
 | **Completion, highlighting, inlay hints** | Ranking/coverage is judgement | Snapshot tests of completion lists/highlight token streams on pinned corpora; "expected item present in top-k" metrics with floors; differential vs LSP servers | Ranking quality stays partly human; keep the metric *behavioural* (top-k hit), not "provider exists" |
-| **Incremental computation** | The "correct" incremental result is the from-scratch result | **Index/analysis consistency**: after any edit sequence, incremental state == fresh from-scratch computation (query results, index contents, diagnostics). Fuzz edit sequences. This is the IDE analogue of CPU-vs-GPU parity (E04-037) | The single most important check; must not be skippable (E05-024 lesson) |
+| **Incremental computation** | The "correct" incremental result is the from-scratch result | **Index/analysis consistency**: after any edit sequence, incremental state == fresh from-scratch computation (query results, index contents, diagnostics), compared after normalising interned ids, file ids and unordered collections, which legitimately differ between runs. Fuzz edit sequences. This is the IDE analogue of CPU-vs-GPU parity (E04-037) | The single most important check; must not be skippable (E05-024 lesson) |
 | **Latency budgets** | No reference timings | Enforced budgets on a dedicated fixed runner (keystroke→highlight, completion p95, open-project-to-ready); plus low-noise proxies: number of query recomputations, allocations, files re-parsed per edit | PhotoCraft's budgets never gated (E04-051); proxies avoid noisy-runner flakiness |
 | **Long-lived mutable state & concurrency** (VFS, caches, background indexing, cancellation) | Image editor sessions are mostly single-document, snapshot history (E04-003, E04-011) | Deterministic scheduler in tests (seeded interleavings); loom-style model checks on core sync primitives; invariants checked after every fuzzed step; cancellation tests ("cancelled query leaves no partial state") | Hard; needs human-owned design (§6) |
 | **File system reality** | — | Fault-injecting VFS backend: external modifications, renames under watch, slow/network FS, permission errors, case-insensitive FS, symlinks. PhotoCraft's save path regressed SMB users (E07-021) | Environment diversity must be in CI, not only on a developer's machine |
@@ -163,7 +163,7 @@ site; differential runs need a second server warmed on the same corpus. PROPOSED
 |---|---|---|---|
 | Parse round-trip, format idempotence, schema completeness, layers | full | full | full |
 | Incremental == from-scratch fuzz | fixed small seed set | larger seed set | long run, new seeds |
-| Diagnostics vs `cargo check` | tier-1 fixtures | tier-2 corpus | tier-3 large repos |
+| Diagnostics vs `cargo check` | small fixtures | medium pinned corpus | large-repo corpus |
 | Refactor compiles + tests pass | changed refactorings only, few sites | rotated sample (PhotoCraft `Sweep` pattern, E04-027) | full sample |
 | Differential vs rust-analyzer / other servers | — | — | full; disagreements filed as triage issues |
 | Latency budgets | proxy counters | fixed-runner timings | full scenario set |
@@ -238,7 +238,7 @@ from the first commit (copying E04-031).
 PhotoCraft's AGENTS.md was a day-0 artefact with architecture invariants, a "before you finish"
 checklist and parallel-agent rules (E01-003, E02 §0). The IDE equivalent should keep the same
 structure, but every invariant must name its enforcing check (PhotoCraft's unchecked rules are the
-ones practice diverged from; E02 §4, E02-016):
+ones practice diverged from; E02 §4):
 
 | Section | Content | Enforced by |
 |---|---|---|
@@ -249,7 +249,7 @@ ones practice diverged from; E02 §4, E02-016):
 | 4. Incremental correctness | Any query change keeps incremental == from-scratch | consistency fuzz test |
 | 5. Verify through the product | Run `ide-cli check`/`run`/`replay`; paste transcript in PR; screenshot for layout changes | PR template field; reviewer checklist |
 | 6. Picking work | Ranked queue; claim before coding | claim board; registry uniqueness tests |
-| 7. Parallel agents | Own `CARGO_TARGET_DIR`, own module, wait-don't-fix (E01-016) | — (social rule; listed as unchecked) |
+| 7. Parallel agents | Own worktree (playbook §6) and `CARGO_TARGET_DIR`, own module (E01-016) | claim check on PR open; owned-file scope check in review (08 §4.4) |
 | 8. Before you finish | `cargo xtask ci` green locally; failing-before fixture for fixes | merge queue |
 | 9. Stop and ask | Plugin API, index format, settings migrations, save path, release, licensing, secrets | path-based required reviewers |
 
@@ -269,7 +269,7 @@ An IDE has a larger deep core, and errors in it are semantic, not textual.
 
 | Work | Shape | Parallelisable? | Supervision model | Contract it depends on |
 |---|---|---|---|---|
-| Inspections / lints | Many, independent; each is "pattern → diagnostic (+ fix)" | Yes — PhotoCraft-menu-like | Agents; review sampling; oracle = snapshot + compiler-agreement where applicable | Semantic query API, diagnostics model |
+| Inspections / lints | Many, independent; each is "pattern → diagnostic (+ fix)" | Yes — PhotoCraft-menu-like | Agents; Medium-tier review (08 §9.1); oracle = snapshot + compiler-agreement where applicable | Semantic query API, diagnostics model |
 | Intentions / quick fixes | Many; each a small refactor | Yes | Agents; oracle = "still compiles + tests pass" on corpus samples | Refactor/edit API, undo model |
 | Per-language syntax support (grammar, highlighting, folding, structure view) | One per language, internally deep-ish | Yes across languages | One agent stream per language; human sign-off on grammar design | Syntax tree API |
 | UI panels (project view, structure, problems, VCS log) | Breadth | Yes | Agents; control-channel structured-state tests + screenshot | Action registry, event model |
@@ -300,8 +300,8 @@ commands took a session + JSON and returned JSON (E04-011) — a narrow, stable 
 
 A breadth task is ready for an agent only when its card names the oracle. Two contrasting cards:
 
-- **Inspection "redundant clone" (Tier 0).** Files: new module `inspections/redundant_clone.rs`, registry entry, fixtures. Acceptance: snapshot test on 10 positive and 10 negative fixtures; quick-fix applied to all corpus hits compiles and passes the corpus crates' tests; feature-matrix row generated. Parallel-safe: yes.
-- **"Make goto-definition work across macro expansions" (Tier 1–2).** Touches the semantic layer and possibly the query graph. Acceptance: differential vs compiler-resolved spans on the corpus above the current floor; incremental consistency still zero mismatches; latency budget unchanged. Needs a human-reviewed design note first; not parallel-safe with other query-engine work.
+- **Inspection "redundant clone" (playbook tier Medium).** Files: new module `inspections/redundant_clone.rs`, registry entry, fixtures. Acceptance: snapshot test on 10 positive and 10 negative fixtures; quick-fix applied to all corpus hits compiles and passes the corpus crates' tests; feature-matrix row generated. Parallel-safe: yes.
+- **"Make goto-definition work across macro expansions" (Medium; High if it changes the query graph).** Touches the semantic layer and possibly the query graph. Acceptance: differential vs compiler-resolved spans on the corpus above the current floor; incremental consistency still zero mismatches; latency budget unchanged. Needs a human-reviewed design note first; not parallel-safe with other query-engine work.
 
 INFERRED from PhotoCraft: its gap epics already list "Main files" per item to prevent collisions
 (E06-034); adding "oracle" and "tier" fields is the IDE-specific extension.
@@ -316,8 +316,8 @@ This section lists only the IDE-specific gates and the PhotoCraft evidence each 
 
 | Playbook topic | PhotoCraft evidence | IDE-specific application (PROPOSED) |
 |---|---|---|
-| **Risk tiers** | Human approval rarely visible; supervision mostly labels and merge decisions (E06-041, E05 §0.3); merge authority concentrated in few people (E03-008) | Tier 0 (breadth: inspection, panel, keymap) — agent + bot review + oracle gates; Tier 1 (semantic analysis, refactoring) — plus human review of oracle results and snapshot diffs; Tier 2 (query engine, VFS, undo, threading, plugin API, save/durability) — human design owner approval required, mechanically enforced via path-based required reviewers |
-| **Independent test authorship** | Tests that asserted nothing; detection via CodeRabbit and mutation (E07-018); 16 of 27 security fixes added no `#[test]` (E09-G-003) | For Tier 1–2, tests written by a different agent/session from the implementation, from the ADR, before the code; mutation testing on changed analysis code |
+| **Risk tiers** | Human approval rarely visible; supervision mostly labels and merge decisions (E06-041, E05 §0.3); merge authority concentrated in few people (E03-008) Use the playbook's tiers (08 §9.1) unchanged. **Medium** — breadth work confined to its own module (inspection, intention, panel, keymap, file type, settings page): reviewer agent + human maintainer review record + oracle gates; semantic-analysis and individual-refactoring changes that alter no contract are also Medium, and the human reviewer additionally signs off oracle results and snapshot diffs. **High** — query engine, VFS, undo, threading, plugin API, index format, save/durability (shared contracts or persistence in 08 terms): ADR + named human owner approval, path-based required reviewers, merged alone. **Low** — docs and new tests only |
+| **Independent test authorship** | Tests that asserted nothing; detection via CodeRabbit and mutation (E07-018); 16 of 27 security fixes added no `#[test]` (E09-G-003) | As in the playbook (08 §8): tests by a different session for every Medium/High change; for High, written from the ADR before the code; mutation testing on changed analysis code |
 | **Real merge queue** | 59 fix-main commits; "red since #X + #Y" (E05-052); integration batches as manual staging (E07-002); never cancel main CI (E05-004) | Merge queue running the full gate on the merged result; main CI never cancelled; registry/catalog consistency tests (PhotoCraft found duplicate rows cheaply once such tests existed, E07-019) |
 | **In-repo session state** | Hand-off via gitignored, private `log/devlog.md` (E02-004, E01-016) | Commit session state and claims in-repo (or in a tracker), so collaborators and reviewers can audit; avoid single shared status lines (E07-020) |
 | **Provenance trailers** | Trailers on ~48 % of non-merge commits; session ids on few; model-name drift; late "no agent attribution" rule (E07 §0, E03-005, E01-012, E02-011) | Require `Co-Authored-By` + session id + model on every agent commit, enforced by a commit-msg check; decide attribution policy once |
@@ -342,7 +342,7 @@ E03-008, E05-052).
 
 ### Phase 0 — Foundations (contracts, gates, oracles)
 
-- **Scope:** workspace and `xtask` (layers, ci, scorecard, corpus, perf); L0–L1 (ids, cancellation, rope, VFS with fault-injecting backend); action registry with schemas; workspace-server skeleton; command log + replay; testkit (fixtures, snapshot+bless, deterministic scheduler); AGENTS.md with invariants and stop-and-ask list; ADRs for all Tier-2 components; merge queue; trailer check; dedicated perf runner.
+- **Scope:** workspace and `xtask` (layers, ci, scorecard, corpus, perf); L0–L1 (ids, cancellation, rope, VFS with fault-injecting backend); action registry with schemas; workspace-server skeleton; command log + replay; testkit (fixtures, snapshot+bless, deterministic scheduler); AGENTS.md with invariants and stop-and-ask list; ADRs for all High-tier components; merge queue; trailer check; dedicated perf runner.
 - **Parallelism:** low — roughly 1–3 concurrent agent streams under one or two human design owners. Reason: almost every task edits a shared contract; parallel work here produces the "individually green, jointly broken" pattern (E05-052) in its most expensive form.
 - **Exit gates (machine-checkable):**
   - `xtask ci` green on main, includes layers, action-schema completeness, action fuzz, fail-on-skip wrapper, `--check` on generated docs.
@@ -356,7 +356,7 @@ E03-008, E05-052).
 - **Scope:** lexer/parser with lossless trees; incremental query engine; name resolution and basic type inference for a subset; diagnostics; highlighting; goto definition; find usages; rename; formatting; one editor view and project panel; LSP adapter.
 - **Parallelism:** moderate — roughly 3–8 streams, split by layer (parser / semantics / editor UI / LSP) once the layer APIs are frozen. Reason: layers communicate through the contracts from phase 0, so cross-stream collisions are API-level and caught by the gate.
 - **Exit gates:**
-  - Parse round-trip and lossless reproduction: 100 % on tier-2 corpus (pinned crates).
+  - Parse round-trip and lossless reproduction: 100 % on the medium pinned corpus (pinned crates).
   - Parser accept/reject agrees with `rustc` on the corpus above a floor, floor ratchets.
   - Incremental == from-scratch on fuzzed edit sequences: zero mismatches over a fixed number of seeds per PR, more nightly.
   - Diagnostics vs `cargo check`: precision/recall floors per diagnostic family, ratcheting.
@@ -367,7 +367,7 @@ E03-008, E05-052).
 ### Phase 2 — Fan-out
 
 - **Scope:** inspections, intentions, more refactorings, panels, keymaps, file types, settings, second and third languages.
-- **Parallelism:** high — tens of concurrent streams are plausible *if* each task maps to one module and has an oracle-backed acceptance test; cap by merge-queue throughput and human review capacity for Tier-1 changes. Reason: this phase is shaped like PhotoCraft's menu work (E03-011, E01-015).
+- **Parallelism:** high — tens of concurrent streams are plausible *if* each task maps to one module and has an oracle-backed acceptance test; cap by merge-queue throughput and human maintainer review capacity for Medium changes. Reason: this phase is shaped like PhotoCraft's menu work (E03-011, E01-015).
 - **Exit gates:**
   - Every inspection/intention has: a snapshot test, a "fix compiles" corpus check, an entry in the generated feature matrix citing that test.
   - Scorecard rows cite behavioural tests; no presence-only metric is reported as progress (anti-E07-013).
@@ -377,7 +377,7 @@ E03-008, E05-052).
 ### Phase 3 — Ecosystem
 
 - **Scope:** plugin API 1.0 and host, DAP/debugger, build-tool integrations, VCS, marketplace, release channels.
-- **Parallelism:** mixed — plugin API and debugger core back to low (Tier 2); integrations and sample plugins high.
+- **Parallelism:** mixed — plugin API and debugger core back to low (High tier); integrations and sample plugins high.
 - **Exit gates:**
   - API surface diff check enforced; semver classification required for every change.
   - Sample-plugin corpus builds and passes against every PR.
@@ -391,7 +391,7 @@ E03-008, E05-052).
 |---|---|---|---|
 | 0 Foundations | ~1–3 | Design owners write ADRs, review every change | Contract tests + replay + VFS fault suite + merge queue live |
 | 1 Vertical slice | ~3–8 | Own semantic/query layers; review oracle results | Round-trip, consistency, diagnostics, rename and latency gates green |
-| 2 Fan-out | tens, bounded by queue and review capacity | Sample reviews; own Tier-1/2 paths; triage oracle disagreements | Feature matrix fully oracle-backed; mutation floor met |
+| 2 Fan-out | tens, bounded by queue and review capacity | Medium-tier reviews; own High-tier paths; triage oracle disagreements | Feature matrix fully oracle-backed; mutation floor met |
 | 3 Ecosystem | mixed | Own plugin API and debugger core | API diff, sample plugins, DAP conformance, release dry runs |
 
 INFERRED: PhotoCraft effectively started in "phase 2" mode within days (E01-014) because its phase 0
@@ -449,4 +449,5 @@ if the playbook's tiers or gate list differ, §7's IDE-specific additions still 
 names should be aligned. The E05/E06 PR samples are WebFetch summaries (lower fidelity).
 
 No new upstream evidence was gathered during synthesis; all PhotoCraft claims cite existing
-evidence entries. No commit shas are cited directly in this document.
+evidence entries. Primary shas are carried only for the §2.2 failure rows; elsewhere they resolve through
+the cited entry (`deliverables/01-evidence-ledger.md`).

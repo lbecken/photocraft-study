@@ -19,3 +19,6 @@ Corrections found while synthesizing; where an evidence file and this list disag
 | 13 | FreeBSD-delegation commit | Correct sha is `0cc161e2a8` (replaces the unverified `0cc421d0d5` in E05). | D06 |
 | 14 | "Required checks gate merges" (E05) | Unresolved: E06/E09 samples show merges with 2 of 5 and 4 of 7 checks passed; skipped jobs may be counted as not passed. Do not state that checks are required for merge. | D06 |
 | 15 | Untagged version bumps | 0.11.0, 0.15.0 and 0.20.0 were bumped but never tagged, each followed by a same-day platform fix; that the release builds failed is INFERRED (no failed run observed). | D06 |
+| 16 | E06 "aiongg has no AI attribution" | True for trailers only: 13 commits authored by the `Codex` identity reached main through his PR #8577; a further 10 came through yoriswind's fork `codex/*` PRs (yoriswind also has 0 trailers). Zero trailers ≠ no AI involvement. | D05 |
+| 17 | PR-page sample size | E05/E06 say 16 pages; including E09's pages the total is about 22, with 4 explicit human approvals. | D05, D06 |
+| 18 | `Model-Effort:` trailers | All 27 commits (25 non-merge) are by one contributor (Trevor Brown) and were merged by David Mann — a single person's convention, not a project practice. | D05 |

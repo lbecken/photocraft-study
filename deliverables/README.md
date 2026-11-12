@@ -6,7 +6,7 @@
 | 02 | Development chronology | **deferred — evidence-level only** | `../evidence/E01-genesis.md` (timeline to 10-08), `E02` §1 (AGENTS.md revisions), `E05` §0.4 + §1 (CI/release timeline), `E07` (incidents, campaigns), `../data/E03_commits_weekly.csv` |
 | 03 | Architecture and process reconstruction | done | `03-architecture-and-process.md` |
 | 04 | Feature case studies | **deferred — evidence-level only** | `../evidence/E09-case-traces.md` (8 cases with commit tables and cross-case comparison) |
-| 05 | AI agent and human role maps | **deferred — evidence-level only** | `../evidence/E06-workflow-roles.md`; partly covered by `03` Part B and `08` §2 |
+| 05 | AI agent and human role maps | done | `05-role-maps.md` |
 | 06 | Testing/CI/release analysis | done | `06-testing-ci-release.md` |
 | 07 | Failure and productivity analysis | done | `07-failures-productivity.md` |
 | 08 | AI Software Engineering Playbook | done | `08-playbook.md` |

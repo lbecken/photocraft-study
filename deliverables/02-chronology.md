@@ -53,14 +53,14 @@ fixes it is VERIFIED and cited.
 | P4 Integration batches + bot review | 10-18 → 10-28 (11 d) | 4,423 / 2,617 | 232 | 1,180 (45.1 %) | 376 (303) | 8 (v0.10.0–v0.17.0) |
 | P5 Consolidation on shared infra | 10-29 → 11-04 (7 d) | 1,736 / 1,157 | 80 | 450 (38.9 %) | 102 (55) | 3 (v0.18.0–v0.20.1) |
 | P6 House rules + release branch | 11-05 → 11-12 (8 d) | 2,242 / 1,265 | 93 | 581 (45.9 %) | 581 (118) | 5 (v0.20.2–v0.23.1) |
-| **Total** | 44 d | **12,396 / 8,329** | 582 (whole period) | **4,130 (49.6 %)** | **3,290** | 27 tags / 26 commits |
+| **Total** | 44 d | **12,396 / 8,329** | 582 (whole period) | **4,130 (49.6 %)** | **3,288** | 27 tags / 26 commits |
 
 Method (VERIFIED, new computation): `scratchpad/work/D02/phases.py` (reproduced in Appendix A) runs
 `git log 74330157cb --format=%P|%an|%ae|%cI|%B`, buckets by UTC committer day, applies the E03 AI-attribution
 rules (any-line co-author regex, AI author identity, session/effort trailers, "Generated with"), and maps
 author aliases via `data/E03_alias_map.csv`. PRs come from `data/E03_pr_daily.csv`, tags from
-`data/E03_releases.csv`. Totals reconcile with E03 (12,396 / 8,329 / 4,130). PR total 3,290 = E03's 3,285
-distinct numbers + 5 recurring/duplicate numbers counted per landing day. Caveats: per-phase author counts
+`data/E03_releases.csv`. Totals reconcile with E03 (12,396 / 8,329 / 4,130). PR total 3,288 = E03's 3,285
+distinct numbers + 3 squash numbers that land twice (E03 §5: 2,690 squash commits, 2,687 numbers). Caveats: per-phase author counts
 are not additive (people span phases); commits from P4 on are inflated by merge-commit PRs importing branch
 histories (E03 C1) — compare **PRs** across phases, not commits.
 
@@ -315,3 +315,173 @@ Row count: 132. Coverage check against E02 §1: AGENTS.md revisions that changed
 and rev 19 (`c161eaec73`, 10-06, "Never commit font files"; fonts from `storytold/craft-fonts`). Revs 4, 8,
 13, 18, 20, 21, 28–31 are map, spelling, sibling-name or whitespace edits. CI gates follow E05-003; the
 row it cites with an unverified sha (`0cc4…`, 01c-errata #9) is omitted. Campaigns follow E07 §4.
+
+---
+
+## 3. Week-by-week metrics strip
+
+**Finding.** Landed PRs peak in W41 (1,347) and fall ~19× to W44 (70) before recovering in W45–W46 as
+merge-commit PRs return at volume; distinct authors peak in W42 (277). Explicit AI attribution falls from
+85 % to 23 % of non-merge commits. Rust LOC and test attributes grow every week (≈14× and ≈20× overall),
+so code growth never tracked the PR curve.
+
+| ISO week (UTC, Mon–Sun) | Commits | Non-merge | Distinct authors (newcomers) | AI-attributed non-merge | AI-attributed first-parent non-merge | PRs landed (squash / merge) | Tagged release commits | Rust LOC, non-blank (week end) | `#[test]` (week end) |
+|---|---|---|---|---|---|---|---|---|---|
+| W40 (09-30 → 10-04) | 126 | 124 | 6 (6) | 105 (84.7 %) | 99 / 118 (83.9 %) | 47 (45 / 2) | 3 | 176,430 | 2,001 |
+| W41 (10-05 → 10-11) | 1,622 | 1,524 | 232 (227) | 957 (62.8 %) | 909 / 1,376 (66.1 %) | 1,347 (1,339 / 8) | 5 | 430,996 | 6,566 |
+| W42 (10-12 → 10-18) | 2,681 | 1,916 | 277 (192) | 1,021 (53.3 %) | 524 / 937 (55.9 %) | 937 (925 / 12) | 3 | 552,308 | 9,045 |
+| W43 (10-19 → 10-25) | 3,086 | 1,734 | 203 (94) | 856 (49.4 %) | 118 / 242 (48.8 %) | 246 (197 / 49) | 6 | 654,428 | 11,308 |
+| W44 (10-26 → 11-01) | 1,718 | 1,125 | 77 (26) | 415 (36.9 %) | 6 / 36 (16.7 %) | 70 (29 / 41) | 3 | 743,027 | 13,096 |
+| W45 (11-02 → 11-08) | 2,400 | 1,517 | 93 (31) | 687 (45.3 %) | 36 / 93 (38.7 %) | 322 (89 / 233) | 3 | 909,024 | 16,636 |
+| W46 (11-09 → 11-12, partial) | 763 | 389 | 54 (6) | 89 (22.9 %) | 8 / 69 (11.6 %) | 316 (63 / 253) | 3 | 955,603 | 18,014 |
+| **Total** | **12,396** | **8,329** | **582** | **4,130 (49.6 %)** | **1,700 / 2,871 (59.2 %)** | **3,285** | **26** | 68,332 → 955,603 | 915 → 18,014 |
+
+Sources (all VERIFIED, produced by `scripts/e03_git_quant.py` and `scripts/e03_growth.py` at the pin):
+`data/E03_commits_weekly.csv` (commits, non-merge), `E03_authors_weekly.csv` (authors, alias-merged),
+`E03_attr_weekly.csv` (AI columns; first-parent share = `nonmerge_first_parent_any_ai / nonmerge_first_parent`,
+my arithmetic), `E03_pr_weekly.csv` (PRs), `E03_releases.csv` (distinct tagged commits by UTC date; 27 tags
+on 26 commits), `E03_growth.csv` (LOC and `#[test]` at the last first-parent commit of the week; the total
+row shows day-1 → pin). E05-019 counts 18,111 `#[test]` at the pin with a different grep; 18,014 is used here
+for consistency (07 §B.4).
+
+**The squash/merge caveat (stated once, applies to every count above).** Until W42, 98.7–99.4 % of PRs were
+squash-merged, so one PR = one first-parent commit and its internal commits vanish. From W43, merge-commit
+PRs import whole branches including "merge main into branch" syncs (3,463 of 4,067 merges on main are such
+side merges), and one integration batch lands 9–48 member PRs under one PR number. Hence: commits
+**overcount** work from W43, "PRs landed" **undercounts** it in W43–W45 (908 PR heads reached main only via
+other PRs or batches, E03 §5), and the AI share is not comparable across the switch (squash bodies
+concatenate all trailers of a PR into one commit, E03 C3; 07 §B.6). The first-parent AI share in W44–W46 is
+computed over very few direct/squash commits (36, 93, 69) and is not a trend signal.
+
+---
+
+## 4. Cause → response chains
+
+**Finding.** In 12 traced pairs, 9 responses state their cause in the commit message (VERIFIED link); the
+other 3 are linked by timing only (INFERRED). The fastest responses (0–1 day) were mechanical (CI or test
+changes); the slowest (11–32 days) were process changes for merge skew and governance. This aligns with
+07 §A.3, which tabulates the same loop with latencies.
+
+| # | Cause (date, ref) | Response (date, ref) | Lag | Link label |
+|---|---|---|---|---|
+| C1 | Crash reports: issue #7 "Dies as soon as i open jpeg image" (10-03, WebFetch); panicking MCP commands in #16/#17 (10-03/04) | AGENTS rule 9 "Never panic on input" (`ed0b99964d`, 10-04 04:10), `panic_hunt` (`bf111b524e`), "Never crash" section + forbid unsafe (`50a27e6c74`), 11-PR sweep (#34–#59) | < 1 d | INFERRED (timing; messages do not cite the issues) — E07-009 |
+| C2 | CI `cargo fmt --check` "has failed on every run because the repo had no rustfmt config" (since `16941f7198`, 09-30) | Workspace rustfmt + blame-ignore (`f7eb6ea9e7`, `574d4fe7da`, 10-04) | ~4 d | VERIFIED (stated in `f7eb6ea9e7`) — E07-012 |
+| C3 | "users hit broken basics that all counted as 'live'" vs "625/625 menu items live" (`58653e617b`, 10-03) | Honest parity assessment (`20783fdc70`, 10-05) and AGENTS step 0 (`433b84fae7`) | 2 d | VERIFIED (stated in `20783fdc70`) — E07-013 |
+| C4 | Stale `Cargo.lock` failing the release build (before 10-05) | CI `--locked` "so a stale Cargo.lock fails CI instead of the release build" (`ad86321738`, 10-05) | — | VERIFIED (stated) — E05-061 |
+| C5 | "80 of 83 push runs on main were cancelled, and a formatting break from two PRs that were each green alone (#663 + #700) went unnoticed" (10-07) | Main runs never cancelled; PRs Linux-only by default (`07174271d5`, 10-07 23:46) | 0 d | VERIFIED (stated) — E05-004 |
+| C6 | Merge-skew reds from 10-07 (`6103da5278`, `25f211500b`, `351149f0df`) | CI-only `claude/integ-batch` trains (10-08) → maintainer batches (`5c89f16b60`, 10-18) → manual "(merge queue)" (`fda05f7b02`, 11-08: "so main's gate stays green after the merge") | 1 / 11 / 32 d | INFERRED for the first two steps (no message cites the reds); the last is VERIFIED in its own message — E07-003/005, 07 §A.3 |
+| C7 | craftrules "returns 404 to everyone outside the organization" (issue #493) | Docs stop linking it (`f9b72468b4`, 10-08) → references removed (`6d737c219e`, 10-31) → public, hash-checked house rules incl. rule 13 "`craftrules` is retired" (`7d8648dfcb`, 11-06) | 0 / 23 / 29 d | VERIFIED for step 1 (cites #493); INFERRED for later steps |
+| C8 | Wasm 25,587,059 bytes over the 24 MiB gate fails release 0.8.1 and unrelated PRs (10-12, `d43db3e153`) | wasm shipped as gzip parts behind `photocraft-web-boot` (`df055f3dcb`, 10-15) | 3 d | VERIFIED (stated in `df055f3dcb`) — E05-062, E07-027 |
+| C9 | panic_hunt "printed a blank page on the default printer" (10-12/13) | `PHOTOCRAFT_NO_PRINT`, `LPDEST` (`70e182b08f`, 10-13) | 0 d | VERIFIED (stated) — E05-074 |
+| C10 | "The full-registry fuzz (AGENTS.md Rule 9) is #[ignore]d and no workflow ran it" (rule since 10-04) | panic_hunt in the CI gate (`45afd2e9d7`, 10-17) | 13 d | VERIFIED (stated) — E05-071 |
+| C11 | "57 GPU checks … returned early and passed without comparing anything" (latent) | lavapipe rerun that fails on authored skips (`2ff8f419cb`, 11-06) | unknown | VERIFIED (stated) — E05-024 |
+| C12 | Release breakage that "only the release build hits … as it did on 11 Nov 2026" (v0.23.0/0.23.1, Flatpak fix `eee667f1d9`) | Nightly release dry run (`f1b5e7d727`, 11-11 22:04) | 0 d | VERIFIED (stated) — E05-063 |
+
+Counter-example worth recording: the 10-27 complexity-lint gate (`604da9d06b`) is a *response* to Sonar
+findings that itself *caused* the 11-11 reds (`47d3dcde33`, `06650357d8`) when merges combined two compliant
+functions; no process response followed by the pin (E07-005; 07 F9). INFERRED.
+
+---
+
+## 5. What the chronology cannot tell us
+
+| Gap | Effect on this timeline | Evidence of the gap |
+|---|---|---|
+| Private `plan/` (research, parity plan, execution plan, estimates) | The pre-code planning phase on 09-30 and any later re-planning are invisible; P1 starts at the first public artefact | `16941f7198:.gitignore`; `16941f7198:AGENTS.md:58-62`; links to never-committed files (E01-005) |
+| Private `log/devlog.md` | The documented agent hand-off record ("the dev log plus a green tree is how the next agent picks up") cannot be dated or counted | `HEAD:AGENTS.md:168`, `/log` gitignored (E02-004) |
+| Private `craftrules` repo (until 10-31) | Standards cited on 10-01, 10-04, 10-07, 10-10 (release playbook, licensing, never-crash, contributors, progress-docs) are known only by name and date of citation | E01-023, E02 §1 revs 6, 11, 12, 22, 26 |
+| Shared `craft-common-actions` and `craft-contrib` internals | Gate and house-rule changes made upstream at `@main` do not appear in this repo's history at all | E05-009, E05 open questions, E02-012 |
+| Discord and private chat | Intake reaches GitHub only via the ticket-craft relay; decisions taken in chat leave no trace | E07-021/022, E08 S08 press-kit note |
+| Unattributed commits (4,199 non-merge, 50.4 %) | AI share per phase is a lower bound; the drop after 11-06 cannot be separated from contributor mix or landing style (07 §B.6) | E03 C7, E03-003 |
+| Squash merges | Who pressed merge on 2,690 squash PRs, and PR internal history, are lost | E03 §4 |
+| PR/issue pages | Review, approval and open/close times rest on ≤16 WebFetch summaries | E00-004, E05 §0.3, E06-041 |
+| Agent counts and orchestration | "8 parallel agents" (10-02) and "10–20 concurrent agents" (10-10) are self-reported; session ids cover 5.8 % of AI commits | E08-003/005, 07 §B.6 |
+| Lightweight tags | Tag dates are commit dates, not tagging/publish dates; who published each draft release is unknown | E03-015, E05-065 |
+| Author vs committer dates | E02/E05 sometimes date rows by author date; this file uses committer UTC, so a few events differ by ≤3 days (rows 87, 108) | method note |
+
+---
+
+## Confidence and gaps
+
+- **Strongest:** dates and shas of every row (resolved against the pin; verifier run below), the weekly
+  metrics (script-generated CSVs), the squash → merge-commit switch date (10-21, daily CSV), the
+  release-branch switch (v0.20.2, 11-05) and the AGENTS.md revision sequence.
+- **Weakest:** phase boundaries (my interpretation; P4/P5 at 10-29 is the softest — W44 is a low-activity
+  week and could as well be the end of P4); the "Review" row of §1.3 (≤16 PR pages, WebFetch summaries);
+  all causal links labelled INFERRED in §4; HN dates marked "~" (from E08's Algolia reads, day precision).
+- **Not checkable:** private `plan/`, `log/`, craftrules, Discord; branch-protection settings; whether
+  `claude/integ-batch-*` and `integration-batch-7..20` are one pipeline (E06-022).
+- **Would change the conclusions:** a published devlog or plan (could move P1/P3 boundaries or reveal
+  orchestration changes not visible in git); branch-protection history (could show the review method changed
+  at different dates than the batch/merge-queue evidence suggests); per-PR attribution of the 2,238 heads
+  with no merge evidence.
+- **Contradictions found and resolved:**
+  - E05-003 dates `6401cfdbe1` 10-17 and E02 §1 dates `0379569d00` 10-29; committer UTC dates at the pin are
+    10-20 17:13 and 10-30 02:22 (author vs committer date). Both are shown with the note.
+  - E03 dates the first `Model-Effort:` commit `b29fdc5a29` 11-07; committer UTC is 11-08 01:05.
+  - PR total 3,288 in §1.1 vs 3,285 distinct numbers in E03 §5: the daily CSV counts landings, and 3
+    squash numbers land twice.
+  - Applied 01c-errata items 1, 2, 4, 6, 7 and 9 (session counts, merge-queue count, Opus 4.8 trailers,
+    fix branches vs integ batches, `Finding:` trailers, unverified `0cc4…` sha).
+
+## New evidence gathered during synthesis
+
+- Per-phase metrics (§1.1): `python3 -I scratchpad/work/D02/phases.py <upstream> /home/user/photocraft-study`
+  at pin `74330157cb` (Appendix A). Output reconciles with E03 totals (12,396 commits, 8,329 non-merge,
+  4,130 AI-attributed).
+- UTC committer timestamps for all timeline shas:
+  `git log -1 --date=format-local:'%m-%d %H:%M' --format='%h|%cd|%an|%s' <sha>` (sandbox TZ = UTC; checked
+  against `386b0566d3` 02:12 −0400 = 06:12).
+- Daily squash/merge-commit landings 10-14 → 11-12 from `data/E03_pr_daily.csv`, giving the 10-21
+  crossover (1 squash / 11 merge-commit) and the 11-07 → 11-12 merge-commit series (87, 80, 36, 56, 146, 15).
+- First-parent integration subjects: `git log --first-parent 74330157cb --reverse --format='%h %cd %an | %s'
+  | grep -i integrat` → first maintainer batch `5c89f16b60` (10-18 15:41, aiongg `integration-2`, #7432),
+  last `6b0f7762e1` (11-06 21:49, batch-20); also third-party batches `45001fc401` (FedeOlivares, 10-29) and FredApps
+  `7d66766afb`, `b1cfff9d30` (10-30).
+- `a196adfe93` (10-04 12:19 UTC) and `c161eaec73` (10-06 22:21 UTC) confirmed as AGENTS revs 10 and 19.
+
+---
+
+## Appendix A — `phases.py` (verbatim, stdlib only)
+
+```python
+# Per-phase metrics for deliverable 02. Usage: python3 -I phases.py <upstream> <study-repo>
+import sys, subprocess, re, csv, datetime as dt, collections
+U, S = sys.argv[1], sys.argv[2]
+PIN = "74330157cb601573ae4523a95bb9132822fc3918"
+PH = [("P1","2026-09-30","2026-10-03"),("P2","2026-10-04","2026-10-07"),("P3","2026-10-08","2026-10-17"),
+      ("P4","2026-10-18","2026-10-28"),("P5","2026-10-29","2026-11-04"),("P6","2026-11-05","2026-11-12")]
+ph = lambda d: next(p for p,a,b in PH if a <= d <= b)
+CO = re.compile(r"^[\s*>-]*co-authored-by:\s*(.*?)\s*(<([^>]*)>)?\s*$", re.I|re.M)
+AIN = re.compile(r"^(Claude\b.*|GPT-?\d.*|(OpenAI )?Codex.*|Cursor( Agent)?|Copilot|Codebuff|Devin|DeepSeek.*|Qwen.*|Gemini.*|Grok.*)$", re.I)
+AIE = re.compile(r"(@anthropic\.com|@openai\.com|@cursor\.com|@codebuff\.com|@qwen\.ai|@deepseek\.com|\+copilot@users\.noreply\.github\.com)", re.I)
+SESS = re.compile(r"^\s*(Claude-Session|Copilot-Session|Model-Effort):", re.I|re.M)
+GEN = re.compile(r"generated with \[?(Claude Code|Codebuff|Codex)", re.I)
+alias = {}
+for r in csv.DictReader(open(S+"/data/E03_alias_map.csv")):
+    for a in r["merged_aliases"].split("; "):
+        if a: alias[a] = r["canonical_name"]
+out = subprocess.run(["git","-C",U,"log",PIN,"--format=%x1e%P%x1f%an%x1f%ae%x1f%cI%x1f%B"],capture_output=True,text=True).stdout
+M = collections.defaultdict(lambda: dict(all=0,nm=0,ai=0,auth=set()))
+for rec in out.split("\x1e")[1:]:
+    par,an,ae,ci,body = rec.split("\x1f",4)
+    d = dt.datetime.fromisoformat(ci).astimezone(dt.timezone.utc).date().isoformat()
+    m = M[ph(d)]; m["all"] += 1; m["auth"].add(alias.get(an,an))
+    if len(par.split()) > 1: continue
+    m["nm"] += 1
+    ai = any(AIN.match(x.group(1).strip()) or AIE.search(x.group(3) or "") for x in CO.finditer(body)) \
+         or ae.lower().endswith(("@anthropic.com","@openai.com")) or re.match(r"^(Claude|Claude Opus.*|Codex)$",an) \
+         or SESS.search(body) or GEN.search(body)
+    m["ai"] += bool(ai)
+pr = collections.Counter(); sq = collections.Counter()
+for r in csv.DictReader(open(S+"/data/E03_pr_daily.csv")):
+    pr[ph(r["day_utc"])] += int(r["prs_landed"]); sq[ph(r["day_utc"])] += int(r["squash_prs_landed"])
+rel = collections.defaultdict(list)
+for r in csv.DictReader(open(S+"/data/E03_releases.csv")):
+    rel[ph(r["commit_date_utc"][:10])].append(r["tag"])
+print("phase|days|commits|non-merge|authors|AI-attr non-merge|PRs landed (squash)|tags")
+for p,a,b in PH:
+    m = M[p]; n = (dt.date.fromisoformat(b)-dt.date.fromisoformat(a)).days+1
+    print(f"{p}|{a}..{b} ({n}d)|{m['all']}|{m['nm']}|{len(m['auth'])}|{m['ai']} ({100*m['ai']/m['nm']:.1f}%)|{pr[p]} ({sq[p]})|{len(rel[p])}: {' '.join(rel[p])}")
+print("TOTAL", sum(m['all'] for m in M.values()), sum(m['nm'] for m in M.values()), sum(m['ai'] for m in M.values()))
+```

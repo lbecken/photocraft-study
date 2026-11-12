@@ -40,7 +40,7 @@ Terms used below:
    unknown) and a driver/briefer/writer split (`Model-Effort:`, one contributor only). Each is evidenced
    below together with what it cannot show.
 6. **Humans kept merge, release publication, and in late months labels and change requests.** In the
-   16 PR pages sampled, visible human approval is rare: 4 PRs with an explicit approval (#7848, #11641, #8452, #9363; E06-041, E05-035, E09).
+   ~22 PR pages read (E05, E06, E09), visible human approval is rare: 4 PRs with an explicit approval (#7848, #11641, #8452, #9363; E06-041, E05-035, E09).
    The documented accountability rule is not mechanically enforced.
 7. **Attribution policy conflicts with itself.** House rule 15 says "No agent attribution" in PRs.
    The product's About ▸ Models screen is built from `Co-Authored-By` trailers
@@ -52,7 +52,7 @@ Terms used below:
 
 Method: authorship and merge counts come from `scripts/e03_git_quant.py` (E03) and E06's `authors.py` /
 `fp.py`. Where they differ the two use different alias merging (E03 C6). AI share = E03
-`with_any_ai_attr / nonmerge_commits`. Review behaviour comes from WebFetch summaries of 16 PR pages
+`with_any_ai_attr / nonmerge_commits`. Review behaviour comes from WebFetch summaries of ~22 PR pages (E05 §0.3, E06 §6, E09)
 (E05 §0.3, E06 §6), which are lower fidelity. Unless a row says otherwise, every role assignment is
 **INFERRED from the cited behaviour**, because no document names these roles.
 
@@ -261,7 +261,7 @@ is documented as a practice.
 
 ### 3.5 Maintainers with low attribution in reviewer, CI and release roles (FredApps, Dylan M. Taylor, Tanish Manku, skylar taylor-barrick)
 - **Evidence:** 1.3–27% AI-attributed (§1.1). These four carry the visible review acts: approvals (FredApps), change requests (tanish2k09), "human review and a human merge are required" (#9363). They also own CI and release (§1.1).
-- **Limits:** the review sample is 16 PR pages (E05 §0.3, E06 §6).
+- **Limits:** the review sample is ~22 PR pages (E05 §0.3, E06 §6, E09).
 
 ### 3.6 Fork contributors with assorted tools, and the per-author distribution
 Finding: contributors split mostly into "almost always attributed" and "never attributed", with a
@@ -326,7 +326,7 @@ and ticket-craft.
 | Implement | R O: 76% AI-attributed | R O | R O | R O: 49.6% of non-merge commits attributed; 1.0% under AI identity | C O: 19 `coderabbitai[bot]` co-author lines (all refs) | — |
 | Write tests | R O | R O: backfill campaign (72e11802d4) | R O | R O: 80.8% of AI-attributed commits touch tests vs 74.4% of non-attributed (E03 §7, heuristic) | — | — |
 | Run local gate | — | U | U: self-reported "Validation"/"Not run" sections (#11059, #8452) | R V: "Before you finish" list addressed to agents (`AGENTS.md:145-168`); "Report only what ran" (`:12`); execution U | — | — |
-| Review | U: early merges "No reviews" (#33, #1261) | R O: FredApps approvals, tanish2k09 change requests; rare (4 approved PRs in 16 pages) | — | R O (self-reported): reviewer + attacker agents (#9386); first-pass automated review (eliets2, #12237) | R O: CodeRabbit on all sampled PRs from 10-19 (E06-040), advisory | R O: required checks pass at merge (check counts, E05-035) |
+| Review | U: early merges "No reviews" (#33, #1261) | R O: FredApps approvals, tanish2k09 change requests; rare (4 approved PRs in ~22 pages) | — | R O (self-reported): reviewer + attacker agents (#9386); first-pass automated review (eliets2, #12237) | R O: CodeRabbit on all sampled PRs from 10-19 (E06-040), advisory | R O: required checks pass at merge (check counts, E05-035) |
 | Approve | A O (to 11-02) | A O: approval or "ready to merge" label (#11062); "a person is accountable" V (`AGENTS.md:6`) | — | — | — (not blocking, E05-030) | C O: checks gate merges (INFERRED, E05-035) |
 | Merge | R/A O: 2 merge clicks; squash merges of #1261, #2792 | R/A O: 597 of 603 merge clicks by 8 people (`E03_mergepr_by_merger.csv`) | — | R O (rare): 14 first-parent commits committed by `Claude` (E03-006) | — | — |
 | Resolve conflicts | — | A O: batch mergers | — | R O: Claude-trailered conflict merges (38609e5615, 2c82295e4c) | — | — |
@@ -378,7 +378,7 @@ already fixed on `main`, PRs left as drafts, or code that uses functions that do
 | Post-merge human testing | skylartaylor found three artboard problems on main after #10512/#10538, fixed in #11441 | OBSERVED, E09-H-002 |
 | Direct pushes to main after PRs began | Dylan's ~30 `security(...)` commits on 10-22; release commits; all before rule 8 | OBSERVED, E06-026 |
 
-Rate: across the 16 PR pages sampled (10 in E06, 6 in E05), 4 merged or decided PRs show an explicit
+Rate: across the ~22 PR pages read (10 in E06, 6 in E05, ~6 in E09: #1421, #8417, #8452, #9363, #10426, #11441), 4 merged or decided PRs show an explicit
 human approval (#7848, #11641, #8452, #9363). The others show labels, comments or nothing. The sample
 was chosen by hand, not at random, so this is not a rate estimate (INFERRED).
 
@@ -414,7 +414,7 @@ the rule, because the contributor mix changed too (E02-016, E05-073).
 |---|---|---|
 | Number of agents running at any moment | Agents run under human git identities; session trailers cover a minority of commits; author dates survive rebases | Self-reported "8 parallel agents" (10-02) and "10–20 concurrent agents" (10-10) without method (E08-003/005); ≤15 distinct session ids on one day (E06-011); 504 landed PRs in flight on 10-13 (E06-051) |
 | Orchestration tooling | No harness config on any ref; `plan/` and `log/devlog.md` gitignored | "vanilla Claude Code" (HN 50029182); `Model-Effort` driver/briefer/writer (one contributor); fork CLAUDE.md "Delegation" never merged (E02-022) |
-| How much each human reads before merge | Squash mergers are not in git; branch protection not visible; ≤16 PR pages sampled via summaries | §5.2 |
+| How much each human reads before merge | Squash mergers are not in git; branch protection not visible; ~22 PR pages sampled via summaries | §5.2 |
 | Autonomy level per agent | No permission files; the stop-and-ask list is prose | `AGENTS.md:14`; anti-stall "Do not ask for it and do not stop when it is absent" (`:186`, E02-010) |
 | AI share of the ~50% unattributed commits | Absence of a trailer = unknown; rule 15 discourages disclosure | Codex-identity commits in 0%-trailer authors' PRs (§2.2) |
 | Who operated d43db3e153 (Claude release commit) and the security-finding tool | No attached human or tool named | E06-005, E09-G-002 |
@@ -476,7 +476,7 @@ and §6 need is kept too.
 ## Confidence and gaps
 
 - **Strongest:** authorship, merge-click and trailer counts (git, scripted, reproducible); `Model-Effort` and Codex-identity landing paths (recomputed here); the rule texts (hash-verified AGENTS.md).
-- **Weakest:** everything about review. It rests on WebFetch summaries of 16 hand-picked PR pages, with no branch-protection data. The operator links (BFlat ↔ Claude commits; the founder ↔ d43db3e153) rest on committer fields and timezones. The "reviewer + attacker" method is a single self-report.
+- **Weakest:** everything about review. It rests on WebFetch summaries of ~22 hand-picked PR pages, with no branch-protection data. The operator links (BFlat ↔ Claude commits; the founder ↔ d43db3e153) rest on committer fields and timezones. The "reviewer + attacker" method is a single self-report.
 - **Not checkable:** squash-merge clickers (2,690 PRs), permission and autonomy settings, `plan/` and `log/devlog.md`, third-party bot configuration, prompts.
 - **What would change conclusions:** branch-protection settings with required approvals (would weaken lessons 2–3); committed review records from batch agents (would turn lesson 4 around); a full crawl of PR pages for approvals (would replace the sample-based §5.2).
 - **Evidence inconsistencies resolved:**
