@@ -16,15 +16,15 @@ _Last updated: 2026-11-12 (session 01)_
 | Stream | Status |
 |---|---|
 | E00 source identity | done |
-| E01 genesis | running (session 01) |
-| E02 agent instructions | running (session 01) |
-| E03 git quant | running (session 01) |
-| E04 architecture | running (session 01) |
-| E05 test/CI/release | running (session 01) |
-| E06 workflow & roles | running (session 01) |
-| E07 failures | running (session 01) |
-| E08 external | running (session 01) |
-| E09 case traces | running (session 01) |
+| E01 genesis | done |
+| E02 agent instructions | done (opus, complete file) |
+| E03 git quant | data+scripts done; write-up running (sonnet) |
+| E04 architecture | re-running (sonnet) |
+| E05 test/CI/release | done (opus, complete file) |
+| E06 workflow & roles | re-running (sonnet) |
+| E07 failures | re-running (sonnet) |
+| E08 external | re-running (sonnet) |
+| E09 case traces | re-running (sonnet) |
 
 ## Deliverable status
 | # | Deliverable | Status |
@@ -42,6 +42,9 @@ _Last updated: 2026-11-12 (session 01)_
 
 ## Backlog / next steps
 - See newest file in `handoffs/`.
+
+## Notes
+- 2026-11-12: Opus weekly quota exhausted mid-run (resets 2026-11-14 16:00 UTC); remaining streams re-launched on Sonnet. Sonnet-produced evidence (E03 write-up, E04, E06–E09) should get an Opus/Fable spot-check of citations in Phase 3.
 
 ## Blockers
 - **Push to `origin` fails (HTTP 403: Claude GitHub App lacks access to `lbecken/photocraft-study`).**
