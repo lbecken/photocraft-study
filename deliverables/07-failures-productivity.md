@@ -464,3 +464,320 @@ converted into a check only after it had been shown not to hold (E05-071).
 INFERRED pattern: the project's reflex is *measure, then ratchet*. Examples are the inert-settings
 count, parity floors, corpus floors and the shrink-only allowlist. That works where a failure can be
 counted per file. It has not been applied to the cross-PR and human-process failures above.
+
+---
+
+# Part B — Productivity analysis
+
+## B.4 Output measures, with denominators
+
+**Finding.** Within 44 days the project went from 68,332 to 955,603 non-blank Rust lines, from 915 to
+18,014 `#[test]` attributes, to 3,285 landed PR numbers, 26 tagged release commits and 582 author
+identities (all VERIFIED, E03-012, E03 §5, E03-015, E03-007). Throughput peaked in W41–W42 and then fell
+by roughly 4–10× in landed PRs per day. Raw commit counts show the opposite shape, so they must not be
+used as an output measure.
+
+### Weekly table (ISO weeks; UTC committer dates; sources in brackets)
+
+| Week | Landed PR numbers (squash + merge) [E03_pr_weekly] | PRs/day | Non-merge commits [E03_commits_weekly] | Non-merge per landed PR | Rust LOC added (week-end delta) [E03_growth] | `#[test]` added | Distinct authors / newcomers [E03_authors_weekly] | Tagged releases [E03_releases] |
+|---|---|---|---|---|---|---|---|---|
+| W40 (09-30→10-04) | 47 (45+2) | 47 on 10-04 only | 124 | 2.6 | +108,098 (from 68,332) | +1,086 | 6 / 6 | 3 (v0.1.0, rc.5, v0.1.1) |
+| W41 | 1,347 (1,339+8) | 192 | 1,524 | 1.1 | +254,566 | +4,565 | 232 / 227 | 5 (v0.2.0–v0.7.0) |
+| W42 | 937 (925+12) | 134 | 1,916 | 2.0 | +121,312 | +2,479 | 277 / 192 | 3 |
+| W43 | 246 (197+49) | 35 | 1,734 | 7.0 | +102,120 | +2,263 | 203 / 94 | 6 |
+| W44 | 70 (29+41) | 10 | 1,125 | 16.1 | +88,599 | +1,788 | 77 / 26 | 3 |
+| W45 | 322 (89+233) | 46 | 1,517 | 4.7 | +165,997 | +3,540 | 93 / 31 | 3 |
+| W46 (Mon–Thu) | 316 (63+253) | 79 | 389 | 1.2 | +46,579 | +1,378 | 54 / 6 | 3 |
+| **Total** | **3,285** | 75 avg | **8,329** | 2.5 | **+887,271** | **+17,099** | **582** | **26** |
+
+Method notes:
+- PRs/day = landed / days with PRs. The derived columns are INFERRED arithmetic on the cited CSVs.
+- LOC and tests come from the snapshot rows in E03 §8. W40 is measured from the day-1 snapshot
+  (14c5c1bc51), so the first-day bulk of 68 k lines is excluded.
+- The pin snapshot (74330157cb) removes `crates/psd` (−25,930 lines) in favour of an external crate
+  (E09-D-004). The W46 LOC delta is therefore net of an extraction, not a slowdown.
+- Release counts are distinct tagged commits by UTC date in `data/E03_releases.csv`.
+
+**Why raw commit counts mislead (VERIFIED mechanism, E03 C1/E03-002):**
+- Until W42, 98.7–99.4 % of PRs were squash-merged. Each PR then contributes exactly one first-parent
+  commit, and its internal commits disappear.
+- By W46, 80.1 % of PRs land as `Merge pull request` commits. These import the whole branch,
+  including "merge main into branch" sync merges: 3,463 of the 4,067 merges on main are such side
+  merges.
+- So W43 shows 3,086 commits for 246 landed PRs (12.5 per PR), while W41 shows 1,622 for 1,347 (1.2).
+  The busiest commit day, 10-21, with 780 commits, had only 15 first-parent commits (E03 §2).
+- The same switch also drops PR numbers from subjects (E06-031) and lets one integration-batch PR land
+  37–48 member PRs. 908 PR heads are ancestors of main only via other PRs or batches (E03 §5). So
+  "landed PR numbers" **undercounts** contributions in W43–W45, and "commits" **overcounts** them.
+- The least-biased unit is "PR heads with any merge evidence", ≈ 4,213 of 6,480 (65 %). It cannot be
+  bucketed by week from git alone (E03 §5).
+
+**Change size and tests (VERIFIED, E03-011, `data/E03_size_summary.csv`, `E03_tests_weekly.csv`):**
+- Median non-merge commit: +52/−5 lines in 2 files (p90 +418). Median landed squash or direct change:
+  +82 lines in 3 files (p90 +583).
+- AI-attributed and unattributed medians are nearly identical (+51 vs +52). This is no basis for a
+  causal claim.
+- 77.5 % of non-merge commits touch tests by the stated heuristic (path or new `#[test]`), ranging
+  from 64.5 % (W40) to 85.3 % (W41). AI-attributed commits: 80.8 %. Unattributed: 74.4 %.
+- Limit: "touches a test path" does not mean "adds a test that fails without the fix" (F4).
+  Integration-batch fix-ups inflate the denominator.
+
+**Release cadence.** 26 distinct tagged commits in 41.4 days, median gap 1.6 days. From v0.20.2
+(11-05), tags sit on a `release` branch and are not ancestors of main (E03-015). Releases kept their
+cadence while PR throughput fell. That is consistent with a project shifting from feature landing to
+stabilisation (INFERRED).
+
+**Interpretation limits.**
+- LOC includes generated or data-like Rust and 9 module-move commits (E03 §7). LOC is not effort.
+- Test-attribute counts include moved code (E05-019, whose counts differ slightly from E03 because
+  the snapshot dates differ: 18,111 vs 18,014 at the pin, since E05 counted `#[test]` with a different
+  grep). A per-commit unit of work cannot be defined across the landing-style switch.
+
+## B.5 Rework and quality indicators
+
+**Finding.** Visible rework is moderate and mostly forward-fixing:
+- 15.7 % of non-merge commits are fix-typed by subject (lower bound);
+- 0 reverts on main's first-parent line;
+- 21 traced red-main incidents with median repair of about 1 h;
+- at least 5 features needed 5 or more follow-up fixes.
+
+The largest potential waste is the 2,238 PR heads (35 %) with no merge evidence. That figure mixes
+open, superseded, duplicate and junk PRs.
+
+| Indicator | Value | Source / command | What it can show | Limits |
+|---|---|---|---|---|
+| Fix-typed share of non-merge commits, by week | 6.2, 17.2, 19.0, 20.3, 6.3, 11.5, 19.9 % (W40–W46); 1,308 / 8,329 = 15.7 % overall | E07-024 regex on subjects | rough rework trend | Lower bound: prose fixes are missed. W44 dip = aiongg's 10-26 refactor series (257 `refactor:` commits, E03 §9). First-parent series (26.2 %, rising to 64.7 % in W46) is **an artefact** of `from x/fix/…` branch names in merge subjects (E07-024) |
+| `fix:` share of conventionally typed commits | 41.6 % (1,091/2,624); only 31.5 % of commits typed | `data/E03_cc_types_weekly.csv` | — | Typing conventions vary per author |
+| Reverts | 23 `^Revert` reachable from main (0.19 %), **0 on first-parent**; 21 more only on unmerged refs | E07-001 | Bad changes were backed out *before* main, mostly inside integration batches (6 in batch-8 alone, cece50d513) | Batch-8 reverts carry no reason; "pre-merge" also means invisible to main's history |
+| Red-main incidents | 21 traced (E07 §2); 59 commits name a red main (40 with AI trailer, includes cherry-pick copies) | E07-005/006 | Frequency: W41 16, W42 4, W43–W45 0, W46 11 commits | Commit counting ≠ incident counting; quiet weeks may reflect batch staging, not fewer conflicts |
+| Red-main TTF | median 68 min, range 3 min–13 h 12 m (n=17); one latent 6.9 d | A.1 arithmetic over E07 §2 | Repair is fast once seen | Time-to-detect is not separately observable; before 10-07 most main runs were cancelled |
+| Follow-up fixes per feature (traced) | Perspective Crop 33 commits (10-11→11-11); Artboards 124 commits mention it, 1 dedicated follow-up PR of 6 commits; Flatpak update 6 PRs in 20 days; egui 0.37 18 commits incl. 1 regression; Windows save ≥5 PRs over 37 days (E07-026). #1381 IME: 0 (E09-B-004). Box blur: 1 measurement correction (E09-F-003) | E07-026, E09 | Features touching UI shell and platform I/O need repeated correction | "Mentions" ≠ follow-ups; selection is biased toward visible cases |
+| Hot-spot files for fixes | `canvas.rs` 112 fix commits, `ui-egui/lib.rs` 77, `panels.rs` 65 (E07-025) | E07-025 | Rework concentrates in shared UI shell files | Same files are also the most-touched overall (623/618) |
+| Duplicate commits | 168 extra copies of (author, subject); 69 identical numstat | `data/E03_duplicates.csv` | Cherry-pick/rebase overhead (≤2 % inflation) | — |
+| Unmerged PR heads | 2,238 of 6,480 (35 %) with no merge evidence | `data/E03_pr_heads_status.csv` | Upper bound on abandoned or redone PR attempts | Includes open PRs. The web showed 1,298 open and 912 closed-unmerged on 11-12 (E06-015, WebFetch). 1,298 + 912 = 2,210 ≈ 2,238 (INFERRED reconciliation, small gap from batch-landed and deleted PRs). So at most ~912 are *closed* without merge, and that set includes dependabot groups, superseded releases, duplicate fixes and junk (E06-015 sample). It is not an agent-waste measure without per-PR attribution |
+| PR lifetime | median 2.8 h (landed 09-30..10-09) → 68.3 h (11-01..11-12) | E06-013 | Queueing grew as review/integration became the bottleneck | First-commit author date ≠ PR open time (upper bound) |
+
+INFERRED reading:
+- Rework is low *on main* because the project pushed rework upstream into integration batches and
+  fork branches (reverts, `Integration:` repair commits: 388, E07-002).
+- So main-only indicators understate total rework.
+- The red-main pattern (fast repair, recurring cause) shows a team optimised for repair speed rather
+  than prevention.
+
+## B.6 AI-attribution analysis
+
+**Finding.** About half of non-merge commits carry explicit AI attribution: 4,130 / 8,329 = 49.6 %, or
+59.2 % of first-parent changes. Claude Opus 5.5 strings dominate. The share declines over time. The
+evidence supports two explanations for the decline: a change in contributor mix, and (weakly)
+within-author decline after the attribution rule. It cannot separate them from squash-versus-merge
+effects.
+
+**Share over time (VERIFIED, `data/E03_attr_weekly.csv`).**
+- Any-AI share of non-merge commits: W40 84.7 %, W41 62.8 %, W42 53.3 %, W43 49.4 %, W44 36.9 %,
+  W45 45.3 %, W46 22.9 % (partial).
+- First-parent non-merge: 1,700 / 2,871 = 59.2 % overall.
+- External corroboration: PHLEARN's "61%" on 10-15 matches 61.7 % first-parent up to that date
+  (E08-022).
+
+**Model strings (VERIFIED as written; they are tool self-reports, not verified model use, E03-004).**
+- "Claude Opus 5.5" 3,158 non-merge commits, plus "(1M context)" 444.
+- Sonnet 5.5 157; Fable 5.1 137; bare "Claude" 53; Opus 4.8 45 (10-02 → 10-04 only); Haiku 5.5 40.
+- Non-Anthropic strings together < 4 %: Cursor 36+4, Copilot 31 (10-07/08 only), GPT-6 22+2,
+  Codex 12+3, Codebuff 8.
+- 25 distinct strings in total.
+- Known unreliability: an "Opus 5.5 effort" doc committed under an Opus 4.8 trailer (E01-012).
+
+**Bimodal per-author use (VERIFIED, `data/E03_attr_by_author.csv`, top 25 authors).**
+- 6 authors are ≥ 90 %: David Mann 98.6 %, vangel76 95.8 %, Higgs32584 100 %, Trevor Brown 99.1 %,
+  Finn Newick 100 %, BFlat 96.6 %.
+- 10 are ≤ 10 %: aiongg 0 %, yoriswind 0 %, rmsff 0 %, Dylan M. Taylor 4.6 %, FredApps 7.6 %,
+  skylar taylor-barrick 1.3 %, Korg1ch, MarekSpodBiedry, dotCooCoo, Marco Arnulfo.
+- 9 are in between, e.g. Brandon Thomas 76.0 %, Hector Villarreal 83.5 %, Khawar Zamman Wani 32.8 %.
+- Attribution is a per-person habit, not a per-change decision.
+- 0 % means "unknown". yoriswind's 19 fork branches are named `codex/*` (E06 roster) with no
+  trailers, so branch names and trailers disagree (E06-025).
+
+**Why the share declines: what the evidence can and cannot say.** New computation for this
+deliverable: `scratchpad/work/D07/attr_split.py`. It runs `git log 74330157cb --no-merges` with an AI
+co-author regex matching anywhere in the body, splits at committer date 2026-11-06, and uses raw
+author names without alias merging.
+
+| Subset | Before 11-06 | From 11-06 |
+|---|---|---|
+| All non-merge | 3,657 / 7,297 = 50.1 % | 440 / 1,032 = 42.6 % |
+| Authors active in both windows (53) | 1,707 / 2,849 = 59.9 % | 428 / 791 = 54.1 % |
+| Authors first seen from 11-06 (23) | — | 12 / 241 = 5.0 % |
+
+Notable after 11-06:
+- rmsff 0 / 119;
+- Hector Villarreal 82 / 151, against 266 / 266 before;
+- Khawar Zamman Wani 4 / 32, against 85 / 239 before;
+- David Mann 149 / 151, unchanged.
+
+| Candidate explanation | Evidence | Verdict |
+|---|---|---|
+| House rule 15 "No agent attribution" (7d8648dfcb, 11-06) | Within-author share fell 59.9 → 54.1 %; two authors dropped sharply; but the rule covers PR text, not commit trailers (E02-011), and the lead integrator still discloses in PR #13396 (E06-042) | Possible contributor; **not established** |
+| Contributor mix | New authors from 11-06 are 5 % attributed; high-volume 0 % authors (aiongg, yoriswind, rmsff) rose through W43–W46 (E03-003) | **Supported**: explains a large part of the drop (INFERRED from the table) |
+| Squash → merge-commit landing | Squash bodies concatenate every PR commit's trailers into one commit; merge-style PRs count each side commit separately (E03 C3/C1) | Direction ambiguous; **cannot be separated** with this data |
+| Less AI use | No evidence either way. Absence of a trailer is "unknown" | **Not supported** by any source |
+
+The evidence files disagree on the size of the decline because they use different denominators.
+Resolved here, not contradicted:
+- E05-073 gives 48.7 → 40.6 % (Claude-only, non-merge, to 11-13).
+- E02-016 gives about 40 → 28 % (all commits including merges).
+- E08-008 gives 31.7 → 27.5 % (all commits, a 10-day pre-window).
+- E07 headline 4,005 (48.1 %) uses `--grep`, which misses list-marker trailers. E03's independent
+  check gives 4,095 against the script's 4,097 (E03 §3).
+- The direction is consistent in every count.
+
+**Session traceability.** 238 non-merge commits (62 distinct `Claude-Session:` ids on main; 129 across
+all refs) can be tied to a session (E03 §3, E06-011). That is 5.8 % of AI-attributed commits.
+
+## B.7 Developers' self-reported effort against git
+
+| # | Claim (source, date) | Git or other check | Verdict |
+|---|---|---|---|
+| 1 | "I just one-shotted Photoshop. The whole thing." (HN 49928088, 10-01, E08-013) | Commit 16941f7198 is literally "one-shot" (+42,241). The project is still "Stage: alpha" (`ROADMAP.md:3`) after 12,000+ commits | **CONTRADICTED** ("whole thing"); the name only is corroborated |
+| 2 | "8 parallel agents" in one session; "wall-clock ≈ agent-hours ÷ 6" (0c2d4bfd1a, 10-02, E08-005) | aa87012aab (10-01) names in-progress work from "the parallel panels, type styles, File menu, photo, filters, UI-parity and fidelity agents" (7 named workstreams, E01-013). No session ids or timing exist for that period | **PARTLY CORROBORATED** (≥7 concurrent agent workstreams named in git; count and speed-up unmeasured) |
+| 3 | "the repository has sustained 10–20 concurrent agents" (`docs/target-app-parity.md:234-236`, 10-10, E08-003) | Max distinct `Claude-Session` ids per day: 10 on main and 15 across all refs (10-13) (E06-011). Only 5.8 % of AI commits carry a session id; sessions per day ≠ concurrency | **UNCORROBORATED** (not contradicted; the order of magnitude is compatible) |
+| 4 | "1,152 commits on `main` and 1,004 merged PRs in 10.5 days" (`docs/target-app-parity.md:205`) | Commits through 10-10: 1,380 (E08-004). PRs landed through 10-09 UTC: 914; through 10-10: 1,172 (`data/E03_pr_daily.csv`). 1,004 falls between; the cutoff is unstated | **CORROBORATED in magnitude** (exact figure not reproducible) |
+| 5 | "Median PR open-to-merge time is 3.4 h" (same doc) | Median first-head-commit → landing for PRs landed 09-30..10-09 = 2.8 h (E06-013; a different definition and an upper bound on open time) | **CORROBORATED in magnitude** |
+| 6 | "~1,000 PRs … represent about 2,000–4,000 agent-hours" (same doc) | Derived as PRs × assumed 2–4 h. Nothing in git meters agent time | **UNCORROBORATED** |
+| 7 | "About 80% of the work parallelizes" (`ROADMAP.md:14-16`) | No measurement | **UNCORROBORATED** |
+| 8 | 95 % parity in "~25–40 wall-clock hours" (10-02) | The project's own revision 8 days later: beta 1,100–1,800 agent-hours (E08-002/005); still alpha at the pin | **CONTRADICTED** (by the project itself) |
+| 9 | "~100% parity within a month" (Reddit via HN 49961646) | Alpha at 11-12 | **CONTRADICTED** |
+| 10 | "using Opus 5.5" (HN 49934844); "vanilla Claude Code … ever so occasionally Codex" (HN 50029182, 49977572) | Opus 5.5 is the dominant trailer; 238 `Claude-Session:` non-merge commits; 15 Codex trailers | **CORROBORATED** ("vanilla" unverifiable) |
+| 11 | "I stopped writing code entirely in February" (HN 49977572) | The repository starts 09-30. Terse, untrailered founder commits exist (E01-010); their authorship is unknown | **UNCORROBORATED** |
+| 12 | "much of the current PR volume comes from coding agents" (RFC-0006, E08-028) | 59.2 % of first-parent changes AI-attributed; 49.6 % of non-merge commits | **CORROBORATED** in direction |
+| 13 | "100% AI software factory and no human review" (HN 50434834, 11-10; does not name PhotoCraft) | Sampled PRs: explicit human approval on 1/6 and 1/10 (E05-035, E06-041), *but* rule 1 requires an accountable person, and approvals exist (#11641, #7848, #9363) | **AMBIGUOUS**: partly consistent with samples; contradicted by the documented rule |
+| 14 | "Let the community token spend … diffuse into the products" (HN 49976861) | 582 author identities; 97 % of merge-PR sources are forks (E03-008) | **CORROBORATED** in direction; the spend itself is unmeasurable |
+
+## B.8 What public data cannot measure, and how a project could instrument it
+
+**Not measurable from the public record (VERIFIED absence, E08 §6, E02 §6):**
+1. **Token or dollar cost.** No figure anywhere. Cost is distributed to contributors by design
+   (E08-018). RFC-0006 lists "spending money" only as a stop-and-ask item.
+2. **Human supervision hours.** Who reviewed, for how long, and who pressed merge on 2,690 squash
+   merges are not in git (E03 §4).
+3. **Prompts, specs and briefs.** `plan/` and `log/devlog.md` are gitignored. `Model-Effort:` names a
+   "briefed" role on 25 commits, but no brief is published.
+4. **Abandoned agent sessions.** Session ids exist only on landed or pushed commits. Sessions that
+   produced nothing leave no trace. The 2,238 unmerged heads cannot be attributed.
+5. **Concurrency over time.** No per-agent identity or session coverage exists. Bursts by one identity
+   are ambiguous between parallel sessions and batch rebases (E03-014).
+6. **Breaking-PR attribution.** It is possible in principle from git, but not tabulated in the
+   evidence (a gap).
+7. **Defect escape rate.** Issue states and labels are blocked from the API. Only WebFetch samples
+   exist.
+
+**PROPOSED instrumentation** (our recommendation; none of it is PhotoCraft practice):
+
+| Gap | Instrument | Cheapest implementation |
+|---|---|---|
+| Cost | Per-session token and $ ledger keyed by session id | Agent wrapper appends `{session, model, tokens_in/out, usd, wall_s}` to a log; CI posts a per-PR sum as a check summary |
+| Provenance | Mandatory structured trailers on *every* commit: `Agent-Session:`, `Agent-Model:`, `Agent-Role:` (driver / briefer / writer, generalising `Model-Effort:`) | `commit-msg` hook plus a CI check that rejects missing trailers; keep PR-text attribution optional if rule 15 is wanted |
+| Supervision | Required approving review recorded with a "minutes spent" field, or a review-start/approve timestamp pair | Branch protection with required reviews; a bot computes first-review latency and approval coverage weekly |
+| Specs | Commit the brief: `briefs/<session>.md` (or attach it to the PR) for every agent-written PR | PR template field linking the brief; CI warns when absent |
+| Abandoned work | Session registry: start, end, outcome (`landed` / `abandoned` / `superseded`) | The wrapper writes on exit; a weekly report joins it with PR state |
+| Merge skew | Count "union failures" caught by a merge queue against failures on main | Enable `merge_group`; label each fix-main PR with the breaking PR pair |
+| Concurrency | Sessions active per hour from the registry | — |
+| Quality | Escape rate = user-reported regressions per landed PR, by attribution class | Issue form with a "regressed in" field; a bot links to the PR |
+
+The aim is to make the claims in B.7 measurable. Examples are agent-hours per PR, concurrent agents,
+and the cost of a red main. It would also let the A.1 failure classes be split by attribution class
+without guessing.
+
+## B.9 Bottom line: what the evidence supports about speed versus quality
+
+1. **VERIFIED.** The method produced very high throughput for an alpha:
+   - about 0.89 M Rust lines and about 17 k `#[test]` attributes added in 6 weeks;
+   - 3,285 landed PR numbers;
+   - a release every 1.6 days (E03-012, E03-015).
+2. **VERIFIED.** Throughput was front-loaded:
+   - landed PRs per day fell from 192 (W41) to 10–79 (W44–W46);
+   - median PR lifetime grew from 2.8 h to 68 h (E06-013);
+   - human integration became the bottleneck, not agent output.
+3. **INFERRED.** Quality held at the level of mechanical gates, not at the level of user-visible
+   behaviour:
+   - 77.5 % of commits touch tests, and crash, format, layering and corpus gates were enforced early;
+   - yet over-claimed parity, inert settings (66/129) and vacuous tests (57 GPU checks) persisted until
+     audits or users exposed them (F4–F6).
+4. **VERIFIED.** The dominant red-main cause was semantic merge skew between individually-green PRs
+   (11 of 21). Repair was fast (median 68 min). Prevention stayed procedural: batches and a manual
+   merge queue, never a mechanical merge queue (F1).
+5. **INFERRED.** Parallelism amplified the failures that are combinational across PRs: merge skew,
+   duplicates, gate-on-union failures and tracker conflicts. The project's corrective tooling is
+   per-file (ratchets, lints) and did not address them (A.2, A.3).
+6. **VERIFIED.** The fastest corrective loops ran from loud signals to mechanical gates:
+   - crash reports → never-crash rule and sweep in under 24 h;
+   - cancelled main runs fixed the same day;
+   - release-day failure → nightly dry run the same day (A.3).
+7. **VERIFIED.** Prose rules lagged reality. panic_hunt was unenforced for 13 days, and "fixes merged
+   without" tests needed a backfill. The house rules answering RFC-0006's agent failure modes arrived
+   on day 38 and remain unenforced (F4, F11, E02 §4).
+8. **VERIFIED (sample) / INFERRED (generalisation).** Review is mostly bot review plus merge decisions
+   by a few maintainers. Explicit human approval appears on a small minority of sampled PRs, and
+   failing bot checks did not block merges (F12).
+9. **VERIFIED.** The project measures its own failure modes where they are countable per file:
+   - inert settings 66 → 8;
+   - parity and corpus floors;
+   - a shrink-only allowlist.
+   It does not measure its own process costs: tokens, supervision, abandoned sessions (B.8).
+10. **INFERRED.** Developers' effort and speed claims are of the right order where git can check them
+    (PR counts, merge times). They are uncorroborated for agent counts and agent-hours, and
+    contradicted for completion ("one-shot", "within a month") (B.7).
+11. **INFERRED.** The provenance needed to judge the AI method itself is degrading. The attribution
+    share fell from 50.1 % to 42.6 % after 11-06, mostly through contributor mix, and session ids
+    cover 5.8 % of AI commits. A reader cannot tell from public data whether AI-attributed work fails
+    more or less often than unattributed work (B.6, F13).
+
+## Confidence and gaps
+- **Weakest points.**
+  - Review evidence rests on 16 WebFetch-summarised PR pages (F12).
+  - Red-main TTF uses merge-to-merge times from E07's 21-incident table, not CI run times, so
+    time-to-detect is folded in.
+  - Fix-type shares depend on subject conventions that changed with landing style.
+  - The attribution split (B.6) uses raw author names (no alias merging) and committer dates, so a
+    few authors may be split or windowed differently than in E03.
+- **Not checkable.**
+  - Branch protection and required reviews.
+  - PR open/closed state per head (only page totals via WebFetch).
+  - Token cost, supervision time, prompts and abandoned sessions.
+  - Whether the breaking PRs in E07 §2 were AI-attributed (not tabulated; this is the most useful next
+    check for A.2).
+- **What would change the conclusions.**
+  - A merge-queue setting, or branch-protection data showing required approvals, would weaken F1/F12.
+  - Per-PR attribution of breaking changes could move modes between "amplified" and "ordinary" in
+    A.2.
+  - Issue-tracker data on regressions per PR would replace the commit-subject rework proxies.
+- **Evidence disagreements found.**
+  - E07-013's "parity discrepancy" is two same-day commits (#182 and #186), not drift. Resolved in F5.
+  - "(merge queue)" commit count: E07-003 says 9; `git log main --grep='(merge queue)'` gives 7 here.
+    Unresolved and minor.
+  - The AI-share figures across E02/E03/E05/E07/E08 differ by denominator. Reconciled in B.6.
+  - E03 reports `#[test]` 18,014 at the pin and E05-019 reports 18,111 (different counting). Noted in
+    B.4.
+  - E07 calls the 625/625 commit and the "decorative" fixes unattributed by omission. The clone shows
+    all three carry `Claude Opus 4.8` trailers (see below).
+
+## New evidence gathered during synthesis
+- 58653e617b (2026-10-03, Brandon Thomas), "File > Import > WIA Support: 625/625 menu items live
+  (100%)", carries `Co-Authored-By: Claude Opus 4.8` (`git log -1 --format=%B 58653e617b`).
+  c89c33c704 and 9dc394dfc8 (both 10-03, "decorative" dropdown wiring) carry the same trailer.
+- 433b84fae7 (#186) gives "feature surface ~60-70%, pro-switchable ~25-35%". 20783fdc70 (#182) gives
+  "~55-70%" and "~20-35%". These are two same-day revisions (`git log -1 --format=%B`).
+- aa87012aab (2026-10-01) subject: "Analysis, notes, proof views, workspaces (+ in-progress work of
+  other agents)". The body naming seven agent workstreams is quoted in E01-013.
+- Commit dates and trailers checked with `git log -1 --format='%cs %an | %s'`:
+  - 45afd2e9d7: 10-17, Ivan, Claude Opus 5.5.
+  - d8d2df4fba: 10-09, Sir Starch, Claude Opus 5.5.
+  - 3092d3b6f9: 10-10, David Mann, Opus 5.5 (1M context).
+  - fda05f7b02: 11-08, no trailer.
+  - f1b5e7d727: 11-11, no trailer.
+  - 72e11802d4: 10-25, no trailer.
+  - 0f955e6c82: 10-05, no trailer.
+- `git log main --grep='(merge queue)' --format=%cs`: 2 on 11-08, 4 on 11-09, 1 on 11-11.
+- Attribution split before and after 2026-11-06 (B.6 table): `scratchpad/work/D07/attr_split.py`
+  over `git log 74330157cb --no-merges`.
+- PRs landed by day from `data/E03_pr_daily.csv`: cumulative 914 through 10-09 and 1,172 through
+  10-10 (B.7 #4).

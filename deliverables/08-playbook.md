@@ -336,3 +336,239 @@ no independent test-author role is documented.
 4. Reviewer deletes or inverts the fix locally; at least one new test must fail.
 5. Bot findings like "passed even if nothing was painted" (c441fd350c) become a lint or a checklist line.
 
+---
+
+## 9. Approval thresholds
+
+Finding: PhotoCraft's only documented approval rule is a closed stop-and-ask list (house rule 9,
+`AGENTS.md:14`) plus "Don't add or change CI in a feature or fix PR" (`AGENTS.md:16, :212-214`);
+who may merge and how many approvals are needed are **not documented** (E02 §6). Sampled PRs merged
+with "No reviews" or label-only signals (E06-041, E05 §0.3). The tier table is `[PROPOSED]`.
+
+**9.1 Risk tiers**
+
+| Tier | Change kinds | Required evidence | Who approves | Merge path |
+|---|---|---|---|---|
+| **Low** | docs, comments, new tests only, i18n strings (non-structural) | gate green; for tests: they fail when target code is broken | reviewer agent | merge queue |
+| **Medium** | feature or fix confined to one module/crate it owns; new command in a new module | gate green; independent tests fail-on-base; mutation spot-check; screenshot/JSON evidence for UI | reviewer agent **and** a human maintainer (label `ready to merge` is not enough without a review record) | merge queue or batch |
+| **High** | shared contracts (command schema, stable ids, layer table, shared structs); persistence/save path; CI/workflows; dependencies/`Cargo.lock`; licensing/assets/fonts; security boundaries (control channel auth, plugin sandbox, parsers of untrusted input); release | all medium evidence + ADR + rollback plan + named human owner approval; fault-injection for persistence; licence check for deps | human owner (plus a second human for security/release) | merged alone, never inside a batch |
+
+Mapping to evidence:
+- CI changes high-tier: `[PC-VERIFIED E02 §2.1 rule 11]` (stated; partly followed, E02 §4).
+- Dependencies/licensing: `[PC-PARTIAL E02 §4]` allowlist stated, no `cargo-deny` check found.
+  `[PROPOSED]` `cargo deny check licenses bans sources` in the gate.
+- Persistence high-tier: `[PROPOSED]` answers E07-021 (save-path fix chain regressed SMB users;
+  ≥5 PRs over 37 days, E07-026).
+- Release: `[PC-PARTIAL E02 §4]` release environment bound to `release` branch, maintainer publishes.
+- Contracts high-tier: `[PROPOSED]` answers E07-003 rows 15 and 19.
+
+**9.2 Approval records.** An approval is a GitHub review (or signed comment) by a named person, not a
+label. `[PROPOSED]` answers E06-041 (label applied and merged by the same maintainer; one approval in 10
+sampled PRs). Required-review counts set in branch protection per path (CODEOWNERS for high-tier paths;
+PhotoCraft has none, E02-020).
+
+**9.3 Stop-and-ask list** (agent stops, writes the question, waits)
+`[PC-VERIFIED E02 §2.1 rule 9]` for the first eight items (verbatim list: "licensing outside the
+allowlist, publishing, releases, a new remote, secrets, spending money, destructive git, and anything
+else hard to undo"); remaining items `[PROPOSED]`:
+1. Licence outside the allowlist / new asset or font source.
+2. Publishing anything (crates.io, store, website, social).
+3. Releases, tags, signing.
+4. Adding a git remote or pushing anywhere but own branch.
+5. Secrets, tokens, personal data.
+6. Spending money (paid APIs, runners, cloud).
+7. Destructive git (force-push, history rewrite, branch delete on shared refs).
+8. Anything hard to undo.
+9. Lowering a FLOOR, adding to a shrink-only allowlist, disabling or skipping a test. `[PROPOSED]` answers E07-018.
+10. Changing a stable command id/schema or the layer table. `[PROPOSED]` answers E07-003.
+11. A save-path or data-format change. `[PROPOSED]` answers E07-021.
+12. The task needs files outside the owned list. `[PROPOSED]` answers E07-019.
+
+Everything else: keep working (anti-stall, §7.3).
+
+---
+
+## 10. Failure recovery
+
+Finding: PhotoCraft repaired main by forward fixes, never by reverting on main's first-parent line
+(0 of 23 reverts first-parent, E07-001); fix-main work was 59 commits, 40 AI-co-authored, done by a few
+maintainers (E07-006). The prefer-mechanical column states what we recommend.
+
+| Failure | Detection signal | Immediate action | Permanent fix (prefer mechanical) | Evidence |
+|---|---|---|---|---|
+| **Red main** | main push run fails (never cancelled) | owner of last merge (or on-call agent) opens `fix/main-<cause>` within 30 min; if not green in 60 min, revert the breaking merge `[PROPOSED]` | merge queue (§6); fail-fast gate order | `[PC-VERIFIED E07-004]`; TTF 3 min–13 h (E07 §2); `[PC-PARTIAL E07-001]` revert-on-main never used |
+| **Semantic merge skew** | red main whose fix names two PRs | as red main | merge queue; contract-first split (§5) | `[PC-VERIFIED E07-003]` 11/21 incidents |
+| **Gate tightened mid-flight** | many PRs/main red on a new lint | land lint as warn, burn down, then deny via ratchet | ratchet: new denies only after count reaches 0 | `[PC-PARTIAL E07-005, E07-011]` `cognitive_complexity = deny` then reds on 11-11 |
+| **Flaky test** | same test fails then passes on rerun; or nightly loop | quarantine with issue + owner, never silent retry | root-cause in code (own binary, lock, condition poll); record before/after rate | `[PC-VERIFIED E07-007]`; retries dropped (E05-050) |
+| **Bad merge / conflict casualty** | conflict markers, dropped lines | fix PR | `[PROPOSED]` gate step `git grep -nE '^(<<<<<<<|>>>>>>>)'`; no shared status lines | `[PC-PARTIAL E07-020]` no mechanism found |
+| **Regression from a fix** | issue reopened / duplicates referencing a fix PR | link to original PR; high-tier if persistence | environment-diverse tests for that area; follow-up count metric (§13) | `[PC-VERIFIED E07-021, E07-026]` |
+| **Vacuous test discovered** | mutation survives; bot comment; skip marker | fix test; audit siblings | fail-on-skip; base-revert job | `[PC-VERIFIED E07-018]` |
+| **Duplicate parallel work** | two PRs for one issue; duplicate keys | close the worse one ("look for a better PR") | claim check bot; consistency tests on catalogs | `[PC-PARTIAL E07-019]`, rule 6 stated |
+| **Generated artefact stale** | `--check` fails after merge | regenerate in fix PR | only integrator/queue regenerates | `[PC-VERIFIED E07 F9]` (3c44319455) |
+| **Agent stuck / looping** | > N cycles (§7.3), same diff reverted and reapplied, no commits in 2 h | stop session; handoff with diagnosis | spec quality review; smaller tasks | `[PROPOSED]` (no PhotoCraft data) |
+| **Context exhaustion / abrupt end** | session ends without handoff | next session reads handoff + `git log`; tree must be green | handoff written at every green checkpoint | `[PC-VERIFIED E02-004]` ("Sessions can end abruptly … context limits") |
+| **Conflicting parallel work in one tree** | build broken by unowned files | wait and retry | worktree per agent | `[PC-VERIFIED E06-050]` / `[PROPOSED]` worktrees |
+| **Release-only breakage** | nightly release dry run fails | fix before release day | nightly dry run | `[PC-VERIFIED E05-062, E05-063]` (0.8.1 failed on wasm size) |
+| **Shared threshold blocks unrelated PRs** | size/perf gate red on PRs that did not grow it | owner of the threshold fixes it | per-component budgets | `[PC-VERIFIED E07-027]` (24 MiB wasm gate) |
+
+Rule-vs-check policy `[PROPOSED]`, derived from E02-016 ("rules with no check are the ones practice
+diverges from"): every incident postmortem (template `incident-postmortem.md`) must end in a mechanical
+check, a ratchet metric, or an explicit "rule only, because …" justification. PhotoCraft's own model:
+"Guards say why" `[PC-VERIFIED E02 §2.1 rule 12]`.
+
+---
+
+## 11. Session continuity
+
+Finding: PhotoCraft's documented hand-off is "append a terse entry to `log/devlog.md` … the dev log
+plus a green tree is how the next agent picks up" (`AGENTS.md:168`); both `log/` and `plan/` are
+gitignored, so the main inter-session memory cannot be audited (E02-004, E01-005). Decisions are an
+informal 2-entry dated log, not ADRs, and one entry vanished (E02 §5).
+
+| Artifact | Location | Written when | Tag |
+|---|---|---|---|
+| Green tree | branch head | every checkpoint; never end red | `[PC-VERIFIED E02-004]` "Keep the tree building at every step" |
+| Handoff note | `handoffs/YYYY-MM-DD-<session>.md` (in repo) | before session end and at each green checkpoint | `[PC-PARTIAL E02-004]` devlog exists but private; `[PROPOSED]` in-repo and public |
+| State file | `STATE.md`: current goals, in-flight claims, blockers, next steps | session end | `[PROPOSED]` |
+| Decision log (ADRs) | `docs/adr/NNNN-title.md`, numbered, status/context/decision/consequences | any tier-high change | `[PC-PARTIAL E02 §5]` `docs/decisions.md` has 2 entries, no status field, no owner rule |
+| Plan / spec | `specs/<issue>.md` committed | spec state | `[PC-PARTIAL E01-005, E09-E-001]` `plan/` private; egui migration plan committed with open gates |
+| Devlog | `log/devlog.md` committed, append-only, one line per session | session end | `[PC-PARTIAL E02-004]` gitignored there |
+| Machine-readable goals | `goals/*.toml` + generated doc | when a number moves | `[PC-VERIFIED E04-050]` |
+| Honest assessment | `docs/where-we-stand.md` that agents read first | weekly | `[PC-VERIFIED E01-019, E07-013]` |
+
+**Must be written before a session ends** `[PROPOSED]` (template `handoff.md`): what changed (shas),
+what ran and its result, what did *not* run, open claims (keep or release), blockers and questions,
+next concrete step, files touched outside ownership (should be none). Commit it with the work.
+Shared rules must be readable by everyone: `[PC-VERIFIED E02 §2.1 rule 13]` ("no links to files a reader
+cannot open"; the private `craftrules` repo failed for outside contributors, E01-023, E02-013).
+
+---
+
+## 12. Token / cost budgets
+
+Finding: **PhotoCraft publishes no token, money or CI-minute cost data.** Its only effort unit is
+"Opus 5.5 agent-hours, one agent working sequentially", self-reported and revised ~10× upward within 8
+days (E02-008, E08-002, E08-005). The founder describes the community as a distributed token budget
+(E08-018; third-party relay, costs undocumented). Everything in this section is `[PROPOSED]`, except the
+CI-cost practices tagged.
+
+**12.1 Per-task budgets by tier** `[PROPOSED]` (calibrate against your own data after 2 weeks, as
+PhotoCraft recalibrated its estimates against merged history, `[PC-VERIFIED E08-005]`):
+
+| Tier | Implementer budget | Reviewer + test author | Hard stop |
+|---|---|---|---|
+| Low | 1 session, ≤ 8 loop cycles | 1 short session | 2× budget → escalate |
+| Medium | ≤ 2 sessions, ≤ 8 cycles each | 1 session each | 2× budget → re-spec / split |
+| High | spec + ≤ 3 sessions | 2 reviewers (one adversarial) | any overrun → human decision |
+
+Record actual tokens per session from your tool's usage report in the handoff note; budgets are
+meaningless until measured.
+
+**12.2 Model selection by task type** `[PROPOSED]`: strongest available model for planning, contract
+changes, review/attack, debugging red main; a cheaper model for mechanical edits (renames, i18n rows,
+regeneration, label triage). PhotoCraft's trailers show many models (Opus, Sonnet, Haiku, Fable, Codex,
+GPT, Qwen, E06 §2.1) but no policy on which to use for what; trailer model names are self-reports.
+
+**12.3 Context hygiene** `[PROPOSED]`: give each agent a scoped reading list (spec + owned files +
+AGENTS.md sections), not "read docs/"; keep digests of long docs; PhotoCraft's orientation table lists
+14 docs to read (`AGENTS.md:58-75`, E02 §2.3) — too much for every task. Write handoff at ~70% context.
+
+**12.4 When to stop and escalate**: budget overrun (12.1), stop conditions (§7.3), stop-and-ask (§9.3).
+
+**12.5 CI-minute budgeting**
+
+| Practice | Tag |
+|---|---|
+| Record runner-minute trade-offs next to config; path-select expensive platforms | `[PC-VERIFIED E05-005, E05-013]` |
+| Rotate long sweeps by day so each PR pays a fraction | `[PC-VERIFIED E05-021]` |
+| Cancel superseded PR runs, never main runs | `[PC-VERIFIED E07-004]` |
+| Slow platforms nightly (FreeBSD, ARM64, perf) | `[PC-VERIFIED E05 §0.1]` |
+| CI minutes per merged change tracked weekly | `[PROPOSED]` (§13) |
+
+---
+
+## 13. Metrics
+
+Finding: PhotoCraft tracks product-goal metrics well (scorecard, FLOORs, dead-settings count, E07-014)
+but no process metrics are published; every process number below was reconstructed by this study from
+git (E03, E06, E07). All definitions `[PROPOSED]`; collection commands are adapted from the study's.
+
+| Family | Metric | Definition | Collect from |
+|---|---|---|---|
+| Flow | Lead time | issue opened → merge on main | `gh issue view N --json createdAt` + merge commit date |
+| Flow | PR lifetime | first commit on head → landing commit date (study method, E06-013) | `git log refs/pull/N/head ^<base>` min author date; `git log --first-parent main` |
+| Flow | Review lag | PR ready → first human review | `gh pr view N --json reviews` |
+| Quality | Red-main minutes / week | Σ(time main's latest completed run is red) | CI API: main push runs, ordered; never-cancel is a prerequisite (E07-004) |
+| Quality | Fix-main commits / week | subjects matching `fix main|main red|red since` (E07 §2 regex) | `git log main -i -E --grep=…` |
+| Quality | Escaped regressions | issues labelled `regression` whose cause is a merged PR | issue labels + "caused by #N" field |
+| Quality | Vacuous-test findings | review/mutation findings tagged `vacuous-test` | PR review labels; commits with "Verified by mutation" (E07-018) |
+| Quality | Revert-before-merge rate | reverts on non-first-parent commits ÷ merged PRs | `git log main -i -E --grep='^revert'` + `git rev-list --first-parent` membership (E07-001) |
+| Quality | Follow-up fix count per feature | fix PRs referencing a feature within 30 days | issue links; E07-026 method |
+| Verification | Change-with-tests share | non-merge commits touching tests ÷ all (E03-011 heuristic) | path regex + added `#[test]` lines |
+| Verification | Fail-on-base proof share | PRs whose base-revert job shows ≥1 failing new test | CI artifact |
+| Verification | Floors | current value vs FLOOR per corpus | gate output |
+| Cost | Tokens per merged change | Σ session tokens ÷ merged PRs | handoff notes / tool usage export |
+| Cost | CI minutes per merged change | Σ billable minutes ÷ merged PRs | CI usage API |
+| Provenance | Attribution completeness | commits with `Co-Authored-By:` model trailer **and** session trailer ÷ AI-assisted commits | `git log --format=%b`; PhotoCraft: 274 session-trailer vs 3,780 Claude co-author commits on main (E06-011) |
+| Provenance | Role separation | PRs where implementer session ≠ test-author session ≠ reviewer session | trailers `Agent-Role:` + session ids |
+
+Attribution policy `[PROPOSED]`: require trailers in commits (machine-readable, enforced by a commit-msg
+check) and decide PR-text disclosure explicitly. PhotoCraft's "No agent attribution" in PRs
+(`AGENTS.md:20`) coexists with a product feature crediting models from trailers and was not uniformly
+followed (`[PC-PARTIAL E02-011, E06-042]`); the richer `Model-Effort:` trailer reached only 25 commits
+(E03-005).
+
+---
+
+## 14. Adoption sequence
+
+**Day 0** (before the first agent writes product code)
+1. Repo with `AGENTS.md` from `09-templates/AGENTS.template.md`; `CLAUDE.md` points to it. `[PC-VERIFIED E01-003, E02-001]`
+2. Workspace skeleton: `core` (headless), `commands` registry, `ui`, `cli`, `xtask`. `[PC-VERIFIED E04 §0.1]`
+3. `cargo xtask ci` with fmt, clippy deny, layers, tests, doc tests, lockfile check. `[PC-VERIFIED E05-010, E01-002]`
+4. Never-crash lints + `unsafe_code = "forbid"` + command fuzzer stub. `[PROPOSED]` earlier than PhotoCraft (E07-009)
+5. Branch protection on main; merge queue enabled; main runs never cancelled. `[PROPOSED]` (E07-003, E07-004)
+6. Commit trailer convention + commit-msg hook. `[PROPOSED]` (E06-011)
+7. `STATE.md`, `handoffs/`, `docs/adr/` committed. `[PROPOSED]` (E02-004)
+8. `risk-tiers.md` and CODEOWNERS for high-tier paths. `[PROPOSED]` (E06-041)
+
+**Week 1**
+1. Control channel with screenshot + offscreen snapshot example; documented in AGENTS.md. `[PC-VERIFIED E04-020]`
+2. Goals TOML + generated scorecard with `--check`. `[PC-VERIFIED E04-050]`
+3. UI-dispatch scan with shrink-only allowlist. `[PC-VERIFIED E04-032]`
+4. Fail-on-skip + zero-match-is-blocked in CI. `[PC-VERIFIED E05-024]` (adopted on day 37 there)
+5. Base-revert ("test fails without the fix") CI job. `[PROPOSED]` (E07-015)
+6. Claim-check bot on PR open. `[PROPOSED]` (E07-019)
+7. Release automation + nightly release dry run. `[PC-VERIFIED E01-024, E05-063]`
+8. Run 2–3 implementers + 1 reviewer; measure red-main minutes and review lag.
+
+**Month 1**
+1. Pinned corpora/oracles with FLOORs per format/language. `[PC-VERIFIED E04-036]`
+2. Mutation spot-checks for tier medium+. `[PROPOSED]` (E07-018)
+3. Nightly fuzz with generated target matrix; nightly plain `cargo test`. `[PROPOSED]` (E05-023, E07-008)
+4. Perf budgets on a fixed runner, enforced, with `enforce=false` only with a measured note. `[PROPOSED]` (E04-051)
+5. `cargo deny` licence/source check. `[PROPOSED]` (E02 §4)
+6. Integration batches when merge rate demands it, with file-by-file conflict notes. `[PC-VERIFIED E06-022]`
+7. First metrics review (§13); recalibrate budgets (§12) and agent count (§4.1).
+8. Monthly backfill sweep for fix commits without tests. `[PC-VERIFIED E07-015]`
+
+---
+
+## Confidence and gaps
+
+- **Strongest**: architecture preconditions (§1), gate composition (§7.2), parallel-agent etiquette
+  (§4.2–4.3), failure classes and their observed fixes (§10) — all from git and file contents at the pin.
+- **Weakest**: everything about human review, approvals and supervision rests on WebFetch summaries of
+  ~16 PRs (E05 §0.3, E06 §6); branch-protection settings are invisible. If PhotoCraft enforces required
+  reviews server-side, §9's "hollow spot" is overstated.
+- **Not checkable**: orchestration tooling, number of concurrent agents, token/money cost, supervision
+  hours, the private devlog/plan contents, external reusable workflows (`craft-common-actions`).
+- **Proposed practices are untested here**: merge queue, independent test author, base-revert job, tier
+  table and budgets answer observed failures but have no PhotoCraft evidence of effect. Integration
+  batches coinciding with quiet red-main weeks (E07-005) is correlation, not proof.
+- **Attribution**: ~half of commits carry no AI trailer; "unknown", not "human" (E03). Model names in
+  trailers are self-reports.
+- **What would change conclusions**: PR review data via the GitHub API; the contents of `log/devlog.md`;
+  cost data from any maintainer.
+- Citations here are evidence IDs; primary shas/PRs are carried where load-bearing and resolve through
+  `deliverables/01-evidence-ledger.md`. The citation-verifier script was not run (per orchestrator instruction).
